@@ -1,0 +1,2 @@
+<%@ Page Title="Users" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Users.aspx.cs" Inherits="OMS.Admin.Users" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server"><div class="rms-page-header"><div><h3 class="mb-0">Users</h3><p class="mb-0 text-600">Admin user management scaffold.</p></div></div><div class="alert alert-info">User CRUD will use Forms Authentication roles and stored procedures.</div></asp:Content>

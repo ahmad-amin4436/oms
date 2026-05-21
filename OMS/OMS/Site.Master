@@ -22,6 +22,7 @@
     <link href="assets/css/theme.min.css" rel="stylesheet" id="style_default" />
     <link href="assets/css/user-rtl.min.css" rel="stylesheet" id="user_style_rtl" />
     <link href="assets/css/user.min.css" rel="stylesheet" id="user_style_default" />
+    <link href="Assets/css/rms-custom.css" rel="stylesheet" />
     <script>
       var isRTL = JSON.parse(localStorage.getItem('isRTL'));
       if (isRTL) {

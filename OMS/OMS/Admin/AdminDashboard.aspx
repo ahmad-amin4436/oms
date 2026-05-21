@@ -1,0 +1,2 @@
+<%@ Page Title="Admin Dashboard" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="AdminDashboard.aspx.cs" Inherits="OMS.Admin.AdminDashboard" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server"><div class="rms-page-header"><div><h3 class="mb-0">Admin Dashboard</h3><p class="mb-0 text-600">Admin overview, user activity, coupons, messages, and system controls.</p></div></div><div class="alert alert-info">Admin module scaffold is ready for CRUD expansion.</div></asp:Content>

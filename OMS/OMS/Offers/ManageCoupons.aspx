@@ -1,0 +1,2 @@
+<%@ Page Title="Coupons" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="ManageCoupons.aspx.cs" Inherits="OMS.Offers.ManageCoupons" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server"><div class="rms-page-header"><div><h3 class="mb-0">Coupons</h3><p class="mb-0 text-600">Manage coupon codes and usage.</p></div></div><asp:GridView ID="gvCoupons" runat="server" CssClass="table table-sm" AutoGenerateColumns="true" GridLines="None" /></asp:Content>

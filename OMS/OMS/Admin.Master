@@ -1,0 +1,28 @@
+<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Admin.Master.cs" Inherits="OMS.AdminMaster" %>
+<%@ Register Src="~/Controls/AdminNotice.ascx" TagPrefix="rms" TagName="AdminNotice" %>
+<!DOCTYPE html>
+<html data-bs-theme="light" lang="en-US" dir="ltr">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%: Page.Title %> - RMS Admin</title>
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link href="assets/css/theme.min.css" rel="stylesheet" />
+    <link href="assets/css/user.min.css" rel="stylesheet" />
+    <link href="Assets/css/rms-custom.css" rel="stylesheet" />
+</head>
+<body>
+    <form runat="server">
+        <asp:ScriptManager runat="server" />
+        <main class="main" id="top">
+            <div class="container py-4">
+                <rms:AdminNotice runat="server" ID="AdminNotice" />
+                <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+            </div>
+        </main>
+    </form>
+    <script src="vendors/bootstrap/bootstrap.min.js"></script>
+    <script src="vendors/fontawesome/all.min.js"></script>
+    <script src="assets/js/theme.js"></script>
+</body>
+</html>

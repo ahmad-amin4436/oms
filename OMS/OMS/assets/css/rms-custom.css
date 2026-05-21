@@ -1,0 +1,53 @@
+.rms-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.rms-kpi-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: .5rem;
+}
+
+.rms-money {
+  font-variant-numeric: tabular-nums;
+}
+
+.rms-card-table .table {
+  margin-bottom: 0;
+}
+
+.rms-upload-preview {
+  width: 4rem;
+  height: 4rem;
+  object-fit: cover;
+  border-radius: .25rem;
+  border: 1px solid var(--falcon-border-color);
+}
+
+.rms-receipt {
+  max-width: 80mm;
+  margin: 0 auto;
+  color: #111;
+  background: #fff;
+}
+
+@media print {
+  .navbar,
+  .settings-panel,
+  .setting-toggle,
+  .rms-no-print {
+    display: none !important;
+  }
+
+  .content {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
