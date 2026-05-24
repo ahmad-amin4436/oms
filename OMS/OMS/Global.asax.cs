@@ -63,7 +63,8 @@ namespace OMS
 
             page.PreInit += delegate
             {
-                page.ViewStateUserKey = Session.SessionID;
+                if (Context.User != null && Context.User.Identity.IsAuthenticated)
+                    page.ViewStateUserKey = Session.SessionID;
             };
         }
 
@@ -71,6 +72,15 @@ namespace OMS
         {
             var ex = Server.GetLastError();
             if (ex == null) return;
+
+            // Stale ViewState from a previous app instance — redirect to a fresh page load
+            if (ex.GetBaseException()?.GetType().Name == "ViewStateException" ||
+                (ex is HttpException && ex.Message.Contains("viewstate MAC")))
+            {
+                Server.ClearError();
+                Response.Redirect(Request.RawUrl, false);
+                return;
+            }
 
             try
             {

@@ -14,7 +14,7 @@ function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableTo
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?ArrayRs. /.test(n)) return _arrayLikeToArray(o, minLen); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
 function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
 
@@ -77,8 +77,8 @@ var hexToRgb = function hexToRgb(hexValue) {
   var hex;
   hexValue.indexOf('#') === 0 ? hex = hexValue.substring(1) : hex = hexValue; // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
 
-  var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])Rs. /i;
-  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})Rs. /i.exec(hex.replace(shorthandRegex, function (m, r, g, b) {
+  var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex.replace(shorthandRegex, function (m, r, g, b) {
     return r + r + g + g + b + b;
   }));
   return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : null;
@@ -204,7 +204,7 @@ var setCookie = function setCookie(name, value, expire) {
 };
 
 var getCookie = function getCookie(name) {
-  var keyValue = document.cookie.match("(^|;) ?".concat(name, "=([^;]*)(;|Rs. )"));
+  var keyValue = document.cookie.match("(^|;) ?".concat(name, "=([^;]*)(;|$)"));
   return keyValue ? keyValue[2] : keyValue;
 };
 
@@ -468,10 +468,10 @@ var bottomBarInit = function bottomBarInit() {
         breakPoint: 'lg'
       };
 
-      var _windowRs. _Rs. merge = window._.merge(defaultOptions, barOptions),
-          target = _windowRs. _Rs. merge.target,
-          offsetTop = _windowRs. _Rs. merge.offsetTop,
-          breakPoint = _windowRs. _Rs. merge.breakPoint; // select target
+      var _window$_$merge = window._.merge(defaultOptions, barOptions),
+          target = _window$_$merge.target,
+          offsetTop = _window$_$merge.offsetTop,
+          breakPoint = _window$_$merge.breakPoint; // select target
 
 
       var targetEl = document.getElementById(target); // handle Bottombar
@@ -529,10 +529,10 @@ var BulkSelect = /*#__PURE__*/function () {
   }, {
     key: "attachNodes",
     value: function attachNodes() {
-      var _thisRs. elementRs. data = this.element.data('bulk-select'),
-          body = _thisRs. elementRs. data.body,
-          actions = _thisRs. elementRs. data.actions,
-          replacedElement = _thisRs. elementRs. data.replacedElement;
+      var _this$element$data = this.element.data('bulk-select'),
+          body = _this$element$data.body,
+          actions = _this$element$data.actions,
+          replacedElement = _this$element$data.replacedElement;
 
       this.actions = new DomNode(document.getElementById(actions));
       this.replacedElement = new DomNode(document.getElementById(replacedElement));
@@ -672,52 +672,52 @@ var chatInit = function chatInit() {
   var DATA_KEY = {
     INDEX: 'index'
   };
-  var Rs. chatSidebar = document.querySelector(Selector.CHAT_SIDEBAR);
-  var Rs. chatContact = document.querySelectorAll(Selector.CHAT_CONTACT);
-  var Rs. chatEmojiarea = document.querySelector(Selector.CHAT_EMOJIAREA);
-  var Rs. btnSend = document.querySelector(Selector.BTN_SEND);
-  var Rs. currentChatArea = document.querySelector(Selector.CHAT_CONTENT_SCROLL_AREA); // Set scrollbar position
+  var $chatSidebar = document.querySelector(Selector.CHAT_SIDEBAR);
+  var $chatContact = document.querySelectorAll(Selector.CHAT_CONTACT);
+  var $chatEmojiarea = document.querySelector(Selector.CHAT_EMOJIAREA);
+  var $btnSend = document.querySelector(Selector.BTN_SEND);
+  var $currentChatArea = document.querySelector(Selector.CHAT_CONTENT_SCROLL_AREA); // Set scrollbar position
 
-  var setScrollbarPosition = function setScrollbarPosition(Rs. chatArea) {
-    if (Rs. chatArea) {
-      var scrollArea = Rs. chatArea;
-      scrollArea.scrollTop = Rs. chatArea.scrollHeight;
+  var setScrollbarPosition = function setScrollbarPosition($chatArea) {
+    if ($chatArea) {
+      var scrollArea = $chatArea;
+      scrollArea.scrollTop = $chatArea.scrollHeight;
     }
   };
 
   setTimeout(function () {
-    setScrollbarPosition(Rs. currentChatArea);
+    setScrollbarPosition($currentChatArea);
   }, 700);
   document.querySelectorAll(Selector.CHAT_CONTACT).forEach(function (el) {
     el.addEventListener(Events.CLICK, function (e) {
-      var Rs. this = e.currentTarget;
-      Rs. this.classList.add('active'); // Hide contact list sidebar on responsive
+      var $this = e.currentTarget;
+      $this.classList.add('active'); // Hide contact list sidebar on responsive
 
-      window.innerWidth < 768 && !e.target.classList.contains('hover-actions') && (Rs. chatSidebar.style.left = '-100%'); // Remove unread-message class when read
+      window.innerWidth < 768 && !e.target.classList.contains('hover-actions') && ($chatSidebar.style.left = '-100%'); // Remove unread-message class when read
 
-      Rs. this.classList.contains(ClassName.UNREAD_MESSAGE) && Rs. this.classList.remove(ClassName.UNREAD_MESSAGE);
+      $this.classList.contains(ClassName.UNREAD_MESSAGE) && $this.classList.remove(ClassName.UNREAD_MESSAGE);
     });
   });
-  Rs. chatContact.forEach(function (el) {
+  $chatContact.forEach(function (el) {
     el.addEventListener(Events.SHOWN_BS_TAB, function () {
-      Rs. chatEmojiarea.innerHTML = '';
-      Rs. btnSend.classList.remove(ClassName.TEXT_PRIMARY);
+      $chatEmojiarea.innerHTML = '';
+      $btnSend.classList.remove(ClassName.TEXT_PRIMARY);
       var TargetChatArea = document.querySelector(Selector.CHAT_CONTENT_SCROLL_AREA_ACTIVE);
       setScrollbarPosition(TargetChatArea);
     });
   }); // change send button color on
 
-  if (Rs. chatEmojiarea) {
-    Rs. chatEmojiarea.setAttribute('placeholder', 'Type your message');
-    Rs. chatEmojiarea.addEventListener(Events.KEYUP, function (e) {
+  if ($chatEmojiarea) {
+    $chatEmojiarea.setAttribute('placeholder', 'Type your message');
+    $chatEmojiarea.addEventListener(Events.KEYUP, function (e) {
       if (e.target.textContent.length <= 0) {
-        Rs. btnSend.classList.remove(ClassName.TEXT_PRIMARY);
+        $btnSend.classList.remove(ClassName.TEXT_PRIMARY);
 
         if (e.target.innerHTML === '<br>') {
           e.target.innerHTML = '';
         }
       } else {
-        Rs. btnSend.classList.add(ClassName.TEXT_PRIMARY);
+        $btnSend.classList.add(ClassName.TEXT_PRIMARY);
       }
 
       var TargetChatArea = document.querySelector(Selector.CHAT_CONTENT_SCROLL_AREA_ACTIVE);
@@ -726,18 +726,18 @@ var chatInit = function chatInit() {
   } // Open conversation info sidebar
 
 
-  Rs. chatEmojiarea && document.querySelectorAll(Selector.BTN_INFO).forEach(function (el) {
+  $chatEmojiarea && document.querySelectorAll(Selector.BTN_INFO).forEach(function (el) {
     el.addEventListener(Events.CLICK, function (e) {
-      var Rs. this = e.currentTarget;
-      var dataIndex = utils.getData(Rs. this, DATA_KEY.INDEX);
-      var Rs. info = document.querySelector("".concat(Selector.CONVERSATION_INFO, "[data-").concat(DATA_KEY.INDEX, "='").concat(dataIndex, "']"));
-      Rs. info.classList.toggle(ClassName.SHOW);
+      var $this = e.currentTarget;
+      var dataIndex = utils.getData($this, DATA_KEY.INDEX);
+      var $info = document.querySelector("".concat(Selector.CONVERSATION_INFO, "[data-").concat(DATA_KEY.INDEX, "='").concat(dataIndex, "']"));
+      $info.classList.toggle(ClassName.SHOW);
     });
   }); // Show contact list sidebar on responsive
 
   document.querySelectorAll(Selector.CONTACTS_LIST_SHOW).forEach(function (el) {
     el.addEventListener(Events.CLICK, function () {
-      Rs. chatSidebar.style.left = 0;
+      $chatSidebar.style.left = 0;
     });
   }); // Set scrollbar area height on resize
 
@@ -746,7 +746,7 @@ var chatInit = function chatInit() {
     setScrollbarPosition(TargetChatArea);
   }); // Emoji append in message text
 
-  Rs. chatEmojiarea && window.picker.on(Events.EMOJI, function (selection) {
+  $chatEmojiarea && window.picker.on(Events.EMOJI, function (selection) {
     document.querySelector(Selector.EMOJIEAREA_EDITOR).innerHTML += selection.emoji;
   });
 };
@@ -774,9 +774,9 @@ var choicesInit = function choicesInit() {
 
             if (choicesItem.querySelector('[required]')) {
               if (singleSelect) {
-                var _singleSelectRs. querySe;
+                var _singleSelect$querySe;
 
-                if (((_singleSelectRs. querySe = singleSelect.querySelector('.choices__item--selectable')) === null || _singleSelectRs. querySe === void 0 ? void 0 : _singleSelectRs. querySe.getAttribute('data-value')) !== '') {
+                if (((_singleSelect$querySe = singleSelect.querySelector('.choices__item--selectable')) === null || _singleSelect$querySe === void 0 ? void 0 : _singleSelect$querySe.getAttribute('data-value')) !== '') {
                   choicesItem.classList.remove('invalid');
                   choicesItem.classList.add('valid');
                 } else {
@@ -927,9 +927,9 @@ var countupInit = function countupInit() {
   if (window.countUp) {
     var countups = document.querySelectorAll('[data-countup]');
     countups.forEach(function (node) {
-      var _utilsRs. getData = utils.getData(node, 'countup'),
-          endValue = _utilsRs. getData.endValue,
-          options = _objectWithoutProperties(_utilsRs. getData, _excluded);
+      var _utils$getData = utils.getData(node, 'countup'),
+          endValue = _utils$getData.endValue,
+          options = _objectWithoutProperties(_utils$getData, _excluded);
 
       var countUp = new window.countUp.CountUp(node, endValue, _objectSpread({
         duration: 5
@@ -950,23 +950,23 @@ var countupInit = function countupInit() {
 
 var dataTablesInit = function dataTablesInit() {
   if (window.jQuery) {
-    var Rs.  = window.jQuery;
-    var dataTables = Rs. ('.data-table');
+    var $ = window.jQuery;
+    var dataTables = $('.data-table');
 
     var customDataTable = function customDataTable(elem) {
       elem.find('.pagination').addClass('pagination-sm');
     };
 
     dataTables.length && dataTables.each(function (index, value) {
-      var Rs. this = Rs. (value);
-      var options = Rs. .extend({
+      var $this = $(value);
+      var options = $.extend({
         dom: "<'row mx-0'<'col-md-6'l><'col-md-6'f>>" + "<'table-responsive scrollbar'tr>" + "<'row g-0 align-items-center justify-content-center justify-content-sm-between'<'col-auto mb-2 mb-sm-0 px-3'i><'col-auto px-3'p>>"
-      }, Rs. this.data('options'));
-      Rs. this.DataTable(options);
-      var Rs. wrpper = Rs. this.closest('.dataTables_wrapper');
-      customDataTable(Rs. wrpper);
-      Rs. this.on('draw.dt', function () {
-        return customDataTable(Rs. wrpper);
+      }, $this.data('options'));
+      $this.DataTable(options);
+      var $wrpper = $this.closest('.dataTables_wrapper');
+      customDataTable($wrpper);
+      $this.on('draw.dt', function () {
+        return customDataTable($wrpper);
       });
     });
   }
@@ -1244,7 +1244,7 @@ var formValidationInit = function formValidationInit() {
 var merge = window._.merge;
 
 var renderCalendar = function renderCalendar(el, option) {
-  var _documentRs. querySelect;
+  var _document$querySelect;
 
   var options = merge({
     initialView: 'dayGridMonth',
@@ -1263,7 +1263,7 @@ var renderCalendar = function renderCalendar(el, option) {
   }, option);
   var calendar = new window.FullCalendar.Calendar(el, options);
   calendar.render();
-  (_documentRs. querySelect = document.querySelector('.navbar-vertical-toggle')) === null || _documentRs. querySelect === void 0 ? void 0 : _documentRs. querySelect.addEventListener('navbar.vertical.toggle', function () {
+  (_document$querySelect = document.querySelector('.navbar-vertical-toggle')) === null || _document$querySelect === void 0 ? void 0 : _document$querySelect.addEventListener('navbar.vertical.toggle', function () {
     return calendar.updateSize();
   });
   return calendar;
@@ -1301,9 +1301,9 @@ var glightboxInit = function glightboxInit() {
 
 function initMap() {
   var themeController = document.body;
-  var Rs. googlemaps = document.querySelectorAll('.googlemap');
+  var $googlemaps = document.querySelectorAll('.googlemap');
 
-  if (Rs. googlemaps.length && window.google) {
+  if ($googlemaps.length && window.google) {
     // Visit https://snazzymaps.com/ for more themes
     var mapStyles = {
       Default: [{
@@ -2213,7 +2213,7 @@ function initMap() {
         }]
       }]
     };
-    Rs. googlemaps.forEach(function (itm) {
+    $googlemaps.forEach(function (itm) {
       var latLng = utils.getData(itm, 'latlng').split(',');
       var markerPopup = itm.innerHTML;
       var icon = utils.getData(itm, 'icon') ? utils.getData(itm, 'icon') : 'https://maps.gstatic.com/mapfiles/api-3/images/spotlight-poi.png';
@@ -2255,9 +2255,9 @@ function initMap() {
         infowindow.open(map, marker);
       });
       themeController && themeController.addEventListener('clickControl', function (_ref3) {
-        var _ref3Rs. detail = _ref3.detail,
-            control = _ref3Rs. detail.control,
-            value = _ref3Rs. detail.value;
+        var _ref3$detail = _ref3.detail,
+            control = _ref3$detail.control,
+            value = _ref3$detail.value;
 
         if (control === 'theme') {
           map.set('styles', value === 'dark' ? mapStyles.Cobalt : mapStyles[mapStyle]);
@@ -3417,9 +3417,9 @@ var leafletActiveUserInit = function leafletActiveUserInit() {
     map.addLayer(mcg);
     var themeController = document.body;
     themeController.addEventListener('clickControl', function (_ref9) {
-      var _ref9Rs. detail = _ref9.detail,
-          control = _ref9Rs. detail.control,
-          value = _ref9Rs. detail.value;
+      var _ref9$detail = _ref9.detail,
+          control = _ref9$detail.control,
+          value = _ref9$detail.value;
 
       if (control === 'theme') {
         tiles.updateFilter(value === 'dark' ? ['invert:98%', 'grayscale:69%', 'bright:89%', 'contrast:111%', 'hue:205deg', 'saturate:1000%'] : ['bright:101%', 'contrast:101%', 'hue:23deg', 'saturate:225%']);
@@ -3717,9 +3717,9 @@ var navbarDarkenOnScroll = function navbarDarkenOnScroll() {
     toggleThemeClass(theme);
     var themeController = document.body;
     themeController.addEventListener('clickControl', function (_ref10) {
-      var _ref10Rs. detail = _ref10.detail,
-          control = _ref10Rs. detail.control,
-          value = _ref10Rs. detail.value;
+      var _ref10$detail = _ref10.detail,
+          control = _ref10$detail.control,
+          value = _ref10$detail.value;
 
       if (control === 'theme') {
         toggleThemeClass(value);
@@ -3736,8 +3736,8 @@ var navbarDarkenOnScroll = function navbarDarkenOnScroll() {
     var navbarCollapse = navbar.querySelector(Selector.NAVBAR_COLLAPSE);
     var colorRgb = utils.hexToRgb(getBgClassName(name, defaultColorName).color);
 
-    var _windowRs. getComputedSt = window.getComputedStyle(navbar),
-        backgroundImage = _windowRs. getComputedSt.backgroundImage;
+    var _window$getComputedSt = window.getComputedStyle(navbar),
+        backgroundImage = _window$getComputedSt.backgroundImage;
 
     var transition = 'background-color 0.35s ease';
     navbar.style.backgroundImage = 'none'; // Change navbar background color on scroll
@@ -3804,18 +3804,18 @@ var navbarTopDropShadow = function navbarTopDropShadow() {
     HIDDEN_BS_COLLAPSE: 'hidden.bs.collapse'
   };
   var navDropShadowFlag = true;
-  var Rs. navbar = document.querySelector(Selector.NAVBAR);
-  var Rs. navbarVertical = document.querySelector(Selector.NAVBAR_VERTICAL);
-  var Rs. navbarVerticalContent = document.querySelector(Selector.NAVBAR_VERTICAL_CONTENT);
-  var Rs. navbarVerticalCollapse = document.getElementById(Selector.NAVBAR_VERTICAL_COLLAPSE);
+  var $navbar = document.querySelector(Selector.NAVBAR);
+  var $navbarVertical = document.querySelector(Selector.NAVBAR_VERTICAL);
+  var $navbarVerticalContent = document.querySelector(Selector.NAVBAR_VERTICAL_CONTENT);
+  var $navbarVerticalCollapse = document.getElementById(Selector.NAVBAR_VERTICAL_COLLAPSE);
   var html = document.documentElement;
-  var breakPoint = utils.getBreakpoint(Rs. navbarVertical);
+  var breakPoint = utils.getBreakpoint($navbarVertical);
 
-  var setDropShadow = function setDropShadow(Rs. elem) {
-    if (Rs. elem.scrollTop > 0 && navDropShadowFlag) {
-      Rs. navbar && Rs. navbar.classList.add(ClassNames.NAVBAR_GLASS_SHADOW);
+  var setDropShadow = function setDropShadow($elem) {
+    if ($elem.scrollTop > 0 && navDropShadowFlag) {
+      $navbar && $navbar.classList.add(ClassNames.NAVBAR_GLASS_SHADOW);
     } else {
-      Rs. navbar && Rs. navbar.classList.remove(ClassNames.NAVBAR_GLASS_SHADOW);
+      $navbar && $navbar.classList.remove(ClassNames.NAVBAR_GLASS_SHADOW);
     }
   };
 
@@ -3823,17 +3823,17 @@ var navbarTopDropShadow = function navbarTopDropShadow() {
     setDropShadow(html);
   });
 
-  if (Rs. navbarVerticalContent) {
-    Rs. navbarVerticalContent.addEventListener(Events.SCROLL, function () {
+  if ($navbarVerticalContent) {
+    $navbarVerticalContent.addEventListener(Events.SCROLL, function () {
       if (window.outerWidth < breakPoint) {
         navDropShadowFlag = true;
-        setDropShadow(Rs. navbarVerticalContent);
+        setDropShadow($navbarVerticalContent);
       }
     });
   }
 
-  if (Rs. navbarVerticalCollapse) {
-    Rs. navbarVerticalCollapse.addEventListener(Events.SHOW_BS_COLLAPSE, function () {
+  if ($navbarVerticalCollapse) {
+    $navbarVerticalCollapse.addEventListener(Events.SHOW_BS_COLLAPSE, function () {
       if (window.outerWidth < breakPoint) {
         navDropShadowFlag = false;
         setDropShadow(html);
@@ -3841,9 +3841,9 @@ var navbarTopDropShadow = function navbarTopDropShadow() {
     });
   }
 
-  if (Rs. navbarVerticalCollapse) {
-    Rs. navbarVerticalCollapse.addEventListener(Events.HIDDEN_BS_COLLAPSE, function () {
-      if (utils.hasClass(Rs. navbarVerticalCollapse, ClassNames.SHOW) && window.outerWidth < breakPoint) {
+  if ($navbarVerticalCollapse) {
+    $navbarVerticalCollapse.addEventListener(Events.HIDDEN_BS_COLLAPSE, function () {
+      if (utils.hasClass($navbarVerticalCollapse, ClassNames.SHOW) && window.outerWidth < breakPoint) {
         navDropShadowFlag = false;
       } else {
         navDropShadowFlag = true;
@@ -3953,8 +3953,8 @@ var progressAnimationToggle = function progressAnimationToggle() {
   animatedProgress.forEach(function (progress) {
     progress.addEventListener('click', function (e) {
       var progressID = utils.getData(e.currentTarget, 'progressAnimation');
-      var Rs. progress = document.getElementById(progressID);
-      Rs. progress.classList.toggle('progress-bar-animated');
+      var $progress = document.getElementById(progressID);
+      $progress.classList.toggle('progress-bar-animated');
     });
   });
 };
@@ -4133,14 +4133,14 @@ var searchInit = function searchInit() {
 
 var select2Init = function select2Init() {
   if (window.jQuery) {
-    var Rs.  = window.jQuery;
-    var select2 = Rs. ('.selectpicker');
+    var $ = window.jQuery;
+    var select2 = $('.selectpicker');
     select2.length && select2.each(function (index, value) {
-      var Rs. this = Rs. (value);
-      var options = Rs. .extend({
+      var $this = $(value);
+      var options = $.extend({
         theme: 'bootstrap-5'
-      }, Rs. this.data('options'));
-      Rs. this.select2(options);
+      }, $this.data('options'));
+      $this.select2(options);
     });
   }
 };
@@ -4896,13 +4896,13 @@ var appCalendarInit = function appCalendarInit() {
     });
     addEventForm && addEventForm.addEventListener(Events.SUBMIT, function (e) {
       e.preventDefault();
-      var _eRs. target = e.target,
-          title = _eRs. target.title,
-          startDate = _eRs. target.startDate,
-          endDate = _eRs. target.endDate,
-          label = _eRs. target.label,
-          description = _eRs. target.description,
-          allDay = _eRs. target.allDay;
+      var _e$target = e.target,
+          title = _e$target.title,
+          startDate = _e$target.startDate,
+          endDate = _e$target.endDate,
+          label = _e$target.label,
+          description = _e$target.description,
+          allDay = _e$target.allDay;
       calendar.addEvent({
         title: title.value,
         start: startDate.value,
@@ -5145,9 +5145,9 @@ var getTemplate = function getTemplate(event) {
 
 
 var D3PackedBubbleInit = function D3PackedBubbleInit() {
-  var Rs. d3PackedBubble = document.querySelector('.d3-packed-bubble-chart');
+  var $d3PackedBubble = document.querySelector('.d3-packed-bubble-chart');
 
-  if (Rs. d3PackedBubble) {
+  if ($d3PackedBubble) {
     var width = 960;
     var height = 960;
     var itemsSpacing = 30;
@@ -5329,9 +5329,9 @@ var D3PackedBubbleInit = function D3PackedBubbleInit() {
 
 
 var trendingKeywordsInit = function trendingKeywordsInit() {
-  var Rs. d3TrendingKeywords = document.querySelector('.d3-trending-keywords');
+  var $d3TrendingKeywords = document.querySelector('.d3-trending-keywords');
 
-  if (Rs. d3TrendingKeywords) {
+  if ($d3TrendingKeywords) {
     var width = 960;
     var height = 960;
     var itemsSpacing = 30;
@@ -5709,11 +5709,11 @@ var chartDoughnut = function chartDoughnut() {
 
 
 var chartHalfDoughnutInit = function chartHalfDoughnutInit() {
-  var Rs. chartHalfDoughnuts = document.querySelectorAll('[data-half-doughnut]');
-  Rs. chartHalfDoughnuts.forEach(function (Rs. chartHalfDoughnut) {
-    if (Rs. chartHalfDoughnut) {
+  var $chartHalfDoughnuts = document.querySelectorAll('[data-half-doughnut]');
+  $chartHalfDoughnuts.forEach(function ($chartHalfDoughnut) {
+    if ($chartHalfDoughnut) {
       var getOptions = function getOptions() {
-        var userOptions = utils.getData(Rs. chartHalfDoughnut, 'half-doughnut');
+        var userOptions = utils.getData($chartHalfDoughnut, 'half-doughnut');
         var defaultOptions = {
           type: 'doughnut',
           data: {
@@ -5749,7 +5749,7 @@ var chartHalfDoughnutInit = function chartHalfDoughnutInit() {
         return options;
       };
 
-      chartJsInit(Rs. chartHalfDoughnut, getOptions);
+      chartJsInit($chartHalfDoughnut, getOptions);
     }
   });
 };
@@ -6133,11 +6133,11 @@ var productShareDoughnutInit = function productShareDoughnutInit() {
 
 
 var activeUsersChartReportInit = function activeUsersChartReportInit() {
-  var Rs. echartsActiveUsersChart = document.querySelector('.echart-active-users-report');
+  var $echartsActiveUsersChart = document.querySelector('.echart-active-users-report');
 
-  if (Rs. echartsActiveUsersChart) {
-    var userOptions = utils.getData(Rs. echartsActiveUsersChart, 'options');
-    var chart = window.echarts.init(Rs. echartsActiveUsersChart);
+  if ($echartsActiveUsersChart) {
+    var userOptions = utils.getData($echartsActiveUsersChart, 'options');
+    var chart = window.echarts.init($echartsActiveUsersChart);
 
     var _tooltipFormatter = function _tooltipFormatter(params) {
       return "\n      <div>\n        <p class='mb-2 text-600'>".concat(window.dayjs(params[0].axisValue).format('MMM DD, YYYY'), "</p>\n        <div class='ms-1'>\n          <h6 class=\"fs--1 text-700\"><span class=\"fas fa-circle text-primary me-2\"></span>").concat(params[0].value, "</h6>\n          <h6 class=\"fs--1 text-700\"><span class=\"fas fa-circle text-success me-2\"></span>").concat(params[1].value, "</h6>\n          <h6 class=\"fs--1 text-700\"><span class=\"fas fa-circle text-info me-2\"></span>").concat(params[2].value, "</h6>\n        </div>\n      </div>\n      ");
@@ -6285,11 +6285,11 @@ var activeUsersChartReportInit = function activeUsersChartReportInit() {
 
 
 var assignmentScoresInit = function assignmentScoresInit() {
-  var Rs. echartAssignmentScores = document.querySelector('.echart-assignment-scores');
+  var $echartAssignmentScores = document.querySelector('.echart-assignment-scores');
 
-  if (Rs. echartAssignmentScores) {
-    var userOptions = utils.getData(Rs. echartAssignmentScores, 'options');
-    var chart = window.echarts.init(Rs. echartAssignmentScores);
+  if ($echartAssignmentScores) {
+    var userOptions = utils.getData($echartAssignmentScores, 'options');
+    var chart = window.echarts.init($echartAssignmentScores);
     var data = [{
       value: 12,
       name: '90-100%'
@@ -6518,8 +6518,8 @@ var audienceChartInit = function audienceChartInit() {
     triggerTabList.forEach(function (triggerEl) {
       triggerEl.addEventListener('shown.bs.tab', function () {
         var key = triggerEl.href.split('#').pop();
-        var Rs. echartAudience = document.getElementById(key).querySelector('.echart-audience');
-        initChart(Rs. echartAudience, getDefaultOptions(data.dataset[key][0], data.dataset[key][1]));
+        var $echartAudience = document.getElementById(key).querySelector('.echart-audience');
+        initChart($echartAudience, getDefaultOptions(data.dataset[key][0], data.dataset[key][1]));
       });
     });
   }
@@ -6532,7 +6532,7 @@ var audienceChartInit = function audienceChartInit() {
 
 
 var avgEnrollmentRateInit = function avgEnrollmentRateInit() {
-  var Rs. echartsLineAvgEnrollmentLms = document.querySelector('.echart-avg-enrollment-rate');
+  var $echartsLineAvgEnrollmentLms = document.querySelector('.echart-avg-enrollment-rate');
 
   function getFormatter(params) {
     return params.map(function (_ref15) {
@@ -6543,11 +6543,11 @@ var avgEnrollmentRateInit = function avgEnrollmentRateInit() {
     }).join('<br/>');
   }
 
-  if (Rs. echartsLineAvgEnrollmentLms) {
-    var userOptions = utils.getData(Rs. echartsLineAvgEnrollmentLms, 'options');
+  if ($echartsLineAvgEnrollmentLms) {
+    var userOptions = utils.getData($echartsLineAvgEnrollmentLms, 'options');
     var onSaleCourseRate = document.querySelector("#".concat(userOptions.optionOne));
     var regularPaidCourseRate = document.querySelector("#".concat(userOptions.optionTwo));
-    var chart = window.echarts.init(Rs. echartsLineAvgEnrollmentLms);
+    var chart = window.echarts.init($echartsLineAvgEnrollmentLms);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -6746,11 +6746,11 @@ var avgEnrollmentRateInit = function avgEnrollmentRateInit() {
 
 
 var bandwidthSavedInit = function bandwidthSavedInit() {
-  var Rs. echartsBandwidthSaved = document.querySelector('.echart-bandwidth-saved');
+  var $echartsBandwidthSaved = document.querySelector('.echart-bandwidth-saved');
 
-  if (Rs. echartsBandwidthSaved) {
-    var userOptions = utils.getData(Rs. echartsBandwidthSaved, 'options');
-    var chart = window.echarts.init(Rs. echartsBandwidthSaved);
+  if ($echartsBandwidthSaved) {
+    var userOptions = utils.getData($echartsBandwidthSaved, 'options');
+    var chart = window.echarts.init($echartsBandwidthSaved);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -6821,7 +6821,7 @@ var bandwidthSavedInit = function bandwidthSavedInit() {
     };
 
     var initChart = function initChart() {
-      if (utils.isScrolledIntoView(Rs. echartsBandwidthSaved)) {
+      if (utils.isScrolledIntoView($echartsBandwidthSaved)) {
         echartSetOption(chart, userOptions, getDefaultOptions);
         window.removeEventListener('scroll', initChart);
       }
@@ -6838,10 +6838,10 @@ var bandwidthSavedInit = function bandwidthSavedInit() {
 
 
 var basicEchartsInit = function basicEchartsInit() {
-  var Rs. echartBasicCharts = document.querySelectorAll('[data-echarts]');
-  Rs. echartBasicCharts.forEach(function (Rs. echartBasicChart) {
-    var userOptions = utils.getData(Rs. echartBasicChart, 'echarts');
-    var chart = window.echarts.init(Rs. echartBasicChart);
+  var $echartBasicCharts = document.querySelectorAll('[data-echarts]');
+  $echartBasicCharts.forEach(function ($echartBasicChart) {
+    var userOptions = utils.getData($echartBasicChart, 'echarts');
+    var chart = window.echarts.init($echartBasicChart);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -6913,7 +6913,7 @@ var basicEchartsInit = function basicEchartsInit() {
 
 
 var bounceRateChartInit = function bounceRateChartInit() {
-  var Rs. echartsBounceRateChart = document.querySelector('.echart-bounce-rate');
+  var $echartsBounceRateChart = document.querySelector('.echart-bounce-rate');
 
   var tooltipFormatter = function tooltipFormatter(params) {
     return "<div>\n          <p class='mb-0 text-600'>".concat(window.dayjs(params[0].axisValue).format('DD, MMMM'), "</p>\n          <div class=\"d-flex align-items-center\">\n            <p class=\"mb-0 text-600\">\n              Rate : <span class='text-800'>").concat(params[0].value, "%</span>\n            </p>\n          </div>\n        </div>");
@@ -6924,9 +6924,9 @@ var bounceRateChartInit = function bounceRateChartInit() {
     month: [40, 37, 42, 44, 36, 39, 37, 43, 38, 35, 43, 39, 42, 36, 37, 36, 42, 44, 34, 41, 37, 41, 40, 40, 43, 34, 41, 35, 44, 41, 40]
   };
 
-  if (Rs. echartsBounceRateChart) {
-    var userOptions = utils.getData(Rs. echartsBounceRateChart, 'options');
-    var chart = window.echarts.init(Rs. echartsBounceRateChart);
+  if ($echartsBounceRateChart) {
+    var userOptions = utils.getData($echartsBounceRateChart, 'options');
+    var chart = window.echarts.init($echartsBounceRateChart);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -7063,7 +7063,7 @@ var bounceRateChartInit = function bounceRateChartInit() {
 
 
 var browsedCoursesInit = function browsedCoursesInit() {
-  var Rs. echartsBrowsedCourses = document.querySelector('.echart-browsed-courses');
+  var $echartsBrowsedCourses = document.querySelector('.echart-browsed-courses');
   var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   var tooltipFormatter = function tooltipFormatter(params) {
@@ -7075,11 +7075,11 @@ var browsedCoursesInit = function browsedCoursesInit() {
     }).join('<br />'), "\n    </div>");
   };
 
-  if (Rs. echartsBrowsedCourses) {
-    var userOptions = utils.getData(Rs. echartsBrowsedCourses, 'options');
+  if ($echartsBrowsedCourses) {
+    var userOptions = utils.getData($echartsBrowsedCourses, 'options');
     var newCourseBrowsedEl = document.querySelector("#".concat(userOptions.optionOne));
     var paidCourseBrowsedEl = document.querySelector("#".concat(userOptions.optionTwo));
-    var chart = window.echarts.init(Rs. echartsBrowsedCourses);
+    var chart = window.echarts.init($echartsBrowsedCourses);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -7175,7 +7175,7 @@ var browsedCoursesInit = function browsedCoursesInit() {
     };
 
     var initChart = function initChart() {
-      if (utils.isScrolledIntoView(Rs. echartsBrowsedCourses)) {
+      if (utils.isScrolledIntoView($echartsBrowsedCourses)) {
         echartSetOption(chart, userOptions, getDefaultOptions);
         window.removeEventListener('scroll', initChart);
       }
@@ -7209,19 +7209,19 @@ var candleChartInit = function candleChartInit() {
   var ECHART_CANDLE_CHART = '.echart-candle-chart';
   var ECHART_ZOOM_IN = "[data-zoom='in']";
   var ECHART_ZOOM_OUT = "[data-zoom='out']";
-  var Rs. echartsCandleChart = document.querySelector(ECHART_CANDLE_CHART);
+  var $echartsCandleChart = document.querySelector(ECHART_CANDLE_CHART);
 
-  if (Rs. echartsCandleChart) {
-    var userOptions = utils.getData(Rs. echartsCandleChart, 'options');
-    var chart = window.echarts.init(Rs. echartsCandleChart);
-    var Rs. echartsZoomIn = document.getElementById(Rs. echartsCandleChart.dataset.actionTarget).querySelector(ECHART_ZOOM_IN);
-    var Rs. echartsZoomOut = document.getElementById(Rs. echartsCandleChart.dataset.actionTarget).querySelector(ECHART_ZOOM_OUT);
+  if ($echartsCandleChart) {
+    var userOptions = utils.getData($echartsCandleChart, 'options');
+    var chart = window.echarts.init($echartsCandleChart);
+    var $echartsZoomIn = document.getElementById($echartsCandleChart.dataset.actionTarget).querySelector(ECHART_ZOOM_IN);
+    var $echartsZoomOut = document.getElementById($echartsCandleChart.dataset.actionTarget).querySelector(ECHART_ZOOM_OUT);
 
-    var _utilsRs. getColors = utils.getColors(),
-        warning = _utilsRs. getColors.warning;
+    var _utils$getColors = utils.getColors(),
+        warning = _utils$getColors.warning;
 
-    var _utilsRs. getColors2 = utils.getColors(),
-        primary = _utilsRs. getColors2.primary;
+    var _utils$getColors2 = utils.getColors(),
+        primary = _utils$getColors2.primary;
 
     var splitData = function splitData(rawData) {
       var categoryData = [];
@@ -7357,31 +7357,31 @@ var candleChartInit = function candleChartInit() {
       });
     };
 
-    Rs. echartsZoomIn.addEventListener('click', function () {
+    $echartsZoomIn.addEventListener('click', function () {
       if (zoomEnd > 10) {
         zoomEnd -= 10;
       }
 
       if (zoomEnd <= 10) {
-        Rs. echartsZoomIn.disabled = true;
+        $echartsZoomIn.disabled = true;
       }
 
       if (zoomEnd > 0) {
-        Rs. echartsZoomOut.disabled = false;
+        $echartsZoomOut.disabled = false;
         dispatchZoomAction();
       }
     });
-    Rs. echartsZoomOut.addEventListener('click', function () {
+    $echartsZoomOut.addEventListener('click', function () {
       if (zoomEnd < 100) {
         zoomEnd += 10;
       }
 
       if (zoomEnd >= 100) {
-        Rs. echartsZoomOut.disabled = true;
+        $echartsZoomOut.disabled = true;
       }
 
       if (zoomEnd > 0) {
-        Rs. echartsZoomIn.disabled = false;
+        $echartsZoomIn.disabled = false;
         dispatchZoomAction();
       }
     });
@@ -7402,13 +7402,13 @@ var candleChartInit = function candleChartInit() {
 
 var closedVsGoalInit = function closedVsGoalInit() {
   var ECHART_LINE_TOTAL_SALES = '.echart-closed-vs-goal';
-  var Rs. echartsLineTotalSales = document.querySelector(ECHART_LINE_TOTAL_SALES);
+  var $echartsLineTotalSales = document.querySelector(ECHART_LINE_TOTAL_SALES);
   var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-  if (Rs. echartsLineTotalSales) {
+  if ($echartsLineTotalSales) {
     // Get options from data attribute
-    var userOptions = utils.getData(Rs. echartsLineTotalSales, 'options');
-    var chart = window.echarts.init(Rs. echartsLineTotalSales);
+    var userOptions = utils.getData($echartsLineTotalSales, 'options');
+    var chart = window.echarts.init($echartsLineTotalSales);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -7501,7 +7501,7 @@ var closedVsGoalInit = function closedVsGoalInit() {
             show: true,
             color: utils.getGrays()['400'],
             formatter: function formatter(value) {
-              return "Rs. ".concat(value);
+              return "$".concat(value);
             },
             margin: 15
           },
@@ -7563,12 +7563,12 @@ var closedVsGoalInit = function closedVsGoalInit() {
 
 
 var courseEnrollmentsInit = function courseEnrollmentsInit() {
-  var Rs. echartBarCourseEnrollments = document.querySelector('.echart-bar-course-enrollments');
+  var $echartBarCourseEnrollments = document.querySelector('.echart-bar-course-enrollments');
   var data = [['course', 'Free Course', 'Paid Course', 'On sale Course'], ['Sun', 4300, 8500, 5000], ['Mon', 8300, 7300, 4500], ['Tue', 8600, 6200, 3600], ['Wed', 7200, 5300, 4500], ['Thu', 8000, 5000, 2600], ['Fri', 5000, 7000, 8800], ['Sat', 8000, 9000, 6000]];
 
-  if (Rs. echartBarCourseEnrollments) {
-    var userOptions = utils.getData(Rs. echartBarCourseEnrollments, 'options');
-    var chart = window.echarts.init(Rs. echartBarCourseEnrollments);
+  if ($echartBarCourseEnrollments) {
+    var userOptions = utils.getData($echartBarCourseEnrollments, 'options');
+    var chart = window.echarts.init($echartBarCourseEnrollments);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -7712,7 +7712,7 @@ var courseEnrollmentsInit = function courseEnrollmentsInit() {
     };
 
     var initChart = function initChart() {
-      if (utils.isScrolledIntoView(Rs. echartBarCourseEnrollments)) {
+      if (utils.isScrolledIntoView($echartBarCourseEnrollments)) {
         echartSetOption(chart, userOptions, getDefaultOptions);
         window.removeEventListener('scroll', initChart);
       }
@@ -7729,7 +7729,7 @@ var courseEnrollmentsInit = function courseEnrollmentsInit() {
 
 
 var courseStatusInit = function courseStatusInit() {
-  var Rs. echartsCourseStatus = document.querySelector('.echart-course-status');
+  var $echartsCourseStatus = document.querySelector('.echart-course-status');
   var data = [{
     value: 13,
     name: 'Completed',
@@ -7756,9 +7756,9 @@ var courseStatusInit = function courseStatusInit() {
     }
   }];
 
-  if (Rs. echartsCourseStatus) {
-    var userOptions = utils.getData(Rs. echartsCourseStatus, 'options');
-    var chart = window.echarts.init(Rs. echartsCourseStatus);
+  if ($echartsCourseStatus) {
+    var userOptions = utils.getData($echartsCourseStatus, 'options');
+    var chart = window.echarts.init($echartsCourseStatus);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -7796,7 +7796,7 @@ var courseStatusInit = function courseStatusInit() {
     };
 
     var initChart = function initChart() {
-      if (utils.isScrolledIntoView(Rs. echartsCourseStatus)) {
+      if (utils.isScrolledIntoView($echartsCourseStatus)) {
         echartSetOption(chart, userOptions, getDefaultOptions);
         window.removeEventListener('scroll', initChart);
       }
@@ -7824,7 +7824,7 @@ var revenueChartInit = function revenueChartInit() {
   };
 
   var tooltipFormatter = function tooltipFormatter(params) {
-    return "<div class=\"card\">\n                <div class=\"card-header bg-light py-2\">\n                  <h6 class=\"text-600 mb-0\">".concat(params[0].axisValue, "</h6>\n                </div>\n              <div class=\"card-body py-2\">\n                <h6 class=\"text-600 fw-normal\">\n                  <span class=\"fas fa-circle text-primary me-2\"></span>Revenue: \n                  <span class=\"fw-medium\">Rs. ").concat(params[0].data, "</span></h6>\n                <h6 class=\"text-600 mb-0 fw-normal\"> \n                  <span class=\"fas fa-circle text-warning me-2\"></span>Revenue Goal: \n                  <span class=\"fw-medium\">Rs. ").concat(params[1].data, "</span></h6>\n              </div>\n            </div>");
+    return "<div class=\"card\">\n                <div class=\"card-header bg-light py-2\">\n                  <h6 class=\"text-600 mb-0\">".concat(params[0].axisValue, "</h6>\n                </div>\n              <div class=\"card-body py-2\">\n                <h6 class=\"text-600 fw-normal\">\n                  <span class=\"fas fa-circle text-primary me-2\"></span>Revenue: \n                  <span class=\"fw-medium\">$").concat(params[0].data, "</span></h6>\n                <h6 class=\"text-600 mb-0 fw-normal\"> \n                  <span class=\"fas fa-circle text-warning me-2\"></span>Revenue Goal: \n                  <span class=\"fw-medium\">$").concat(params[1].data, "</span></h6>\n              </div>\n            </div>");
   };
 
   var getDefaultOptions = function getDefaultOptions(data1, data2) {
@@ -7942,12 +7942,12 @@ var revenueChartInit = function revenueChartInit() {
 };
 
 var echartsCustomerSatisfactionInit = function echartsCustomerSatisfactionInit() {
-  var Rs. echartCustomerSatisfaction = document.querySelector('.echart-customer-setisfaction');
+  var $echartCustomerSatisfaction = document.querySelector('.echart-customer-setisfaction');
 
-  if (Rs. echartCustomerSatisfaction) {
+  if ($echartCustomerSatisfaction) {
     // Get options from data attribute
-    var userOptions = utils.getData(Rs. echartCustomerSatisfaction, 'options');
-    var chart = window.echarts.init(Rs. echartCustomerSatisfaction);
+    var userOptions = utils.getData($echartCustomerSatisfaction, 'options');
+    var chart = window.echarts.init($echartCustomerSatisfaction);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -8021,14 +8021,14 @@ var echartsCustomerSatisfactionInit = function echartsCustomerSatisfactionInit()
 
 
 var dealStorageFunnelInit = function dealStorageFunnelInit() {
-  var Rs. echartDealStorageFunnel = document.querySelector('.echart-deal-storage-funnel');
+  var $echartDealStorageFunnel = document.querySelector('.echart-deal-storage-funnel');
 
-  if (Rs. echartDealStorageFunnel) {
-    var userOptions = utils.getData(Rs. echartDealStorageFunnel, 'options');
+  if ($echartDealStorageFunnel) {
+    var userOptions = utils.getData($echartDealStorageFunnel, 'options');
     var data = userOptions.data,
         dataAxis1 = userOptions.dataAxis1,
         dataAxis2 = userOptions.dataAxis2;
-    var chart = window.echarts.init(Rs. echartDealStorageFunnel);
+    var chart = window.echarts.init($echartDealStorageFunnel);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -8124,11 +8124,11 @@ var dealStorageFunnelInit = function dealStorageFunnelInit() {
 };
 
 var echartsDistributionOfPerformanceInit = function echartsDistributionOfPerformanceInit() {
-  var Rs. distributionOfPerformance = document.querySelector('.echart-distribution-of-performance');
+  var $distributionOfPerformance = document.querySelector('.echart-distribution-of-performance');
 
-  if (Rs. distributionOfPerformance) {
-    var userOptions = utils.getData(Rs. distributionOfPerformance, 'options');
-    var chart = window.echarts.init(Rs. distributionOfPerformance);
+  if ($distributionOfPerformance) {
+    var userOptions = utils.getData($distributionOfPerformance, 'options');
+    var chart = window.echarts.init($distributionOfPerformance);
     var xAxisData = ['Mar 01', 'Mar 02', 'Mar 03', 'Mar 04', 'Mar 05', 'Mar 06', 'Mar 07', 'Mar 08', 'Mar 09', 'Mar 10', 'Mar 11', 'Mar 12'];
     var data1 = [50, 25, 35, 30, 45, 35, 38, 30, 35, 30, 35, 38];
     var data2 = [45, 50, 40, 35, 50, 40, 44, 35, 40, 45, 40, 44];
@@ -8262,10 +8262,10 @@ var tooltipFormatter = function tooltipFormatter(params) {
 };
 
 var resizeEcharts = function resizeEcharts() {
-  var Rs. echarts = document.querySelectorAll('[data-echart-responsive]');
+  var $echarts = document.querySelectorAll('[data-echart-responsive]');
 
-  if (Rs. echarts.length) {
-    Rs. echarts.forEach(function (item) {
+  if ($echarts.length) {
+    $echarts.forEach(function (item) {
       if (utils.getData(item, 'echart-responsive')) {
         if (!(item.closest('.tab-pane') && window.getComputedStyle(item.closest('.tab-pane')).display === 'none')) {
           window.echarts.init(item).resize();
@@ -8301,19 +8301,19 @@ echartTabs && echartTabs.forEach(function (tab) {
 
 var grossRevenueChartInit = function grossRevenueChartInit() {
   var ECHART_GROSS_REVENUE = '.echart-gross-revenue-chart';
-  var Rs. echartsGrossRevenue = document.querySelector(ECHART_GROSS_REVENUE);
+  var $echartsGrossRevenue = document.querySelector(ECHART_GROSS_REVENUE);
   var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-  if (Rs. echartsGrossRevenue) {
+  if ($echartsGrossRevenue) {
     // Get options from data attribute
-    var userOptions = utils.getData(Rs. echartsGrossRevenue, 'options');
-    var chart = window.echarts.init(Rs. echartsGrossRevenue);
+    var userOptions = utils.getData($echartsGrossRevenue, 'options');
+    var chart = window.echarts.init($echartsGrossRevenue);
     var SELECT_MONTH = "#".concat(userOptions.monthSelect);
     var LEGEND_MONTH_TARGET = userOptions.target;
     var LEGEND_CURRENT_MONTH = "#".concat(userOptions.optionOne);
     var LEGEND_PREV_MONTH = "#".concat(userOptions.optionTwo);
-    var Rs. legendCurrentMonth = document.getElementById(LEGEND_MONTH_TARGET).querySelector(LEGEND_CURRENT_MONTH);
-    var Rs. legendPrevMonth = document.getElementById(LEGEND_MONTH_TARGET).querySelector(LEGEND_PREV_MONTH);
+    var $legendCurrentMonth = document.getElementById(LEGEND_MONTH_TARGET).querySelector(LEGEND_CURRENT_MONTH);
+    var $legendPrevMonth = document.getElementById(LEGEND_MONTH_TARGET).querySelector(LEGEND_PREV_MONTH);
 
     var dates = function dates(month) {
       return utils.getDates(window.dayjs().month(month).date(1), window.dayjs().month(Number(month) + 1).date(0), 1000 * 60 * 60 * 24 * 3);
@@ -8466,8 +8466,8 @@ var grossRevenueChartInit = function grossRevenueChartInit() {
       month = e.currentTarget.value;
       currentMonthData = monthsnumber[Number(month) + 1];
       prevMonthData = monthsnumber[month];
-      Rs. legendCurrentMonth.querySelector('.text').innerText = months[month];
-      Rs. legendPrevMonth.querySelector('.text').innerText = months[month - 1] ? months[month - 1] : 'Dec';
+      $legendCurrentMonth.querySelector('.text').innerText = months[month];
+      $legendPrevMonth.querySelector('.text').innerText = months[month - 1] ? months[month - 1] : 'Dec';
       chart.setOption({
         xAxis: {
           data: dates(month)
@@ -8479,15 +8479,15 @@ var grossRevenueChartInit = function grossRevenueChartInit() {
         }]
       });
     });
-    Rs. legendCurrentMonth.addEventListener('click', function () {
-      Rs. legendCurrentMonth.classList.toggle('opacity-50');
+    $legendCurrentMonth.addEventListener('click', function () {
+      $legendCurrentMonth.classList.toggle('opacity-50');
       chart.dispatchAction({
         type: 'legendToggleSelect',
         name: 'currentMonth'
       });
     });
-    Rs. legendPrevMonth.addEventListener('click', function () {
-      Rs. legendPrevMonth.classList.toggle('opacity-50');
+    $legendPrevMonth.addEventListener('click', function () {
+      $legendPrevMonth.classList.toggle('opacity-50');
       chart.dispatchAction({
         type: 'legendToggleSelect',
         name: 'prevMonth'
@@ -8503,11 +8503,11 @@ var grossRevenueChartInit = function grossRevenueChartInit() {
 
 
 var leadConversionInit = function leadConversionInit() {
-  var Rs. leadConversion = document.querySelector('.echart-lead-conversion');
+  var $leadConversion = document.querySelector('.echart-lead-conversion');
 
-  if (Rs. leadConversion) {
-    var userOptions = utils.getData(Rs. leadConversion, 'options');
-    var chart = window.echarts.init(Rs. leadConversion);
+  if ($leadConversion) {
+    var userOptions = utils.getData($leadConversion, 'options');
+    var chart = window.echarts.init($leadConversion);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -8622,7 +8622,7 @@ var leadConversionInit = function leadConversionInit() {
 
 
 var linePaymentChartInit = function linePaymentChartInit() {
-  var Rs. echartsLinePaymentChart = document.querySelector('.echart-line-payment');
+  var $echartsLinePaymentChart = document.querySelector('.echart-line-payment');
   var dataset = {
     all: [4, 1, 6, 2, 7, 12, 4, 6, 5, 4, 5, 10],
     successful: [3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5, 8],
@@ -8630,9 +8630,9 @@ var linePaymentChartInit = function linePaymentChartInit() {
   };
   var labels = ['9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM', '7:00 PM', '8:00 PM'];
 
-  if (Rs. echartsLinePaymentChart) {
-    var userOptions = utils.getData(Rs. echartsLinePaymentChart, 'options');
-    var chart = window.echarts.init(Rs. echartsLinePaymentChart);
+  if ($echartsLinePaymentChart) {
+    var userOptions = utils.getData($echartsLinePaymentChart, 'options');
+    var chart = window.echarts.init($echartsLinePaymentChart);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -8787,7 +8787,7 @@ var linePaymentChartInit = function linePaymentChartInit() {
 
 
 var locationBySessionInit = function locationBySessionInit() {
-  var Rs. locationBySessionMap = document.querySelector('.echart-location-by-session-map');
+  var $locationBySessionMap = document.querySelector('.echart-location-by-session-map');
   var data = [{
     name: 'Afghanistan',
     value: 28397.812
@@ -9327,11 +9327,11 @@ var locationBySessionInit = function locationBySessionInit() {
   var maxZoomLevel = 5;
   var minZoomLevel = 1;
 
-  if (Rs. locationBySessionMap) {
-    var _documentRs. querySelect2, _documentRs. querySelect3, _documentRs. querySelect4;
+  if ($locationBySessionMap) {
+    var _document$querySelect2, _document$querySelect3, _document$querySelect4;
 
-    var userOptions = utils.getData(Rs. locationBySessionMap, 'options');
-    var chart = window.echarts.init(Rs. locationBySessionMap);
+    var userOptions = utils.getData($locationBySessionMap, 'options');
+    var chart = window.echarts.init($locationBySessionMap);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -9346,9 +9346,9 @@ var locationBySessionInit = function locationBySessionInit() {
           borderWidth: 1,
           transitionDuration: 0,
           formatter: function formatter(params) {
-            var _paramsRs. data, _paramsRs. data2;
+            var _params$data, _params$data2;
 
-            return "<strong>".concat((_paramsRs. data = params.data) === null || _paramsRs. data === void 0 ? void 0 : _paramsRs. data.name, " :</strong> ").concat((((_paramsRs. data2 = params.data) === null || _paramsRs. data2 === void 0 ? void 0 : _paramsRs. data2.value) / total * 100).toFixed(2), "%");
+            return "<strong>".concat((_params$data = params.data) === null || _params$data === void 0 ? void 0 : _params$data.name, " :</strong> ").concat((((_params$data2 = params.data) === null || _params$data2 === void 0 ? void 0 : _params$data2.value) / total * 100).toFixed(2), "%");
           }
         },
         visualMap: {
@@ -9390,7 +9390,7 @@ var locationBySessionInit = function locationBySessionInit() {
 
     echartSetOption(chart, userOptions, getDefaultOptions);
     var zoomLevel = 1;
-    (_documentRs. querySelect2 = document.querySelector('.location-by-session-map-reset')) === null || _documentRs. querySelect2 === void 0 ? void 0 : _documentRs. querySelect2.addEventListener('click', function () {
+    (_document$querySelect2 = document.querySelector('.location-by-session-map-reset')) === null || _document$querySelect2 === void 0 ? void 0 : _document$querySelect2.addEventListener('click', function () {
       zoomLevel = 1;
       chart.dispatchAction({
         type: 'restore'
@@ -9401,7 +9401,7 @@ var locationBySessionInit = function locationBySessionInit() {
         }
       });
     });
-    (_documentRs. querySelect3 = document.querySelector('.location-by-session-map-zoom')) === null || _documentRs. querySelect3 === void 0 ? void 0 : _documentRs. querySelect3.addEventListener('click', function () {
+    (_document$querySelect3 = document.querySelector('.location-by-session-map-zoom')) === null || _document$querySelect3 === void 0 ? void 0 : _document$querySelect3.addEventListener('click', function () {
       if (zoomLevel < maxZoomLevel) {
         zoomLevel += 1;
       }
@@ -9412,7 +9412,7 @@ var locationBySessionInit = function locationBySessionInit() {
         }
       });
     });
-    (_documentRs. querySelect4 = document.querySelector('.location-by-session-map-zoomOut')) === null || _documentRs. querySelect4 === void 0 ? void 0 : _documentRs. querySelect4.addEventListener('click', function () {
+    (_document$querySelect4 = document.querySelector('.location-by-session-map-zoomOut')) === null || _document$querySelect4 === void 0 ? void 0 : _document$querySelect4.addEventListener('click', function () {
       if (zoomLevel > minZoomLevel) {
         zoomLevel -= 1;
       }
@@ -9434,11 +9434,11 @@ var locationBySessionInit = function locationBySessionInit() {
 
 var marketShareEcommerceInit = function marketShareEcommerceInit() {
   var ECHART_PRODUCT_SHARE = '.echart-product-share';
-  var Rs. echartProductShare = document.querySelector(ECHART_PRODUCT_SHARE);
+  var $echartProductShare = document.querySelector(ECHART_PRODUCT_SHARE);
 
-  if (Rs. echartProductShare) {
-    var userOptions = utils.getData(Rs. echartProductShare, 'options');
-    var chart = window.echarts.init(Rs. echartProductShare);
+  if ($echartProductShare) {
+    var userOptions = utils.getData($echartProductShare, 'options');
+    var chart = window.echarts.init($echartProductShare);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -9517,11 +9517,11 @@ var marketShareEcommerceInit = function marketShareEcommerceInit() {
 
 var marketShareInit = function marketShareInit() {
   var ECHART_MARKET_SHARE = '.echart-market-share';
-  var Rs. echartMarketShare = document.querySelector(ECHART_MARKET_SHARE);
+  var $echartMarketShare = document.querySelector(ECHART_MARKET_SHARE);
 
-  if (Rs. echartMarketShare) {
-    var userOptions = utils.getData(Rs. echartMarketShare, 'options');
-    var chart = window.echarts.init(Rs. echartMarketShare);
+  if ($echartMarketShare) {
+    var userOptions = utils.getData($echartMarketShare, 'options');
+    var chart = window.echarts.init($echartMarketShare);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -9599,11 +9599,11 @@ var marketShareInit = function marketShareInit() {
 
 
 var marketingExpensesInit = function marketingExpensesInit() {
-  var Rs. echartsMarketingExp = document.querySelector('.echart-marketing-expenses');
+  var $echartsMarketingExp = document.querySelector('.echart-marketing-expenses');
 
-  if (Rs. echartsMarketingExp) {
-    var userOptions = utils.getData(Rs. echartsMarketingExp, 'options');
-    var chart = window.echarts.init(Rs. echartsMarketingExp);
+  if ($echartsMarketingExp) {
+    var userOptions = utils.getData($echartsMarketingExp, 'options');
+    var chart = window.echarts.init($echartsMarketingExp);
     var marketingExpenses = [{
       value: 412600,
       name: 'Offline Marketing',
@@ -9732,7 +9732,7 @@ var marketingExpensesInit = function marketingExpensesInit() {
     };
 
     var initChart = function initChart() {
-      if (utils.isScrolledIntoView(Rs. echartsMarketingExp)) {
+      if (utils.isScrolledIntoView($echartsMarketingExp)) {
         echartSetOption(chart, userOptions, getDefaultOptions);
         window.removeEventListener('scroll', initChart);
       }
@@ -9750,11 +9750,11 @@ var marketingExpensesInit = function marketingExpensesInit() {
 
 var mostLeadsInit = function mostLeadsInit() {
   var ECHART_MOST_LEADS = '.echart-most-leads';
-  var Rs. echartMostLeads = document.querySelector(ECHART_MOST_LEADS);
+  var $echartMostLeads = document.querySelector(ECHART_MOST_LEADS);
 
-  if (Rs. echartMostLeads) {
-    var userOptions = utils.getData(Rs. echartMostLeads, 'options');
-    var chart = window.echarts.init(Rs. echartMostLeads);
+  if ($echartMostLeads) {
+    var userOptions = utils.getData($echartMostLeads, 'options');
+    var chart = window.echarts.init($echartMostLeads);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -9829,11 +9829,11 @@ var mostLeadsInit = function mostLeadsInit() {
 };
 
 var echartsNumberOfTicketsInit = function echartsNumberOfTicketsInit() {
-  var Rs. numberOfTickets = document.querySelector('.echart-number-of-tickets');
+  var $numberOfTickets = document.querySelector('.echart-number-of-tickets');
 
-  if (Rs. numberOfTickets) {
-    var userOptions = utils.getData(Rs. numberOfTickets, 'options');
-    var chart = window.echarts.init(Rs. numberOfTickets);
+  if ($numberOfTickets) {
+    var userOptions = utils.getData($numberOfTickets, 'options');
+    var chart = window.echarts.init($numberOfTickets);
     var numberOfTicketsLegend = document.querySelectorAll('[data-number-of-tickets]');
     var xAxisData = ['Mar 01', 'Mar 02', 'Mar 03', 'Mar 04', 'Mar 05', 'Mar 06'];
     var data1 = [45, 35, 55, 55, 55, 45];
@@ -9958,11 +9958,11 @@ var echartsNumberOfTicketsInit = function echartsNumberOfTicketsInit() {
 
 
 var realTimeUsersChartInit = function realTimeUsersChartInit() {
-  var Rs. echartsRealTimeUsers = document.querySelector('.echart-real-time-users');
+  var $echartsRealTimeUsers = document.querySelector('.echart-real-time-users');
 
-  if (Rs. echartsRealTimeUsers) {
-    var userOptions = utils.getData(Rs. echartsRealTimeUsers, 'options');
-    var chart = window.echarts.init(Rs. echartsRealTimeUsers);
+  if ($echartsRealTimeUsers) {
+    var userOptions = utils.getData($echartsRealTimeUsers, 'options');
+    var chart = window.echarts.init($echartsRealTimeUsers);
     var data = [921, 950, 916, 913, 909, 962, 926, 936, 977, 976, 999, 981, 998, 1000, 900, 906, 973, 911, 994, 982, 917, 972, 952, 963, 991];
     var axisData = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];
 
@@ -10056,11 +10056,11 @@ var realTimeUsersChartInit = function realTimeUsersChartInit() {
 };
 
 var echartsReceivedTicketsInit = function echartsReceivedTicketsInit() {
-  var Rs. receivedTickets = document.querySelector('.echart-received-tickets');
+  var $receivedTickets = document.querySelector('.echart-received-tickets');
 
-  if (Rs. receivedTickets) {
-    var userOptions = utils.getData(Rs. receivedTickets, 'options');
-    var chart = window.echarts.init(Rs. receivedTickets);
+  if ($receivedTickets) {
+    var userOptions = utils.getData($receivedTickets, 'options');
+    var chart = window.echarts.init($receivedTickets);
     var xAxisData = ['Apr 01', 'Apr 02', 'Apr 03', 'Apr 04', 'Apr 05', 'Apr 06', 'Apr 07', 'Apr 08', 'Apr 09', 'Apr 10'];
     var data1 = [28, 35, 28, 25, 21, 32, 25, 30, 23, 37];
     var data2 = [20, 27, 21, 15, 17, 22, 18, 20, 15, 27];
@@ -10179,15 +10179,15 @@ var echartsReceivedTicketsInit = function echartsReceivedTicketsInit() {
 
 var reportForThisWeekInit = function reportForThisWeekInit() {
   var ECHART_BAR_REPORT_FOR_THIS_WEEK = '.echart-bar-report-for-this-week';
-  var Rs. echartBarReportForThisWeek = document.querySelector(ECHART_BAR_REPORT_FOR_THIS_WEEK);
+  var $echartBarReportForThisWeek = document.querySelector(ECHART_BAR_REPORT_FOR_THIS_WEEK);
 
-  if (Rs. echartBarReportForThisWeek) {
-    var selectChart = utils.getData(Rs. echartBarReportForThisWeek, 'chart');
+  if ($echartBarReportForThisWeek) {
+    var selectChart = utils.getData($echartBarReportForThisWeek, 'chart');
     var legendThisWeek = document.getElementById(selectChart === null || selectChart === void 0 ? void 0 : selectChart.option1);
     var legendLastWeek = document.getElementById(selectChart === null || selectChart === void 0 ? void 0 : selectChart.option2);
     var data = [['product', 'This Week', 'Last Week'], ['Sun', 43, 85], ['Mon', 83, 73], ['Tue', 86, 62], ['Wed', 72, 53], ['Thu', 80, 50], ['Fri', 50, 70], ['Sat', 80, 90]];
-    var userOptions = utils.getData(Rs. echartBarReportForThisWeek, 'options');
-    var chart = window.echarts.init(Rs. echartBarReportForThisWeek);
+    var userOptions = utils.getData($echartBarReportForThisWeek, 'options');
+    var chart = window.echarts.init($echartBarReportForThisWeek);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -10318,19 +10318,19 @@ var reportForThisWeekInit = function reportForThisWeekInit() {
 
 var returningCustomerRateInit = function returningCustomerRateInit() {
   var ECHART_LINE_RETURNING_CUSTOMER_RATE = '.echart-line-returning-customer-rate';
-  var Rs. echartsLineReturningCustomerRate = document.querySelector(ECHART_LINE_RETURNING_CUSTOMER_RATE);
+  var $echartsLineReturningCustomerRate = document.querySelector(ECHART_LINE_RETURNING_CUSTOMER_RATE);
   var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-  if (Rs. echartsLineReturningCustomerRate) {
+  if ($echartsLineReturningCustomerRate) {
     // Get options from data attribute
-    var userOptions = utils.getData(Rs. echartsLineReturningCustomerRate, 'options');
+    var userOptions = utils.getData($echartsLineReturningCustomerRate, 'options');
     var LEGEND_MONTH_TARGET = userOptions.target;
     var SELECT_MONTH = "#".concat(userOptions.monthSelect);
     var LEGEND_NEW_MONTH = "#".concat(userOptions.optionOne);
     var LEGEND_RETURNING_MONTH = "#".concat(userOptions.optionTwo);
-    var Rs. legendNewMonth = document.getElementById(LEGEND_MONTH_TARGET).querySelector(LEGEND_NEW_MONTH);
-    var Rs. legendReturningMonth = document.getElementById(LEGEND_MONTH_TARGET).querySelector(LEGEND_RETURNING_MONTH);
-    var chart = window.echarts.init(Rs. echartsLineReturningCustomerRate);
+    var $legendNewMonth = document.getElementById(LEGEND_MONTH_TARGET).querySelector(LEGEND_NEW_MONTH);
+    var $legendReturningMonth = document.getElementById(LEGEND_MONTH_TARGET).querySelector(LEGEND_RETURNING_MONTH);
+    var chart = window.echarts.init($echartsLineReturningCustomerRate);
     var monthNumbers = [[20, 40, 20, 80, 50, 80, 120, 80, 50, 120, 110, 110], [60, 80, 60, 80, 65, 130, 120, 100, 30, 40, 30, 70], [100, 70, 80, 50, 120, 100, 130, 140, 90, 100, 40, 50], [80, 50, 60, 40, 60, 120, 100, 130, 60, 80, 50, 60], [70, 80, 100, 70, 90, 60, 80, 130, 40, 60, 50, 80], [90, 40, 80, 80, 100, 140, 100, 130, 90, 60, 70, 50], [80, 60, 80, 60, 40, 100, 120, 100, 30, 40, 30, 70], [20, 40, 20, 50, 70, 60, 110, 80, 90, 30, 50, 50], [60, 70, 30, 40, 80, 140, 80, 140, 120, 130, 100, 110], [90, 90, 40, 60, 40, 110, 90, 110, 60, 80, 60, 70], [50, 80, 50, 80, 50, 80, 120, 80, 50, 120, 110, 110], [60, 90, 60, 70, 40, 70, 100, 140, 30, 40, 30, 70], [20, 40, 20, 50, 30, 80, 120, 100, 30, 40, 30, 70]];
 
     var dates = function dates(month) {
@@ -10518,15 +10518,15 @@ var returningCustomerRateInit = function returningCustomerRateInit() {
         }]
       });
     });
-    Rs. legendNewMonth.addEventListener('click', function () {
-      Rs. legendNewMonth.classList.toggle('opacity-50');
+    $legendNewMonth.addEventListener('click', function () {
+      $legendNewMonth.classList.toggle('opacity-50');
       chart.dispatchAction({
         type: 'legendToggleSelect',
         name: 'New'
       });
     });
-    Rs. legendReturningMonth.addEventListener('click', function () {
-      Rs. legendReturningMonth.classList.toggle('opacity-50');
+    $legendReturningMonth.addEventListener('click', function () {
+      $legendReturningMonth.classList.toggle('opacity-50');
       chart.dispatchAction({
         type: 'legendToggleSelect',
         name: 'Returning'
@@ -10543,17 +10543,17 @@ var returningCustomerRateInit = function returningCustomerRateInit() {
 
 var salesByPosLocationInit = function salesByPosLocationInit() {
   var ECHART_RADAR_SALES_BY_POS_LOCATION = '.echart-radar-sales-by-pos-location';
-  var Rs. echartsRadarSalesByPosLocation = document.querySelector(ECHART_RADAR_SALES_BY_POS_LOCATION);
+  var $echartsRadarSalesByPosLocation = document.querySelector(ECHART_RADAR_SALES_BY_POS_LOCATION);
 
   function getformatter(params) {
     //const indicators = ['Marketing','Sales', 'Dev', 'Support', 'Tech', 'Admin']
     return "<strong > ".concat(params.name, " </strong>\n    <div class=\"fs--1 text-600\">\n      <strong >Marketing</strong>: ").concat(params.value[0], "  <br>\n      <strong>Sales</strong>: ").concat(params.value[1], "  <br>\n      <strong>Dev</strong>: ").concat(params.value[2], "  <br>\n      <strong>Support</strong>: ").concat(params.value[3], "  <br>\n      <strong>Tech</strong>: ").concat(params.value[4], "  <br>\n      <strong>Admin</strong>: ").concat(params.value[5], "  <br>\n    </div>");
   }
 
-  if (Rs. echartsRadarSalesByPosLocation) {
+  if ($echartsRadarSalesByPosLocation) {
     // Get options from data attribute
-    var userOptions = utils.getData(Rs. echartsRadarSalesByPosLocation, 'options');
-    var chart = window.echarts.init(Rs. echartsRadarSalesByPosLocation);
+    var userOptions = utils.getData($echartsRadarSalesByPosLocation, 'options');
+    var chart = window.echarts.init($echartsRadarSalesByPosLocation);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -10666,11 +10666,11 @@ var salesByPosLocationInit = function salesByPosLocationInit() {
 };
 
 var echartsSatisfactionSurveyInit = function echartsSatisfactionSurveyInit() {
-  var Rs. satisfactionSurvey = document.querySelector('.echart-satisfaction-survey');
+  var $satisfactionSurvey = document.querySelector('.echart-satisfaction-survey');
 
-  if (Rs. satisfactionSurvey) {
-    var userOptions = utils.getData(Rs. satisfactionSurvey, 'options');
-    var chart = window.echarts.init(Rs. satisfactionSurvey);
+  if ($satisfactionSurvey) {
+    var userOptions = utils.getData($satisfactionSurvey, 'options');
+    var chart = window.echarts.init($satisfactionSurvey);
     var xAxisData = ['05 April', '06 April', '07 April', '08 April', '09 April', '10 April', '11 April', '12 April', '13 April', '14 April', '15 April'];
     var data1 = [98, 105, 65, 110, 75, 55, 95, 75, 90, 45, 70];
     var data2 = [80, 60, 78, 58, 65, 65, 75, 110, 40, 60, 60];
@@ -10787,11 +10787,11 @@ var echartsSatisfactionSurveyInit = function echartsSatisfactionSurveyInit() {
 
 
 var sessionByBrowserChartInit = function sessionByBrowserChartInit() {
-  var Rs. sessionByBroswser = document.querySelector('.echart-session-by-browser');
+  var $sessionByBroswser = document.querySelector('.echart-session-by-browser');
 
-  if (Rs. sessionByBroswser) {
-    var userOptions = utils.getData(Rs. sessionByBroswser, 'options');
-    var chart = window.echarts.init(Rs. sessionByBroswser);
+  if ($sessionByBroswser) {
+    var userOptions = utils.getData($sessionByBroswser, 'options');
+    var chart = window.echarts.init($sessionByBroswser);
     var dataset = {
       week: [{
         value: 50.3,
@@ -10898,7 +10898,7 @@ var sessionByBrowserChartInit = function sessionByBrowserChartInit() {
 
 
 var sessionByCountryMapInit = function sessionByCountryMapInit() {
-  var Rs. sessionByCountryMap = document.querySelector('.echart-session-by-country-map');
+  var $sessionByCountryMap = document.querySelector('.echart-session-by-country-map');
   var data = [{
     name: 'Afghanistan',
     value: 28397.812
@@ -11436,11 +11436,11 @@ var sessionByCountryMapInit = function sessionByCountryMapInit() {
   }];
   var total = 6961500;
 
-  if (Rs. sessionByCountryMap) {
-    var _documentRs. querySelect5;
+  if ($sessionByCountryMap) {
+    var _document$querySelect5;
 
-    var userOptions = utils.getData(Rs. sessionByCountryMap, 'options');
-    var chart = window.echarts.init(Rs. sessionByCountryMap);
+    var userOptions = utils.getData($sessionByCountryMap, 'options');
+    var chart = window.echarts.init($sessionByCountryMap);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -11455,9 +11455,9 @@ var sessionByCountryMapInit = function sessionByCountryMapInit() {
           borderWidth: 1,
           transitionDuration: 0,
           formatter: function formatter(params) {
-            var _paramsRs. data3, _paramsRs. data4;
+            var _params$data3, _params$data4;
 
-            return "<strong>".concat((_paramsRs. data3 = params.data) === null || _paramsRs. data3 === void 0 ? void 0 : _paramsRs. data3.name, " :</strong> ").concat((((_paramsRs. data4 = params.data) === null || _paramsRs. data4 === void 0 ? void 0 : _paramsRs. data4.value) / total * 100).toFixed(2), "%");
+            return "<strong>".concat((_params$data3 = params.data) === null || _params$data3 === void 0 ? void 0 : _params$data3.name, " :</strong> ").concat((((_params$data4 = params.data) === null || _params$data4 === void 0 ? void 0 : _params$data4.value) / total * 100).toFixed(2), "%");
           }
         },
         toolbox: {
@@ -11504,7 +11504,7 @@ var sessionByCountryMapInit = function sessionByCountryMapInit() {
     };
 
     echartSetOption(chart, userOptions, getDefaultOptions);
-    (_documentRs. querySelect5 = document.querySelector('.session-by-country-map-reset')) === null || _documentRs. querySelect5 === void 0 ? void 0 : _documentRs. querySelect5.addEventListener('click', function () {
+    (_document$querySelect5 = document.querySelector('.session-by-country-map-reset')) === null || _document$querySelect5 === void 0 ? void 0 : _document$querySelect5.addEventListener('click', function () {
       chart.dispatchAction({
         type: 'restore'
       });
@@ -11519,12 +11519,12 @@ var sessionByCountryMapInit = function sessionByCountryMapInit() {
 
 
 var sessionByCountryChartInit = function sessionByCountryChartInit() {
-  var Rs. sessionByCountry = document.querySelector('.echart-session-by-country');
+  var $sessionByCountry = document.querySelector('.echart-session-by-country');
   var data = [['CHINA', 'INDIA', 'USA', 'IRAN', 'BRAZIL', 'PAKISTAN'], [19.53, 17.32, 4.49, 3.46, 2.8, 1.7]];
 
-  if (Rs. sessionByCountry) {
-    var userOptions = utils.getData(Rs. sessionByCountry, 'options');
-    var chart = window.echarts.init(Rs. sessionByCountry);
+  if ($sessionByCountry) {
+    var userOptions = utils.getData($sessionByCountry, 'options');
+    var chart = window.echarts.init($sessionByCountry);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -11617,24 +11617,24 @@ var sessionByCountryChartInit = function sessionByCountryChartInit() {
 };
 
 var echartTicketPriority = function echartTicketPriority() {
-  var Rs. paginationBtnNext = document.querySelector('[data-list-pagination-chart="next"]');
-  var Rs. paginationBtnPrev = document.querySelector('[data-list-pagination-chart="prev"]');
-  var Rs. paginationContainer = document.querySelector('[data-list-pagination-chart]');
+  var $paginationBtnNext = document.querySelector('[data-list-pagination-chart="next"]');
+  var $paginationBtnPrev = document.querySelector('[data-list-pagination-chart="prev"]');
+  var $paginationContainer = document.querySelector('[data-list-pagination-chart]');
 
-  if (Rs. paginationBtnNext) {
-    Rs. paginationBtnNext.addEventListener('click', function () {
+  if ($paginationBtnNext) {
+    $paginationBtnNext.addEventListener('click', function () {
       basicEchartsInit();
     });
   }
 
-  if (Rs. paginationBtnPrev) {
-    Rs. paginationBtnPrev.addEventListener('click', function () {
+  if ($paginationBtnPrev) {
+    $paginationBtnPrev.addEventListener('click', function () {
       basicEchartsInit();
     });
   }
 
-  if (Rs. paginationContainer) {
-    Rs. paginationContainer.addEventListener('click', function (e) {
+  if ($paginationContainer) {
+    $paginationContainer.addEventListener('click', function (e) {
       if (e.target.tagName === 'BUTTON') {
         console.log(e.target);
         setTimeout(function () {
@@ -11652,11 +11652,11 @@ var echartTicketPriority = function echartTicketPriority() {
 
 
 var ticketVolumeChartInit = function ticketVolumeChartInit() {
-  var Rs. ticketVolume = document.querySelector('.echart-ticket-volume');
+  var $ticketVolume = document.querySelector('.echart-ticket-volume');
 
-  if (Rs. ticketVolume) {
-    var userOptions = utils.getData(Rs. ticketVolume, 'options');
-    var chart = window.echarts.init(Rs. ticketVolume);
+  if ($ticketVolume) {
+    var userOptions = utils.getData($ticketVolume, 'options');
+    var chart = window.echarts.init($ticketVolume);
     var ticketVolumeLegend = document.querySelectorAll('[data-ticket-volume]');
 
     var getDefaultOptions = function getDefaultOptions() {
@@ -11924,8 +11924,8 @@ var topCustomersChartInit = function topCustomersChartInit() {
     triggerTabList.forEach(function (triggerEl) {
       triggerEl.addEventListener('shown.bs.tab', function () {
         var key = triggerEl.href.split('#').pop();
-        var Rs. echartTopCustomers = document.getElementById(key).querySelector('.echart-top-customers');
-        initChart(Rs. echartTopCustomers, getDefaultOptions(data.dataset[key][0]));
+        var $echartTopCustomers = document.getElementById(key).querySelector('.echart-top-customers');
+        initChart($echartTopCustomers, getDefaultOptions(data.dataset[key][0]));
       });
     });
   }
@@ -11939,12 +11939,12 @@ var topCustomersChartInit = function topCustomersChartInit() {
 
 var topProductsInit = function topProductsInit() {
   var ECHART_BAR_TOP_PRODUCTS = '.echart-bar-top-products';
-  var Rs. echartBarTopProducts = document.querySelector(ECHART_BAR_TOP_PRODUCTS);
+  var $echartBarTopProducts = document.querySelector(ECHART_BAR_TOP_PRODUCTS);
 
-  if (Rs. echartBarTopProducts) {
+  if ($echartBarTopProducts) {
     var data = [['product', '2019', '2018'], ['Boots4', 43, 85], ['Reign Pro', 83, 73], ['Slick', 86, 62], ['Falcon', 72, 53], ['Sparrow', 80, 50], ['Hideway', 50, 70], ['Freya', 80, 90]];
-    var userOptions = utils.getData(Rs. echartBarTopProducts, 'options');
-    var chart = window.echarts.init(Rs. echartBarTopProducts);
+    var userOptions = utils.getData($echartBarTopProducts, 'options');
+    var chart = window.echarts.init($echartBarTopProducts);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -12069,12 +12069,12 @@ var totalOrderInit = function totalOrderInit() {
   // ─── TOTAL ORDER CHART ──────────────────────────────────────────────────────────
   //
 
-  var Rs. echartLineTotalOrder = document.querySelector(ECHART_LINE_TOTAL_ORDER);
+  var $echartLineTotalOrder = document.querySelector(ECHART_LINE_TOTAL_ORDER);
 
-  if (Rs. echartLineTotalOrder) {
+  if ($echartLineTotalOrder) {
     // Get options from data attribute
-    var userOptions = utils.getData(Rs. echartLineTotalOrder, 'options');
-    var chart = window.echarts.init(Rs. echartLineTotalOrder); // Default options
+    var userOptions = utils.getData($echartLineTotalOrder, 'options');
+    var chart = window.echarts.init($echartLineTotalOrder); // Default options
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -12193,7 +12193,7 @@ var totalOrderInit = function totalOrderInit() {
 
 var totalSalesEcommerce = function totalSalesEcommerce() {
   var ECHART_LINE_TOTAL_SALES_ECOMM = '.echart-line-total-sales-ecommerce';
-  var Rs. echartsLineTotalSalesEcomm = document.querySelector(ECHART_LINE_TOTAL_SALES_ECOMM);
+  var $echartsLineTotalSalesEcomm = document.querySelector(ECHART_LINE_TOTAL_SALES_ECOMM);
   var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   function getFormatter(params) {
@@ -12204,14 +12204,14 @@ var totalSalesEcommerce = function totalSalesEcommerce() {
     }).join('<br/>');
   }
 
-  if (Rs. echartsLineTotalSalesEcomm) {
+  if ($echartsLineTotalSalesEcomm) {
     // Get options from data attribute
-    var userOptions = utils.getData(Rs. echartsLineTotalSalesEcomm, 'options');
+    var userOptions = utils.getData($echartsLineTotalSalesEcomm, 'options');
     var TOTAL_SALES_LAST_MONTH = "#".concat(userOptions.optionOne);
     var TOTAL_SALES_PREVIOUS_YEAR = "#".concat(userOptions.optionTwo);
     var totalSalesLastMonth = document.querySelector(TOTAL_SALES_LAST_MONTH);
     var totalSalesPreviousYear = document.querySelector(TOTAL_SALES_PREVIOUS_YEAR);
-    var chart = window.echarts.init(Rs. echartsLineTotalSalesEcomm);
+    var chart = window.echarts.init($echartsLineTotalSalesEcomm);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -12373,21 +12373,21 @@ var totalSalesEcommerce = function totalSalesEcommerce() {
 var totalSalesInit = function totalSalesInit() {
   var ECHART_LINE_TOTAL_SALES = '.echart-line-total-sales';
   var SELECT_MONTH = '.select-month';
-  var Rs. echartsLineTotalSales = document.querySelector(ECHART_LINE_TOTAL_SALES);
+  var $echartsLineTotalSales = document.querySelector(ECHART_LINE_TOTAL_SALES);
   var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   function getFormatter(params) {
-    var _paramsRs.  = params[0],
-        name = _paramsRs. .name,
-        value = _paramsRs. .value;
+    var _params$ = params[0],
+        name = _params$.name,
+        value = _params$.value;
     var date = new Date(name);
     return "".concat(months[0], " ").concat(date.getDate(), ", ").concat(value);
   }
 
-  if (Rs. echartsLineTotalSales) {
+  if ($echartsLineTotalSales) {
     // Get options from data attribute
-    var userOptions = utils.getData(Rs. echartsLineTotalSales, 'options');
-    var chart = window.echarts.init(Rs. echartsLineTotalSales);
+    var userOptions = utils.getData($echartsLineTotalSales, 'options');
+    var chart = window.echarts.init($echartsLineTotalSales);
     var monthsnumber = [[60, 80, 60, 80, 65, 130, 120, 100, 30, 40, 30, 70], [100, 70, 80, 50, 120, 100, 130, 140, 90, 100, 40, 50], [80, 50, 60, 40, 60, 120, 100, 130, 60, 80, 50, 60], [70, 80, 100, 70, 90, 60, 80, 130, 40, 60, 50, 80], [90, 40, 80, 80, 100, 140, 100, 130, 90, 60, 70, 50], [80, 60, 80, 60, 40, 100, 120, 100, 30, 40, 30, 70], [20, 40, 20, 50, 70, 60, 110, 80, 90, 30, 50, 50], [60, 70, 30, 40, 80, 140, 80, 140, 120, 130, 100, 110], [90, 90, 40, 60, 40, 110, 90, 110, 60, 80, 60, 70], [50, 80, 50, 80, 50, 80, 120, 80, 50, 120, 110, 110], [60, 90, 60, 70, 40, 70, 100, 140, 30, 40, 30, 70], [20, 40, 20, 50, 30, 80, 120, 100, 30, 40, 30, 70]];
 
     var getDefaultOptions = function getDefaultOptions() {
@@ -12517,9 +12517,9 @@ var totalSalesInit = function totalSalesInit() {
         chart.setOption({
           tooltip: {
             formatter: function formatter(params) {
-              var _paramsRs. 2 = params[0],
-                  name = _paramsRs. 2.name,
-                  value = _paramsRs. 2.value;
+              var _params$2 = params[0],
+                  name = _params$2.name,
+                  value = _params$2.value;
               var date = new Date(name);
               return "".concat(months[month], " ").concat(date.getDate(), ", ").concat(value);
             }
@@ -12549,11 +12549,11 @@ var totalSalesInit = function totalSalesInit() {
 
 
 var trafficChannelChartInit = function trafficChannelChartInit() {
-  var Rs. trafficChannels = document.querySelector('.echart-traffic-channels');
+  var $trafficChannels = document.querySelector('.echart-traffic-channels');
 
-  if (Rs. trafficChannels) {
-    var userOptions = utils.getData(Rs. trafficChannels, 'options');
-    var chart = window.echarts.init(Rs. trafficChannels);
+  if ($trafficChannels) {
+    var userOptions = utils.getData($trafficChannels, 'options');
+    var chart = window.echarts.init($trafficChannels);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -12676,11 +12676,11 @@ var trafficChannelChartInit = function trafficChannelChartInit() {
 };
 
 var echartsUnresolvedTicketsInit = function echartsUnresolvedTicketsInit() {
-  var Rs. unresolvedTickets = document.querySelector('.echart-unresolved-tickets');
+  var $unresolvedTickets = document.querySelector('.echart-unresolved-tickets');
 
-  if (Rs. unresolvedTickets) {
-    var userOptions = utils.getData(Rs. unresolvedTickets, 'options');
-    var chart = window.echarts.init(Rs. unresolvedTickets);
+  if ($unresolvedTickets) {
+    var userOptions = utils.getData($unresolvedTickets, 'options');
+    var chart = window.echarts.init($unresolvedTickets);
     var unresolvedTicketsLegend = document.querySelectorAll('[data-unresolved-tickets]');
     var xAxisData = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     var data1 = [20, 18, 15, 20, 12, 15, 10];
@@ -12806,7 +12806,7 @@ var echartsUnresolvedTicketsInit = function echartsUnresolvedTicketsInit() {
 
 
 var userByLocationInit = function userByLocationInit() {
-  var Rs. userByLocationMap = document.querySelector('.echart-user-by-location-map');
+  var $userByLocationMap = document.querySelector('.echart-user-by-location-map');
   var data = [{
     name: 'Afghanistan',
     value: 28397
@@ -13345,11 +13345,11 @@ var userByLocationInit = function userByLocationInit() {
   var maxZoomLevel = 5;
   var minZoomLevel = 1;
 
-  if (Rs. userByLocationMap) {
-    var _documentRs. querySelect6, _documentRs. querySelect7;
+  if ($userByLocationMap) {
+    var _document$querySelect6, _document$querySelect7;
 
-    var userOptions = utils.getData(Rs. userByLocationMap, 'options');
-    var chart = window.echarts.init(Rs. userByLocationMap);
+    var userOptions = utils.getData($userByLocationMap, 'options');
+    var chart = window.echarts.init($userByLocationMap);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -13364,9 +13364,9 @@ var userByLocationInit = function userByLocationInit() {
           borderWidth: 1,
           transitionDuration: 0,
           formatter: function formatter(params) {
-            var _paramsRs. data5, _paramsRs. data6;
+            var _params$data5, _params$data6;
 
-            return "<strong>".concat((_paramsRs. data5 = params.data) === null || _paramsRs. data5 === void 0 ? void 0 : _paramsRs. data5.name, " :</strong> ").concat((_paramsRs. data6 = params.data) === null || _paramsRs. data6 === void 0 ? void 0 : _paramsRs. data6.value);
+            return "<strong>".concat((_params$data5 = params.data) === null || _params$data5 === void 0 ? void 0 : _params$data5.name, " :</strong> ").concat((_params$data6 = params.data) === null || _params$data6 === void 0 ? void 0 : _params$data6.value);
           }
         },
         visualMap: {
@@ -13408,7 +13408,7 @@ var userByLocationInit = function userByLocationInit() {
 
     echartSetOption(chart, userOptions, getDefaultOptions);
     var zoomLevel = 1;
-    (_documentRs. querySelect6 = document.querySelector('.user-by-location-map-zoom')) === null || _documentRs. querySelect6 === void 0 ? void 0 : _documentRs. querySelect6.addEventListener('click', function () {
+    (_document$querySelect6 = document.querySelector('.user-by-location-map-zoom')) === null || _document$querySelect6 === void 0 ? void 0 : _document$querySelect6.addEventListener('click', function () {
       if (zoomLevel < maxZoomLevel) {
         zoomLevel += 1;
       }
@@ -13419,7 +13419,7 @@ var userByLocationInit = function userByLocationInit() {
         }
       });
     });
-    (_documentRs. querySelect7 = document.querySelector('.user-by-location-map-zoomOut')) === null || _documentRs. querySelect7 === void 0 ? void 0 : _documentRs. querySelect7.addEventListener('click', function () {
+    (_document$querySelect7 = document.querySelector('.user-by-location-map-zoomOut')) === null || _document$querySelect7 === void 0 ? void 0 : _document$querySelect7.addEventListener('click', function () {
       if (zoomLevel > minZoomLevel) {
         zoomLevel -= 1;
       }
@@ -13440,7 +13440,7 @@ var userByLocationInit = function userByLocationInit() {
 
 
 var usersByTimeChartInit = function usersByTimeChartInit() {
-  var Rs. echartUsersByTimeChart = document.querySelector('.echart-users-by-time');
+  var $echartUsersByTimeChart = document.querySelector('.echart-users-by-time');
   var hours = ['12 AM', '1 AM', '2 AM', '3 AM', '4 AM', '5 AM', '6 AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM', '7 PM', '8 PM', '9 PM', '10 PM', '11 PM'];
   var data = [];
 
@@ -13454,9 +13454,9 @@ var usersByTimeChartInit = function usersByTimeChartInit() {
     return "<div>\n          <p class='mb-0 text-600'>".concat(window.dayjs(params.name).format('MMM DD, YYYY'), "</p>\n          <div class=\"d-flex align-items-center\">\n            <p class=\"mb-0 text-600\">\n              ").concat(window.dayjs().hour(params.data[1]).format('hA'), " : <span class='text-800 fw-semi-bold'>").concat(params.data[2], "</span>\n            </p>\n          </div>\n        </div>");
   };
 
-  if (Rs. echartUsersByTimeChart) {
-    var userOptions = utils.getData(Rs. echartUsersByTimeChart, 'options');
-    var chart = window.echarts.init(Rs. echartUsersByTimeChart);
+  if ($echartUsersByTimeChart) {
+    var userOptions = utils.getData($echartUsersByTimeChart, 'options');
+    var chart = window.echarts.init($echartUsersByTimeChart);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -13570,11 +13570,11 @@ var usersByTimeChartInit = function usersByTimeChartInit() {
 
 
 var weeklyGoalsInit = function weeklyGoalsInit() {
-  var Rs. echartsBandwidthSaved = document.querySelector('.echart-weekly-goals-lms');
+  var $echartsBandwidthSaved = document.querySelector('.echart-weekly-goals-lms');
 
-  if (Rs. echartsBandwidthSaved) {
-    var userOptions = utils.getData(Rs. echartsBandwidthSaved, 'options');
-    var chart = window.echarts.init(Rs. echartsBandwidthSaved);
+  if ($echartsBandwidthSaved) {
+    var userOptions = utils.getData($echartsBandwidthSaved, 'options');
+    var chart = window.echarts.init($echartsBandwidthSaved);
 
     var getDefaultOptions = function getDefaultOptions() {
       return {
@@ -13697,7 +13697,7 @@ var weeklyGoalsInit = function weeklyGoalsInit() {
     };
 
     var initChart = function initChart() {
-      if (utils.isScrolledIntoView(Rs. echartsBandwidthSaved)) {
+      if (utils.isScrolledIntoView($echartsBandwidthSaved)) {
         echartSetOption(chart, userOptions, getDefaultOptions);
         window.removeEventListener('scroll', initChart);
       }
@@ -13717,16 +13717,16 @@ var weeklyGoalsInit = function weeklyGoalsInit() {
 
 var weeklySalesInit = function weeklySalesInit() {
   var ECHART_BAR_WEEKLY_SALES = '.echart-bar-weekly-sales';
-  var Rs. echartBarWeeklySales = document.querySelector(ECHART_BAR_WEEKLY_SALES);
+  var $echartBarWeeklySales = document.querySelector(ECHART_BAR_WEEKLY_SALES);
 
-  if (Rs. echartBarWeeklySales) {
+  if ($echartBarWeeklySales) {
     // Get options from data attribute
-    var userOptions = utils.getData(Rs. echartBarWeeklySales, 'options');
+    var userOptions = utils.getData($echartBarWeeklySales, 'options');
     var data = [120, 200, 150, 80, 70, 110, 120]; // Max value of data
 
     var yMax = Math.max.apply(Math, data); // const dataBackground = data.map(() => yMax);
 
-    var chart = window.echarts.init(Rs. echartBarWeeklySales); // Default options
+    var chart = window.echarts.init($echartBarWeeklySales); // Default options
 
     var getDefaultOptions = function getDefaultOptions() {
       return {

@@ -21,7 +21,7 @@ namespace OMS
             string error;
             if (AuthService.TryLogin(txtEmail.Text.Trim(), txtPassword.Text, chkRememberMe.Checked, out error))
             {
-                Response.Redirect("~/Dashboard.aspx", false);
+                Response.Redirect("~/Default.aspx", false);
                 Context.ApplicationInstance.CompleteRequest();
                 return;
             }
