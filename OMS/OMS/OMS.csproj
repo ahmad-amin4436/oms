@@ -103,6 +103,34 @@
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform">
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.0\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
     </Reference>
+    <!-- Microsoft Enterprise Library Data Access Application Block -->
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.Common">
+      <HintPath>..\packages\EnterpriseLibrary.Common.6.0.1304.0\lib\NET45\Microsoft.Practices.EnterpriseLibrary.Common.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.Data">
+      <HintPath>..\packages\EnterpriseLibrary.Data.6.0.1304.0\lib\NET45\Microsoft.Practices.EnterpriseLibrary.Data.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity">
+      <HintPath>..\packages\Unity.3.5.1404.0\lib\Net45\Microsoft.Practices.Unity.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.Interception">
+      <HintPath>..\packages\Unity.3.5.1404.0\lib\Net45\Microsoft.Practices.Unity.Interception.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <!-- Project references: OMS.Common (BLL + Models) and OMS.DAL (Repositories) -->
+  <ItemGroup>
+    <ProjectReference Include="..\OMS.Common\OMS.Common.csproj">
+      <Project>{cb9169fa-24ab-4f23-a5dc-e52328ef850d}</Project>
+      <Name>OMS.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OMS.DAL\OMS.DAL.csproj">
+      <Project>{654040e8-82dc-48a7-a802-f60cd4ef33d9}</Project>
+      <Name>OMS.DAL</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Admin\AdminDashboard.aspx" />
@@ -472,6 +500,7 @@
     <Content Include="dashboard\saas.html" />
     <Content Include="dashboard\support-desk.html" />
     <Content Include="Database\DatabaseSetup.sql" />
+    <Content Include="Database\NavMenuSetup.sql" />
     <Content Include="Dashboard.aspx" />
     <Content Include="Default.aspx" />
     <Content Include="demo\combo-nav.html" />
