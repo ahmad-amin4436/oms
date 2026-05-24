@@ -899,7 +899,6 @@
     </Compile>
     <Compile Include="Orders\NewOrder.aspx.cs">
       <DependentUpon>NewOrder.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Orders\NewOrder.aspx.designer.cs">
       <DependentUpon>NewOrder.aspx</DependentUpon>
@@ -926,16 +925,6 @@
     <Compile Include="Reports\PrintInvoice.aspx.designer.cs">
       <DependentUpon>PrintInvoice.aspx</DependentUpon>
     </Compile>
-    <Compile Include="RMSCode\BLL\AuthService.cs" />
-    <Compile Include="RMSCode\BLL\DashboardService.cs" />
-    <Compile Include="RMSCode\DAL\DBHelper.cs" />
-    <Compile Include="RMSCode\Helpers\ImageHelper.cs" />
-    <Compile Include="RMSCode\Helpers\PasswordHelper.cs" />
-    <Compile Include="RMSCode\Helpers\SecurityHelper.cs" />
-    <Compile Include="RMSCode\Helpers\UiHelper.cs" />
-    <Compile Include="RMSCode\Models\DashboardSummary.cs" />
-    <Compile Include="RMSCode\Models\MenuItemModel.cs" />
-    <Compile Include="RMSCode\Models\OrderModel.cs" />
     <Compile Include="Site.Master.cs">
       <DependentUpon>Site.Master</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

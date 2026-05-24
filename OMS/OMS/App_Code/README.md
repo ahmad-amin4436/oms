@@ -5,11 +5,10 @@ Application projects also compile code-behind into the application assembly, so
 placing shared `.cs` code here creates duplicate type conflicts during
 precompilation.
 
-For that reason, RMS shared code is compiled from `/RMSCode` while preserving the
-same logical namespaces:
+For that reason, RMS shared code lives in the separate `OMS.Common` class library
+project (referenced by the web project) under these namespaces:
 
-- `OMS.App_Code.DAL`
-- `OMS.App_Code.BLL`
-- `OMS.App_Code.Models`
-- `OMS.App_Code.Helpers`
-
+- `OMS.Common.DAL`
+- `OMS.Common.BLL`
+- `OMS.Common.Models`
+- `OMS.Common.Helpers`

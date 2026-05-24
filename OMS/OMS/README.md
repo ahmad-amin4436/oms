@@ -40,12 +40,12 @@ Default login:
 
 ## Project Note
 
-This is a Web Application project. Physical `.cs` files under `App_Code` are dynamically compiled by ASP.NET and conflict with Web Application precompilation when also compiled into the project assembly. Shared RMS code is therefore compiled from `RMSCode` while keeping the logical namespaces requested by the spec:
+This is a Web Application project. Physical `.cs` files under `App_Code` are dynamically compiled by ASP.NET and conflict with Web Application precompilation when also compiled into the project assembly. Shared RMS code therefore lives in the separate `OMS.Common` class library project (referenced by the web project) under these namespaces:
 
-- `OMS.App_Code.DAL`
-- `OMS.App_Code.BLL`
-- `OMS.App_Code.Models`
-- `OMS.App_Code.Helpers`
+- `OMS.Common.DAL`
+- `OMS.Common.BLL`
+- `OMS.Common.Models`
+- `OMS.Common.Helpers`
 
 `App_Code/README.md` documents this decision.
 

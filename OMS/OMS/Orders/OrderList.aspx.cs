@@ -1,6 +1,6 @@
 using System;
-using OMS.App_Code.DAL;
-using OMS.App_Code.Helpers;
+using OMS.Common.DAL;
+using OMS.Common.Helpers;
 
 namespace OMS.Orders
 {

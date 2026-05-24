@@ -1,5 +1,6 @@
 using System;
-using OMS.App_Code.DAL;
+using System.Data;
+using OMS.Common.DAL;
 
 namespace OMS.Menu
 {
@@ -9,7 +10,12 @@ namespace OMS.Menu
         {
             if (!IsPostBack)
             {
-                rptPublicMenu.DataSource = DBHelper.ExecuteDataTable("sp_GetMenuItems", DBHelper.Parameter("@CategoryID", DBNull.Value), DBHelper.Parameter("@IsAvailable", true));
+                var dt = DBHelper.ExecuteDataTable("sp_GetMenuItems",
+                    DBHelper.Parameter("@CategoryID", DBNull.Value),
+                    DBHelper.Parameter("@IsAvailable", true));
+
+                pnlNoItems.Visible      = (dt.Rows.Count == 0);
+                rptPublicMenu.DataSource = dt.Rows.Count > 0 ? (object)dt : null;
                 rptPublicMenu.DataBind();
             }
         }

@@ -137,8 +137,8 @@ DECLARE @grpDashboard INT,
         @grpReports   INT;
 
 -- Top-level: Dashboard (direct link — no sub-items)
-INSERT INTO dbo.NavGroups (SectionID, GroupName,    IconClass, Url,               CollapseId, SortOrder)
-     VALUES               (NULL,      'Dashboard',  '',        '~/Default.aspx',  NULL,        1);
+INSERT INTO dbo.NavGroups (SectionID, GroupName,    IconClass, Url,              CollapseId, SortOrder)
+     VALUES               (NULL,      'Dashboard',  '',        '~/Default.aspx', NULL,        1);
 SET @grpDashboard = SCOPE_IDENTITY();
 
 -- Restaurant section

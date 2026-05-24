@@ -1,5 +1,5 @@
 using System;
-using OMS.App_Code.BLL;
+using OMS.Common.BLL;
 
 namespace OMS
 {
@@ -9,7 +9,7 @@ namespace OMS
         {
             if (!IsPostBack && User.Identity.IsAuthenticated)
             {
-                Response.Redirect("~/Dashboard.aspx", false);
+                Response.Redirect("~/Default.aspx", false);
                 Context.ApplicationInstance.CompleteRequest();
             }
         }

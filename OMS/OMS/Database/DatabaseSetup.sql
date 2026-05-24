@@ -360,6 +360,38 @@ BEGIN
 END
 GO
 
+CREATE OR ALTER PROCEDURE dbo.sp_GetAllUsers
+AS
+BEGIN
+  SELECT u.UserID, u.FullName, u.Email, r.RoleName, u.IsActive, u.CreatedAt
+  FROM dbo.Users u
+  INNER JOIN dbo.Roles r ON u.RoleID = r.RoleID
+  ORDER BY u.CreatedAt DESC;
+END
+GO
+
+CREATE OR ALTER PROCEDURE dbo.sp_ToggleUserStatus
+  @UserID INT
+AS
+BEGIN
+  UPDATE dbo.Users SET IsActive = 1 - IsActive WHERE UserID = @UserID;
+  SELECT IsActive FROM dbo.Users WHERE UserID = @UserID;
+END
+GO
+
+CREATE OR ALTER PROCEDURE dbo.sp_GetAdminStats
+AS
+BEGIN
+  SELECT
+    (SELECT COUNT(*) FROM dbo.Users)                                   AS UserCount,
+    (SELECT COUNT(*) FROM dbo.MenuItems WHERE IsAvailable = 1)        AS MenuCount,
+    (SELECT COUNT(*) FROM dbo.Messages WHERE IsRead = 0)              AS UnreadMessages,
+    (SELECT COUNT(*) FROM dbo.Offers  WHERE IsActive = 1
+       AND StartDate <= CAST(SYSUTCDATETIME() AS DATE)
+       AND EndDate   >= CAST(SYSUTCDATETIME() AS DATE))                AS ActiveOffers;
+END
+GO
+
 CREATE OR ALTER PROCEDURE dbo.sp_GetDashboardSummary
   @Date DATE
 AS
@@ -390,9 +422,12 @@ CREATE OR ALTER PROCEDURE dbo.sp_GetRevenueByDay
   @EndDate DATE
 AS
 BEGIN
-  SELECT CAST(CreatedAt AS DATE) AS SaleDate, ISNULL(SUM(TotalAmount), 0) AS Revenue
+  SELECT CAST(CreatedAt AS DATE) AS SaleDate,
+         COUNT(*) AS OrderCount,
+         ISNULL(SUM(TotalAmount), 0) AS Revenue
   FROM dbo.Orders
-  WHERE CreatedAt >= @StartDate AND CreatedAt < DATEADD(DAY, 1, @EndDate) AND PaymentStatus = 'Paid'
+  WHERE CreatedAt >= @StartDate AND CreatedAt < DATEADD(DAY, 1, @EndDate)
+    AND PaymentStatus = 'Paid'
   GROUP BY CAST(CreatedAt AS DATE)
   ORDER BY SaleDate;
 END
@@ -402,11 +437,18 @@ CREATE OR ALTER PROCEDURE dbo.sp_GetOrdersByHour
   @Date DATE
 AS
 BEGIN
-  SELECT DATEPART(HOUR, CreatedAt) AS OrderHour, COUNT(*) AS OrderCount
+  SELECT CONVERT(NVARCHAR(8),
+           DATEADD(HOUR, DATEPART(HOUR, CreatedAt), CAST('00:00' AS TIME)), 108)
+           + ' – '
+           + CONVERT(NVARCHAR(8),
+               DATEADD(HOUR, DATEPART(HOUR, CreatedAt) + 1, CAST('00:00' AS TIME)), 108)
+         AS HourLabel,
+         COUNT(*)             AS OrderCount,
+         ISNULL(SUM(TotalAmount), 0) AS Revenue
   FROM dbo.Orders
   WHERE CreatedAt >= @Date AND CreatedAt < DATEADD(DAY, 1, @Date)
   GROUP BY DATEPART(HOUR, CreatedAt)
-  ORDER BY OrderHour;
+  ORDER BY DATEPART(HOUR, CreatedAt);
 END
 GO
 
@@ -416,10 +458,13 @@ CREATE OR ALTER PROCEDURE dbo.sp_GetTopMenuItems
   @TopN INT = 5
 AS
 BEGIN
-  SELECT TOP (@TopN) mi.ItemID, mi.Name, SUM(oi.Quantity) AS QuantitySold, SUM(oi.LineTotal) AS Revenue
+  SELECT TOP (@TopN)
+         mi.Name                  AS ItemName,
+         SUM(oi.Quantity)         AS OrderCount,
+         SUM(oi.LineTotal)        AS Revenue
   FROM dbo.OrderItems oi
   INNER JOIN dbo.MenuItems mi ON oi.ItemID = mi.ItemID
-  INNER JOIN dbo.Orders o ON oi.OrderID = o.OrderID
+  INNER JOIN dbo.Orders    o  ON oi.OrderID = o.OrderID
   WHERE o.CreatedAt >= @StartDate AND o.CreatedAt < DATEADD(DAY, 1, @EndDate)
   GROUP BY mi.ItemID, mi.Name
   ORDER BY SUM(oi.Quantity) DESC;
@@ -756,6 +801,56 @@ BEGIN
   WHERE o.CreatedAt >= @StartDate AND o.CreatedAt < DATEADD(DAY, 1, @EndDate)
   GROUP BY mi.Name
   ORDER BY Revenue DESC;
+END
+GO
+
+CREATE OR ALTER PROCEDURE dbo.sp_GetMenuCategories
+AS
+BEGIN
+  SELECT CategoryID, Name AS CategoryName, DisplayOrder
+  FROM dbo.Categories
+  WHERE IsActive = 1
+  ORDER BY DisplayOrder, Name;
+END
+GO
+
+CREATE OR ALTER PROCEDURE dbo.sp_InsertOrderItem
+  @OrderID   INT,
+  @ItemID    INT,
+  @Quantity  INT,
+  @UnitPrice DECIMAL(10,2),
+  @LineTotal DECIMAL(10,2)
+AS
+BEGIN
+  INSERT INTO dbo.OrderItems (OrderID, ItemID, Quantity, UnitPrice, LineTotal)
+  VALUES (@OrderID, @ItemID, @Quantity, @UnitPrice, @LineTotal);
+END
+GO
+
+CREATE OR ALTER PROCEDURE dbo.sp_ToggleMenuItemAvailability
+  @ItemID INT
+AS
+BEGIN
+  UPDATE dbo.MenuItems SET IsAvailable = 1 - IsAvailable WHERE ItemID = @ItemID;
+  SELECT IsAvailable FROM dbo.MenuItems WHERE ItemID = @ItemID;
+END
+GO
+
+CREATE OR ALTER PROCEDURE dbo.sp_ToggleCouponStatus
+  @CouponID INT
+AS
+BEGIN
+  UPDATE dbo.Coupons SET IsActive = 1 - IsActive WHERE CouponID = @CouponID;
+  SELECT IsActive FROM dbo.Coupons WHERE CouponID = @CouponID;
+END
+GO
+
+CREATE OR ALTER PROCEDURE dbo.sp_ToggleOfferStatus
+  @OfferID INT
+AS
+BEGIN
+  UPDATE dbo.Offers SET IsActive = 1 - IsActive WHERE OfferID = @OfferID;
+  SELECT IsActive FROM dbo.Offers WHERE OfferID = @OfferID;
 END
 GO
 

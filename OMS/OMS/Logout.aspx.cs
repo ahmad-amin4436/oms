@@ -1,5 +1,5 @@
 using System;
-using OMS.App_Code.BLL;
+using OMS.Common.BLL;
 
 namespace OMS
 {

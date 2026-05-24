@@ -92,8 +92,10 @@ namespace OMS
             if (group.IsDirectLink)
             {
                 // Direct link — no children
+                bool directActive = IsItemActive(group.Url, currentPath);
                 sb.AppendFormat(
-                    "<a class=\"nav-link\" href=\"{0}\" role=\"button\">{1}</a>{2}",
+                    "<a class=\"nav-link{0}\" href=\"{1}\" role=\"button\">{2}</a>{3}",
+                    directActive ? " active" : string.Empty,
                     ResolveUrl(group.Url),
                     BuildGroupInner(group),
                     Environment.NewLine);

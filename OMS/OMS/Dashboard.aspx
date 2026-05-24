@@ -70,7 +70,7 @@
                   <asp:BoundField DataField="TotalAmount" HeaderText="Total" DataFormatString="Rs. {0:N2}" />
                   <asp:TemplateField HeaderText="Status">
                     <ItemTemplate>
-                      <span class='badge rounded-pill <%# OMS.App_Code.Helpers.UiHelper.StatusBadgeClass(Eval("Status").ToString()) %>'><%# Eval("Status") %></span>
+                      <span class='badge rounded-pill <%# OMS.Common.Helpers.UiHelper.StatusBadgeClass(Eval("Status").ToString()) %>'><%# Eval("Status") %></span>
                     </ItemTemplate>
                   </asp:TemplateField>
                   <asp:HyperLinkField Text="View" DataNavigateUrlFields="OrderID" DataNavigateUrlFormatString="Orders/OrderDetail.aspx?id={0}" ControlStyle-CssClass="btn btn-sm btn-falcon-default" />
