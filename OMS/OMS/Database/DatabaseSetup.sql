@@ -814,6 +814,52 @@ BEGIN
 END
 GO
 
+-- All categories (active + inactive) for the management grid, with a live item count.
+CREATE OR ALTER PROCEDURE dbo.sp_GetAllCategories
+AS
+BEGIN
+  SELECT c.CategoryID,
+         c.Name AS CategoryName,
+         c.DisplayOrder,
+         c.IsActive,
+         ItemCount = (SELECT COUNT(*) FROM dbo.MenuItems mi WHERE mi.CategoryID = c.CategoryID)
+  FROM dbo.Categories c
+  ORDER BY c.DisplayOrder, c.Name;
+END
+GO
+
+-- Insert when @CategoryID = 0/NULL, otherwise update.
+CREATE OR ALTER PROCEDURE dbo.sp_SaveCategory
+  @CategoryID INT OUTPUT,
+  @Name NVARCHAR(80),
+  @DisplayOrder INT = 0,
+  @IsActive BIT = 1
+AS
+BEGIN
+  IF ISNULL(@CategoryID, 0) = 0
+  BEGIN
+    INSERT INTO dbo.Categories (Name, DisplayOrder, IsActive)
+    VALUES (@Name, @DisplayOrder, @IsActive);
+    SET @CategoryID = SCOPE_IDENTITY();
+  END
+  ELSE
+  BEGIN
+    UPDATE dbo.Categories
+    SET Name = @Name, DisplayOrder = @DisplayOrder, IsActive = @IsActive
+    WHERE CategoryID = @CategoryID;
+  END
+END
+GO
+
+-- Soft delete: keep the row (menu items may still reference it) and just deactivate.
+CREATE OR ALTER PROCEDURE dbo.sp_DeleteCategory
+  @CategoryID INT
+AS
+BEGIN
+  UPDATE dbo.Categories SET IsActive = 0 WHERE CategoryID = @CategoryID;
+END
+GO
+
 CREATE OR ALTER PROCEDURE dbo.sp_InsertOrderItem
   @OrderID   INT,
   @ItemID    INT,

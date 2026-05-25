@@ -6,7 +6,7 @@
   <div class="d-flex align-items-center justify-content-between mb-3">
     <div>
       <h4 class="mb-0">Sizes &amp; Pricing</h4>
-      <p class="text-600 fs--1 mb-0">Per-item size pricing matrix — calculated vs. custom.</p>
+      <p class="text-600 fs--1 mb-0">Per-item size pricing matrix &mdash; calculated vs. custom.</p>
     </div>
   </div>
 
@@ -33,7 +33,7 @@
             HeaderStyle-CssClass="text-end fw-medium"
             ItemStyle-CssClass="text-end">
             <ItemTemplate>
-              <%# DBNull.Value.Equals(Eval("CustomPrice")) ? "<span class=\"text-300\">—</span>" : "Rs.&#160;" + string.Format("{0:N0}", Eval("CustomPrice")) %>
+              <%# DBNull.Value.Equals(Eval("CustomPrice")) ? "<span class=\"text-300\">&mdash;</span>" : "Rs.&#160;" + string.Format("{0:N0}", Eval("CustomPrice")) %>
             </ItemTemplate>
           </asp:TemplateField>
           <asp:BoundField DataField="EffectivePrice" HeaderText="Effective"
