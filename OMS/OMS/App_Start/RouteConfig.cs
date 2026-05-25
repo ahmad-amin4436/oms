@@ -11,7 +11,13 @@ namespace OMS
         public static void RegisterRoutes(RouteCollection routes)
         {
             var settings = new FriendlyUrlSettings();
-            settings.AutoRedirectMode = RedirectMode.Permanent;
+            // Off (not Permanent): do NOT 301-redirect *.aspx to extensionless URLs.
+            // With Permanent, pages were served at "/Orders/NewOrder" and the Web Forms
+            // <form> posted back to that relative, extensionless URL — which breaks
+            // __doPostBack event routing, so LinkButton/Repeater ItemCommand clicks and
+            // AutoPostBack never fired. Turning auto-redirect off keeps real .aspx URLs,
+            // so postbacks resolve to the page and all server events fire normally.
+            settings.AutoRedirectMode = RedirectMode.Off;
             routes.EnableFriendlyUrls(settings);
         }
     }

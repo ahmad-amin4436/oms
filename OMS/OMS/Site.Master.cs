@@ -14,8 +14,43 @@ namespace OMS
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            FixScriptManagerPaths();
+
             if (!IsPostBack)
                 RenderNavMenu();
+        }
+
+        // The MSAjax/WebForms ScriptManager NuGet packages register their framework
+        // script bundles ("MsAjaxBundle", "WebFormsBundle") so the ScriptManager renders
+        // them with an app-RELATIVE <script src> (e.g. "Scripts/WebForms/MsAjax/...").
+        // On a page in a subfolder like /Orders/ the browser resolves that to
+        // "/Orders/Scripts/..." which 404s, so the Ajax framework fails to load
+        // (Sys/Type undefined) and postback/validation features break. Pointing the
+        // ScriptManager's own ResourceMapping at the physical files with a ROOT-relative
+        // ("~/") path — set per request so it always wins over the package defaults —
+        // makes the <script src> render correctly from any folder depth.
+        private void FixScriptManagerPaths()
+        {
+            var map = ScriptManager.ScriptResourceMapping;
+
+            // Point the MsAjax/WebForms framework bundles at the physical script files
+            // using an app-root-absolute path ("/<app>/Scripts/WebForms/...") so the
+            // rendered <script src> resolves the same from any folder depth. The default
+            // package registration rendered these folder-relative, which 404'd on pages
+            // under subfolders like /Orders/ and left the Ajax framework unloaded.
+            string root = ResolveUrl("~/").TrimEnd('/');
+
+            void Map(string name, string localFile)
+            {
+                map.AddDefinition(name, new System.Web.UI.ScriptResourceDefinition
+                {
+                    Path = root + localFile,
+                    DebugPath = root + localFile
+                });
+            }
+
+            Map("MsAjaxBundle",   "/Scripts/WebForms/MsAjax/MicrosoftAjax.js");
+            Map("WebFormsBundle", "/Scripts/WebForms/WebForms.js");
         }
 
         // ----------------------------------------------------------------

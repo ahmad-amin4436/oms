@@ -36,13 +36,26 @@ namespace OMS.Orders
             set { ViewState["SelCat"] = value; }
         }
 
+        private string SearchTerm
+        {
+            get { return (ViewState["Search"] as string) ?? string.Empty; }
+            set { ViewState["Search"] = value; }
+        }
+
         // ── Lifecycle ────────────────────────────────────────────────
 
         protected void Page_Load(object sender, EventArgs e)
         {
             SecurityHelper.RequireRoles("Admin", "Manager", "Cashier", "Waiter");
-            // Always bind so the Repeater control trees exist for event routing on postback
-            BindAll();
+
+            // Bind only on first load. On postback the Repeater control trees are
+            // rebuilt from ViewState, which is what lets ItemCommand events route to
+            // their handlers. Re-binding (DataBind) here would recreate the child
+            // controls and swallow the click — that is why the category tabs, search
+            // and Add buttons appeared "not working". Each event handler re-binds the
+            // parts it changes after updating state.
+            if (!IsPostBack)
+                BindAll();
         }
 
         // ── Bind helpers ─────────────────────────────────────────────
@@ -50,7 +63,7 @@ namespace OMS.Orders
         private void BindAll()
         {
             BindCategories();
-            BindMenuItems(SelectedCategory);
+            BindMenuItems(SelectedCategory, SearchTerm);
             BindCart();
             ApplyLayout();
         }
@@ -70,7 +83,7 @@ namespace OMS.Orders
             rptCategories.DataBind();
         }
 
-        private void BindMenuItems(int? categoryId)
+        private void BindMenuItems(int? categoryId, string search)
         {
             var catParam = categoryId.HasValue
                 ? DBHelper.Parameter("@CategoryID", categoryId.Value)
@@ -81,8 +94,17 @@ namespace OMS.Orders
                 catParam,
                 DBHelper.Parameter("@IsAvailable", true));
 
-            pnlNoItems.Visible = (dt.Rows.Count == 0);
-            rptMenu.DataSource = dt.Rows.Count > 0 ? (object)dt : null;
+            // sp_GetMenuItems has no text filter, so apply the search in-memory on Name/Description.
+            DataView view = dt.DefaultView;
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                string safe = search.Trim().Replace("'", "''").Replace("[", "[[]").Replace("%", "[%]");
+                view.RowFilter = $"Name LIKE '%{safe}%' OR Description LIKE '%{safe}%'";
+            }
+
+            bool hasRows = view.Count > 0;
+            pnlNoItems.Visible = !hasRows;
+            rptMenu.DataSource = hasRows ? (object)view : null;
             rptMenu.DataBind();
         }
 
@@ -96,6 +118,9 @@ namespace OMS.Orders
 
             rptCart.DataSource = hasItems ? (object)cart : null;
             rptCart.DataBind();
+
+            int totalQty = cart.Sum(c => c.Qty);
+            lblCartCount.Text = totalQty == 1 ? "1 item" : totalQty + " items";
 
             CalcAndDisplayTotals(cart);
         }
@@ -122,8 +147,19 @@ namespace OMS.Orders
         private void ApplyLayout()
         {
             string type = ddlOrderType.SelectedValue;
-            pnlTableNo.Visible = (type == "DineIn");
-            pnlAddress.Visible = (type == "Delivery");
+            bool isDineIn   = (type == "DineIn");
+            bool isDelivery = (type == "Delivery");
+
+            pnlTableNo.Visible = isDineIn;
+            pnlAddress.Visible = isDelivery;
+
+            // Only validate the field that is actually shown for the chosen order type.
+            rfvTableNo.Enabled = isDineIn;
+            rfvAddress.Enabled = isDelivery;
+
+            // Clear fields that no longer apply so stale values are never submitted.
+            if (!isDineIn)   txtTableNo.Text = string.Empty;
+            if (!isDelivery) txtAddress.Text = string.Empty;
         }
 
         // ── ASPX binding helpers ─────────────────────────────────────
@@ -159,6 +195,12 @@ namespace OMS.Orders
                 SelectedCategory = Convert.ToInt32(e.CommandArgument);
                 BindAll();
             }
+        }
+
+        protected void txtSearch_Changed(object sender, EventArgs e)
+        {
+            SearchTerm = txtSearch.Text;
+            BindAll();
         }
 
         // ── Menu item add event ──────────────────────────────────────
@@ -226,6 +268,11 @@ namespace OMS.Orders
 
         protected void btnPlaceOrder_Click(object sender, EventArgs e)
         {
+            // Server-side guard — the client-side OnClientClick is only a convenience.
+            Page.Validate("PlaceOrder");
+            if (!Page.IsValid)
+                return;
+
             var cart = Cart;
 
             if (cart.Count == 0)
@@ -290,7 +337,8 @@ namespace OMS.Orders
 
         private void ShowError(string msg)
         {
-            lblError.Text    = msg;
+            lblError.Text    = "<span class=\"fas fa-exclamation-circle me-2\"></span>" +
+                               HttpUtility.HtmlEncode(msg);
             lblError.Visible = true;
         }
     }
