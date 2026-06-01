@@ -187,7 +187,8 @@ INSERT INTO dbo.NavItems (GroupID,      ItemName,          Url,                 
     -- Admin Panel
     (@grpAdmin,   'Admin Dashboard',    '~/Admin/AdminDashboard.aspx',    1),
     (@grpAdmin,   'Users',              '~/Admin/Users.aspx',             2),
-    (@grpAdmin,   'Messages',           '~/Admin/Messages.aspx',          3);
+    (@grpAdmin,   'Roles & Rights',     '~/Admin/Roles.aspx',             3),
+    (@grpAdmin,   'Messages',           '~/Admin/Messages.aspx',          4);
 
 -- ----------------------------------------------------------------
 -- Role-based access

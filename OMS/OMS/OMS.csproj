@@ -136,6 +136,7 @@
     <Content Include="Admin\AdminDashboard.aspx" />
     <Content Include="Admin\Messages.aspx" />
     <Content Include="Admin\Users.aspx" />
+    <Content Include="Admin\Roles.aspx" />
     <Content Include="Admin.Master" />
     <Content Include="Analytics\Analytics.aspx" />
     <Content Include="AccessDenied.aspx" />
@@ -806,6 +807,13 @@
     </Compile>
     <Compile Include="Admin\Users.aspx.designer.cs">
       <DependentUpon>Users.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Admin\Roles.aspx.cs">
+      <DependentUpon>Roles.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Admin\Roles.aspx.designer.cs">
+      <DependentUpon>Roles.aspx</DependentUpon>
     </Compile>
     <Compile Include="Analytics\Analytics.aspx.cs">
       <DependentUpon>Analytics.aspx</DependentUpon>
