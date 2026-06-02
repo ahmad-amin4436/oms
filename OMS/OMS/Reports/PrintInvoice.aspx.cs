@@ -9,7 +9,9 @@ namespace OMS.Reports
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            SecurityHelper.RequireRoles("Admin", "Manager", "Cashier");
+            // Access follows the DB-driven nav rights (Roles & Rights screen),
+            // so granting a role the Print Invoice menu also lets it open here.
+            SecurityHelper.RequireUrlAccess();
             if (!IsPostBack)
                 BindInvoice();
         }

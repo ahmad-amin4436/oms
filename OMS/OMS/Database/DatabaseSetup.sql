@@ -392,63 +392,66 @@ BEGIN
 END
 GO
 
+-- @Date is the LOCAL business day. Orders.CreatedAt is UTC, so every comparison
+-- converts to local time (UTC+5) first. Revenue is gross (excludes Cancelled).
 CREATE OR ALTER PROCEDURE dbo.sp_GetDashboardSummary
   @Date DATE
 AS
 BEGIN
-  DECLARE @Start DATETIME2 = @Date;
-  DECLARE @End DATETIME2 = DATEADD(DAY, 1, @Start);
-  DECLARE @YesterdayStart DATETIME2 = DATEADD(DAY, -1, @Start);
+  DECLARE @Yesterday DATE = DATEADD(DAY, -1, @Date);
 
   SELECT
-    TodayOrders = COUNT(CASE WHEN CreatedAt >= @Start AND CreatedAt < @End THEN 1 END),
-    YesterdayOrders = COUNT(CASE WHEN CreatedAt >= @YesterdayStart AND CreatedAt < @Start THEN 1 END),
-    TodayRevenue = ISNULL(SUM(CASE WHEN CreatedAt >= @Start AND CreatedAt < @End AND PaymentStatus = 'Paid' THEN TotalAmount END), 0),
-    PendingOrders = COUNT(CASE WHEN Status = 'Pending' THEN 1 END)
+    TodayOrders     = COUNT(CASE WHEN CAST(DATEADD(HOUR,5,CreatedAt) AS DATE) = @Date THEN 1 END),
+    YesterdayOrders = COUNT(CASE WHEN CAST(DATEADD(HOUR,5,CreatedAt) AS DATE) = @Yesterday THEN 1 END),
+    TodayRevenue    = ISNULL(SUM(CASE WHEN CAST(DATEADD(HOUR,5,CreatedAt) AS DATE) = @Date
+                                       AND Status <> 'Cancelled' THEN TotalAmount END), 0),
+    PendingOrders   = COUNT(CASE WHEN Status NOT IN ('Delivered','Cancelled') THEN 1 END)
   FROM dbo.Orders;
 
   SELECT TOP 1 mi.Name, SUM(oi.Quantity) AS OrderCount
   FROM dbo.OrderItems oi
   INNER JOIN dbo.MenuItems mi ON oi.ItemID = mi.ItemID
   INNER JOIN dbo.Orders o ON oi.OrderID = o.OrderID
-  WHERE o.CreatedAt >= DATEADD(DAY, -7, @End)
+  WHERE CAST(DATEADD(HOUR,5,o.CreatedAt) AS DATE) >= DATEADD(DAY, -6, @Date)
   GROUP BY mi.Name
   ORDER BY SUM(oi.Quantity) DESC;
 END
 GO
 
+-- Orders.CreatedAt is UTC; the business day is UTC+5. All analytics SPs convert
+-- to local time (DATEADD(HOUR,5,CreatedAt)) before filtering/grouping by date.
+-- Revenue is gross: SUM(TotalAmount) over all orders in range.
 CREATE OR ALTER PROCEDURE dbo.sp_GetRevenueByDay
   @StartDate DATE,
   @EndDate DATE
 AS
 BEGIN
-  SELECT CAST(CreatedAt AS DATE) AS SaleDate,
-         COUNT(*) AS OrderCount,
-         ISNULL(SUM(TotalAmount), 0) AS Revenue
+  SELECT CAST(DATEADD(HOUR, 5, CreatedAt) AS DATE) AS SaleDate,
+         COUNT(*)                                  AS OrderCount,
+         ISNULL(SUM(TotalAmount), 0)               AS Revenue
   FROM dbo.Orders
-  WHERE CreatedAt >= @StartDate AND CreatedAt < DATEADD(DAY, 1, @EndDate)
-    AND PaymentStatus = 'Paid'
-  GROUP BY CAST(CreatedAt AS DATE)
+  WHERE CAST(DATEADD(HOUR, 5, CreatedAt) AS DATE) BETWEEN @StartDate AND @EndDate
+  GROUP BY CAST(DATEADD(HOUR, 5, CreatedAt) AS DATE)
   ORDER BY SaleDate;
 END
 GO
 
 CREATE OR ALTER PROCEDURE dbo.sp_GetOrdersByHour
-  @Date DATE
+  @Date    DATE,
+  @EndDate DATE = NULL          -- NULL => single day (@Date)
 AS
 BEGIN
-  SELECT CONVERT(NVARCHAR(8),
-           DATEADD(HOUR, DATEPART(HOUR, CreatedAt), CAST('00:00' AS TIME)), 108)
-           + ' – '
-           + CONVERT(NVARCHAR(8),
-               DATEADD(HOUR, DATEPART(HOUR, CreatedAt) + 1, CAST('00:00' AS TIME)), 108)
-         AS HourLabel,
-         COUNT(*)             AS OrderCount,
-         ISNULL(SUM(TotalAmount), 0) AS Revenue
+  DECLARE @end DATE = ISNULL(@EndDate, @Date);
+  SELECT HourLabel =
+           RIGHT('0' + CAST(DATEPART(HOUR, DATEADD(HOUR,5,CreatedAt)) AS VARCHAR(2)), 2) + ':00'
+           + ' - '
+           + RIGHT('0' + CAST((DATEPART(HOUR, DATEADD(HOUR,5,CreatedAt)) + 1) % 24 AS VARCHAR(2)), 2) + ':00',
+         OrderCount = COUNT(*),
+         Revenue    = ISNULL(SUM(TotalAmount), 0)
   FROM dbo.Orders
-  WHERE CreatedAt >= @Date AND CreatedAt < DATEADD(DAY, 1, @Date)
-  GROUP BY DATEPART(HOUR, CreatedAt)
-  ORDER BY DATEPART(HOUR, CreatedAt);
+  WHERE CAST(DATEADD(HOUR, 5, CreatedAt) AS DATE) BETWEEN @Date AND @end
+  GROUP BY DATEPART(HOUR, DATEADD(HOUR, 5, CreatedAt))
+  ORDER BY DATEPART(HOUR, DATEADD(HOUR, 5, CreatedAt));
 END
 GO
 
@@ -465,7 +468,7 @@ BEGIN
   FROM dbo.OrderItems oi
   INNER JOIN dbo.MenuItems mi ON oi.ItemID = mi.ItemID
   INNER JOIN dbo.Orders    o  ON oi.OrderID = o.OrderID
-  WHERE o.CreatedAt >= @StartDate AND o.CreatedAt < DATEADD(DAY, 1, @EndDate)
+  WHERE CAST(DATEADD(HOUR, 5, o.CreatedAt) AS DATE) BETWEEN @StartDate AND @EndDate
   GROUP BY mi.ItemID, mi.Name
   ORDER BY SUM(oi.Quantity) DESC;
 END
@@ -782,10 +785,47 @@ CREATE OR ALTER PROCEDURE dbo.sp_GetPaymentAnalytics
   @EndDate DATE
 AS
 BEGIN
-  SELECT PaymentMethod, COUNT(*) AS Orders, SUM(TotalAmount) AS Revenue
+  SELECT PaymentMethod,
+         Orders  = COUNT(*),
+         Revenue = ISNULL(SUM(TotalAmount), 0)
   FROM dbo.Orders
-  WHERE CreatedAt >= @StartDate AND CreatedAt < DATEADD(DAY, 1, @EndDate)
+  WHERE CAST(DATEADD(HOUR, 5, CreatedAt) AS DATE) BETWEEN @StartDate AND @EndDate
   GROUP BY PaymentMethod;
+END
+GO
+
+-- KPI summary for the Analytics page: gross totals for the selected range plus
+-- the same metrics for the immediately preceding range of equal length (deltas).
+CREATE OR ALTER PROCEDURE dbo.sp_GetAnalyticsSummary
+  @StartDate DATE,
+  @EndDate   DATE
+AS
+BEGIN
+  SET NOCOUNT ON;
+
+  DECLARE @days INT = DATEDIFF(DAY, @StartDate, @EndDate) + 1;
+  DECLARE @prevStart DATE = DATEADD(DAY, -@days, @StartDate);
+  DECLARE @prevEnd   DATE = DATEADD(DAY, -1, @StartDate);
+
+  -- Current range (gross revenue across all orders in range).
+  -- Completed = Delivered; Active = anything still in progress (not Delivered,
+  -- not Cancelled). Based on order Status, not payment status.
+  SELECT
+    TotalRevenue    = ISNULL(SUM(TotalAmount), 0),
+    TotalOrders     = COUNT(*),
+    CompletedOrders = COUNT(CASE WHEN Status = 'Delivered' THEN 1 END),
+    ActiveOrders    = COUNT(CASE WHEN Status NOT IN ('Delivered', 'Cancelled') THEN 1 END),
+    AvgOrderValue   = CASE WHEN COUNT(*) = 0 THEN 0
+                           ELSE ISNULL(SUM(TotalAmount), 0) / COUNT(*) END
+  FROM dbo.Orders
+  WHERE CAST(DATEADD(HOUR, 5, CreatedAt) AS DATE) BETWEEN @StartDate AND @EndDate;
+
+  -- Previous (comparison) range
+  SELECT
+    PrevRevenue = ISNULL(SUM(TotalAmount), 0),
+    PrevOrders  = COUNT(*)
+  FROM dbo.Orders
+  WHERE CAST(DATEADD(HOUR, 5, CreatedAt) AS DATE) BETWEEN @prevStart AND @prevEnd;
 END
 GO
 

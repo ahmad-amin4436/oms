@@ -50,6 +50,7 @@
     <Compile Include="Helpers\SecurityHelper.cs" />
     <Compile Include="Helpers\UiHelper.cs" />
     <Compile Include="Interfaces\INavMenuRepository.cs" />
+    <Compile Include="Models\AnalyticsSummary.cs" />
     <Compile Include="Models\DashboardSummary.cs" />
     <Compile Include="Models\MenuItemModel.cs" />
     <Compile Include="Models\NavMenuGroup.cs" />

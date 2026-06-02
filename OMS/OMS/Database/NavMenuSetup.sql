@@ -150,8 +150,8 @@ INSERT INTO dbo.NavGroups (SectionID,       GroupName,          IconClass, Url, 
      VALUES               (@secRestaurant,  'Menu Management',  '',        NULL,  'grpMenu',   12);
 SET @grpMenu = SCOPE_IDENTITY();
 
-INSERT INTO dbo.NavGroups (SectionID,       GroupName,          IconClass, Url,   CollapseId,   SortOrder)
-     VALUES               (@secRestaurant,  'Offers & Coupons', '',        NULL,  'grpOffers',  13);
+INSERT INTO dbo.NavGroups (SectionID,       GroupName, IconClass, Url,   CollapseId,   SortOrder)
+     VALUES               (@secRestaurant,  'Deals',   '',        NULL,  'grpOffers',  13);
 SET @grpOffers = SCOPE_IDENTITY();
 
 INSERT INTO dbo.NavGroups (SectionID,       GroupName,    IconClass, Url,                           CollapseId, SortOrder)
@@ -181,9 +181,9 @@ INSERT INTO dbo.NavItems (GroupID,      ItemName,          Url,                 
     (@grpMenu,    'Menu Items',         '~/Menu/MenuItems.aspx',          1),
     (@grpMenu,    'Menu Page',          '~/Menu/MenuPage.aspx',           2),
     (@grpMenu,    'Pricing',            '~/Menu/Pricing.aspx',            3),
-    -- Offers & Coupons
-    (@grpOffers,  'Offer List',         '~/Offers/OfferList.aspx',        1),
-    (@grpOffers,  'Manage Coupons',     '~/Offers/ManageCoupons.aspx',    2),
+    -- Deals
+    (@grpOffers,  'Create Deals',       '~/Deals/CreateDeals.aspx',       1),
+    (@grpOffers,  'Deals List',         '~/Deals/DealsList.aspx',         2),
     -- Admin Panel
     (@grpAdmin,   'Admin Dashboard',    '~/Admin/AdminDashboard.aspx',    1),
     (@grpAdmin,   'Users',              '~/Admin/Users.aspx',             2),

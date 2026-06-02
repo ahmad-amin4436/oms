@@ -40,9 +40,53 @@ namespace OMS.Common.BLL
             return DBHelper.ExecuteDataTable("sp_GetOrdersByHour", DBHelper.Parameter("@Date", date.Date));
         }
 
+        // Hourly distribution across a date range (inclusive).
+        public static DataTable OrdersByHour(DateTime start, DateTime end)
+        {
+            return DBHelper.ExecuteDataTable("sp_GetOrdersByHour",
+                DBHelper.Parameter("@Date", start.Date),
+                DBHelper.Parameter("@EndDate", end.Date));
+        }
+
         public static DataTable TopMenuItems(DateTime start, DateTime end, int top)
         {
             return DBHelper.ExecuteDataTable("sp_GetTopMenuItems", DBHelper.Parameter("@StartDate", start.Date), DBHelper.Parameter("@EndDate", end.Date), DBHelper.Parameter("@TopN", top));
+        }
+
+        public static DataTable TwoMonthDailySales(DateTime today)
+        {
+            return DBHelper.ExecuteDataTable("sp_GetTwoMonthDailySales",
+                DBHelper.Parameter("@Today", today.Date));
+        }
+
+        public static DataTable PaymentAnalytics(DateTime start, DateTime end)
+        {
+            return DBHelper.ExecuteDataTable("sp_GetPaymentAnalytics", DBHelper.Parameter("@StartDate", start.Date), DBHelper.Parameter("@EndDate", end.Date));
+        }
+
+        public static AnalyticsSummary AnalyticsSummary(DateTime start, DateTime end)
+        {
+            var ds = DBHelper.ExecuteDataSet("sp_GetAnalyticsSummary",
+                DBHelper.Parameter("@StartDate", start.Date),
+                DBHelper.Parameter("@EndDate", end.Date));
+
+            var s = new AnalyticsSummary();
+            if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                var r = ds.Tables[0].Rows[0];
+                s.TotalRevenue    = Convert.ToDecimal(r["TotalRevenue"]);
+                s.TotalOrders     = Convert.ToInt32(r["TotalOrders"]);
+                s.CompletedOrders = Convert.ToInt32(r["CompletedOrders"]);
+                s.ActiveOrders    = Convert.ToInt32(r["ActiveOrders"]);
+                s.AvgOrderValue   = Convert.ToDecimal(r["AvgOrderValue"]);
+            }
+            if (ds.Tables.Count > 1 && ds.Tables[1].Rows.Count > 0)
+            {
+                var r = ds.Tables[1].Rows[0];
+                s.PrevRevenue = Convert.ToDecimal(r["PrevRevenue"]);
+                s.PrevOrders  = Convert.ToInt32(r["PrevOrders"]);
+            }
+            return s;
         }
     }
 }

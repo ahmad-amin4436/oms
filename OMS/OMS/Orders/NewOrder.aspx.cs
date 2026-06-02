@@ -13,10 +13,15 @@ namespace OMS.Orders
     [Serializable]
     public class CartItem
     {
+        // Unique per cart line so deal lines never collide with à-la-carte lines
+        // that reference the same MenuItem.ItemID.
+        public string  Key       { get; set; }
         public int     ItemID    { get; set; }
         public string  Name      { get; set; }
         public decimal UnitPrice { get; set; }
         public int     Qty       { get; set; }
+        // Non-empty when this line came from a deal (shown as a badge, not merged).
+        public string  DealName  { get; set; }
         public decimal LineTotal { get { return Math.Round(UnitPrice * Qty, 2); } }
     }
 
@@ -46,7 +51,7 @@ namespace OMS.Orders
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            SecurityHelper.RequireRoles("Admin", "Manager", "Cashier", "Waiter");
+            SecurityHelper.RequireUrlAccess();
 
             // Bind only on first load. On postback the Repeater control trees are
             // rebuilt from ViewState, which is what lets ItemCommand events route to
@@ -62,10 +67,95 @@ namespace OMS.Orders
 
         private void BindAll()
         {
+            BindDeals(SearchTerm);
             BindCategories();
             BindMenuItems(SelectedCategory, SearchTerm);
             BindCart();
             ApplyLayout();
+        }
+
+        // Loads active deals and shows them as cards above the menu grid. Each card
+        // displays the deal price and (struck-through) the original sum of its items.
+        // When a search term is given, deals are matched on their title or member items.
+        private void BindDeals(string search)
+        {
+            DataSet ds;
+            try
+            {
+                ds = DBHelper.ExecuteDataSet("sp_GetActiveDealsWithItems");
+            }
+            catch
+            {
+                pnlDeals.Visible = false;
+                return;
+            }
+
+            if (ds.Tables.Count < 1 || ds.Tables[0].Rows.Count == 0)
+            {
+                pnlDeals.Visible = false;
+                return;
+            }
+
+            DataTable deals = ds.Tables[0];
+            DataTable items = ds.Tables.Count > 1 ? ds.Tables[1] : new DataTable();
+
+            // Original price = sum of member item BasePrices, per deal.
+            var originalByDeal = new Dictionary<int, decimal>();
+            var namesByDeal    = new Dictionary<int, List<string>>();
+            foreach (DataRow r in items.Rows)
+            {
+                int dealId = Convert.ToInt32(r["DealID"]);
+                decimal bp = Convert.ToDecimal(r["BasePrice"]);
+                originalByDeal[dealId] = (originalByDeal.TryGetValue(dealId, out var o) ? o : 0m) + bp;
+                if (!namesByDeal.TryGetValue(dealId, out var list)) { list = new List<string>(); namesByDeal[dealId] = list; }
+                list.Add(Convert.ToString(r["ItemName"]));
+            }
+
+            var view = new DataTable();
+            view.Columns.Add("DealID", typeof(int));
+            view.Columns.Add("Title", typeof(string));
+            view.Columns.Add("ItemsLabel", typeof(string));
+            view.Columns.Add("DealPrice", typeof(decimal));
+            view.Columns.Add("OriginalPrice", typeof(decimal));
+
+            foreach (DataRow d in deals.Rows)
+            {
+                int dealId   = Convert.ToInt32(d["DealID"]);
+                decimal orig = originalByDeal.TryGetValue(dealId, out var o) ? o : 0m;
+                decimal price = ComputeDealPrice(d, orig);
+                string itemsLabel = namesByDeal.TryGetValue(dealId, out var names)
+                    ? string.Join(", ", names) : "";
+
+                view.Rows.Add(dealId, Convert.ToString(d["Title"]), itemsLabel,
+                    Math.Round(price, 0), Math.Round(orig, 0));
+            }
+
+            // Match the search on the deal title or any of its member item names.
+            DataView dv = view.DefaultView;
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                string safe = search.Trim().Replace("'", "''").Replace("[", "[[]").Replace("%", "[%]");
+                dv.RowFilter = $"Title LIKE '%{safe}%' OR ItemsLabel LIKE '%{safe}%'";
+            }
+
+            bool hasDeals = dv.Count > 0;
+            rptDeals.DataSource = hasDeals ? (object)dv : null;
+            rptDeals.DataBind();
+            pnlDeals.Visible = hasDeals;
+        }
+
+        // The effective price of a whole deal given the sum of its item base prices.
+        private static decimal ComputeDealPrice(DataRow deal, decimal originalSum)
+        {
+            string type = Convert.ToString(deal["DealType"]);
+            decimal value = Convert.ToDecimal(deal["DiscountValue"]);
+
+            if (type == "BundlePrice")
+                return deal["DealPrice"] == DBNull.Value ? originalSum : Convert.ToDecimal(deal["DealPrice"]);
+            if (type == "Percentage")
+                return Math.Round(originalSum * (1 - value / 100m), 2);
+            // Flat amount off the whole bundle (never below zero).
+            return Math.Max(0m, originalSum - value);
         }
 
         private void BindCategories()
@@ -103,7 +193,9 @@ namespace OMS.Orders
             }
 
             bool hasRows = view.Count > 0;
-            pnlNoItems.Visible = !hasRows;
+            // Don't show the "no items" empty-state if matching deals are on screen —
+            // the search did return something (a deal), just not an à-la-carte item.
+            pnlNoItems.Visible = !hasRows && !pnlDeals.Visible;
             rptMenu.DataSource = hasRows ? (object)view : null;
             rptMenu.DataBind();
         }
@@ -218,23 +310,86 @@ namespace OMS.Orders
             string  name   = HttpUtility.UrlDecode(parts[2]);
 
             var cart     = Cart;
-            var existing = cart.FirstOrDefault(c => c.ItemID == itemId);
+            // Merge only with an existing à-la-carte line for the same item
+            // (deal lines carry a DealName and are kept separate).
+            var existing = cart.FirstOrDefault(c => c.ItemID == itemId && string.IsNullOrEmpty(c.DealName));
             if (existing != null)
                 existing.Qty++;
             else
-                cart.Add(new CartItem { ItemID = itemId, Name = name, UnitPrice = price, Qty = 1 });
+                cart.Add(new CartItem { Key = NewKey(), ItemID = itemId, Name = name, UnitPrice = price, Qty = 1 });
 
             Cart = cart;
             BindCart();
         }
 
+        // ── Deal add event ───────────────────────────────────────────
+
+        protected void rptDeals_ItemCommand(object source, RepeaterCommandEventArgs e)
+        {
+            if (e.CommandName != "AddDeal") return;
+
+            int dealId = Convert.ToInt32(e.CommandArgument);
+
+            var ds = DBHelper.ExecuteDataSet("sp_GetActiveDealsWithItems");
+            if (ds.Tables.Count < 2) return;
+
+            DataRow deal = ds.Tables[0].AsEnumerable()
+                .FirstOrDefault(r => Convert.ToInt32(r["DealID"]) == dealId);
+            var dealItems = ds.Tables[1].AsEnumerable()
+                .Where(r => Convert.ToInt32(r["DealID"]) == dealId).ToList();
+            if (deal == null || dealItems.Count == 0) return;
+
+            string dealName  = Convert.ToString(deal["Title"]);
+            decimal original = dealItems.Sum(r => Convert.ToDecimal(r["BasePrice"]));
+            decimal dealPrice = ComputeDealPrice(deal, original);
+
+            // Distribute the deal price across the member items in proportion to
+            // their base price, so the line totals sum to the deal price. The last
+            // line absorbs any rounding remainder.
+            var cart = Cart;
+            decimal allocated = 0m;
+            for (int i = 0; i < dealItems.Count; i++)
+            {
+                var r       = dealItems[i];
+                int itemId  = Convert.ToInt32(r["ItemID"]);
+                string name = Convert.ToString(r["ItemName"]);
+                decimal bp  = Convert.ToDecimal(r["BasePrice"]);
+
+                decimal linePrice;
+                if (i == dealItems.Count - 1)
+                    linePrice = Math.Round(dealPrice - allocated, 2);          // remainder
+                else
+                {
+                    linePrice = original > 0
+                        ? Math.Round(dealPrice * (bp / original), 2)
+                        : Math.Round(dealPrice / dealItems.Count, 2);
+                    allocated += linePrice;
+                }
+
+                cart.Add(new CartItem
+                {
+                    Key       = NewKey(),
+                    ItemID    = itemId,
+                    Name      = name,
+                    UnitPrice = linePrice,
+                    Qty       = 1,
+                    DealName  = dealName
+                });
+            }
+
+            Cart = cart;
+            BindCart();
+        }
+
+        private static string NewKey() => Guid.NewGuid().ToString("N");
+
         // ── Cart events ──────────────────────────────────────────────
 
         protected void rptCart_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
-            int itemId = Convert.ToInt32(e.CommandArgument);
+            string key = Convert.ToString(e.CommandArgument);
             var cart   = Cart;
-            var item   = cart.FirstOrDefault(c => c.ItemID == itemId);
+            var item   = cart.FirstOrDefault(c => c.Key == key);
             if (item == null) return;
 
             switch (e.CommandName)

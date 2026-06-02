@@ -72,6 +72,41 @@
         <%-- Menu items grid --%>
         <div class="card-body p-3">
 
+          <%-- ── Active deals ── --%>
+          <asp:Panel ID="pnlDeals" runat="server" Visible="false" CssClass="mb-3">
+            <h6 class="fs--1 fw-bold text-uppercase text-600 mb-2">
+              <span class="fas fa-tags me-1 text-warning"></span>Deals
+            </h6>
+            <div class="row g-2">
+              <asp:Repeater ID="rptDeals" runat="server" OnItemCommand="rptDeals_ItemCommand">
+                <ItemTemplate>
+                  <div class="col-sm-6 col-md-6">
+                    <div class="card h-100 border border-warning shadow-none bg-soft-warning">
+                      <div class="card-body p-2 d-flex flex-column">
+                        <p class="fw-semibold fs--1 mb-1 text-truncate" title='<%# Eval("Title") %>'>
+                          <span class="fas fa-tag text-warning me-1 fs--2"></span><%# Eval("Title") %>
+                        </p>
+                        <p class="text-600 fs--2 mb-1"><%# Eval("ItemsLabel") %></p>
+                        <div class="d-flex align-items-center justify-content-between mt-auto">
+                          <div>
+                            <span class="fw-bold text-primary fs--1">Rs.&#160;<%# Eval("DealPrice", "{0:N0}") %></span>
+                            <span class='fs--2 text-decoration-line-through text-500 ms-1 <%# (decimal)Eval("OriginalPrice") > (decimal)Eval("DealPrice") ? "" : "d-none" %>'>Rs.&#160;<%# Eval("OriginalPrice", "{0:N0}") %></span>
+                          </div>
+                          <asp:LinkButton ID="lbAddDeal" runat="server"
+                            CommandName="AddDeal"
+                            CommandArgument='<%# Eval("DealID") %>'
+                            CssClass="btn btn-sm btn-warning px-2 py-1 fs--2"
+                            CausesValidation="false"><span class="fas fa-plus me-1"></span>Add Deal</asp:LinkButton>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </ItemTemplate>
+              </asp:Repeater>
+            </div>
+            <hr class="my-3" />
+          </asp:Panel>
+
           <asp:Panel ID="pnlNoItems" runat="server" Visible="false"
             CssClass="text-center text-600 py-5 fs--1">
             <span class="fas fa-utensils fs-3 d-block mb-2 text-300"></span>
@@ -209,18 +244,21 @@
                         <td class="ps-0">
                           <div class="text-truncate" style="max-width:140px" title='<%# Eval("Name") %>'><%# Eval("Name") %></div>
                           <div class="text-600 fs--2">Rs.&#160;<%# Eval("UnitPrice", "{0:N0}") %> ea.</div>
+                          <span class='badge badge-subtle-warning fs--2 mt-1 <%# string.IsNullOrEmpty(Convert.ToString(Eval("DealName"))) ? "d-none" : "" %>'>
+                            <span class="fas fa-tag me-1"></span><%# Eval("DealName") %>
+                          </span>
                         </td>
                         <td class="text-center">
                           <div class="d-flex align-items-center justify-content-center gap-1">
                             <asp:LinkButton ID="lbMinus" runat="server"
                               CommandName="Minus"
-                              CommandArgument='<%# Eval("ItemID") %>'
+                              CommandArgument='<%# Eval("Key") %>'
                               CssClass="btn btn-sm btn-falcon-default px-2 py-0 lh-sm"
                               CausesValidation="false" ToolTip="Decrease">&#8722;</asp:LinkButton>
                             <span class="fw-semibold px-1" style="min-width:20px;text-align:center"><%# Eval("Qty") %></span>
                             <asp:LinkButton ID="lbPlus" runat="server"
                               CommandName="Plus"
-                              CommandArgument='<%# Eval("ItemID") %>'
+                              CommandArgument='<%# Eval("Key") %>'
                               CssClass="btn btn-sm btn-falcon-default px-2 py-0 lh-sm"
                               CausesValidation="false" ToolTip="Increase">+</asp:LinkButton>
                           </div>
@@ -229,7 +267,7 @@
                         <td class="text-center">
                           <asp:LinkButton ID="lbRemove" runat="server"
                             CommandName="Remove"
-                            CommandArgument='<%# Eval("ItemID") %>'
+                            CommandArgument='<%# Eval("Key") %>'
                             CssClass="btn btn-sm btn-falcon-danger p-1 lh-1"
                             CausesValidation="false" ToolTip="Remove">&times;</asp:LinkButton>
                         </td>

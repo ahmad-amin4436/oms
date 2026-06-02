@@ -635,6 +635,8 @@
     <Content Include="modules\utilities\typography.html" />
     <Content Include="modules\utilities\vertical-align.html" />
     <Content Include="modules\utilities\visibility.html" />
+    <Content Include="Deals\CreateDeals.aspx" />
+    <Content Include="Deals\DealsList.aspx" />
     <Content Include="Offers\ManageCoupons.aspx" />
     <Content Include="Offers\OfferList.aspx" />
     <Content Include="Orders\NewOrder.aspx" />
@@ -890,6 +892,20 @@
     </Compile>
     <Compile Include="Menu\Pricing.aspx.designer.cs">
       <DependentUpon>Pricing.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Deals\CreateDeals.aspx.cs">
+      <DependentUpon>CreateDeals.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Deals\CreateDeals.aspx.designer.cs">
+      <DependentUpon>CreateDeals.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Deals\DealsList.aspx.cs">
+      <DependentUpon>DealsList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Deals\DealsList.aspx.designer.cs">
+      <DependentUpon>DealsList.aspx</DependentUpon>
     </Compile>
     <Compile Include="Offers\ManageCoupons.aspx.cs">
       <DependentUpon>ManageCoupons.aspx</DependentUpon>

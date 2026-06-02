@@ -76,6 +76,16 @@ namespace OMS.Orders {
         protected global::System.Web.UI.WebControls.Button lbSearch;
 
         /// <summary>
+        /// pnlDeals control.
+        /// </summary>
+        protected global::System.Web.UI.WebControls.Panel pnlDeals;
+
+        /// <summary>
+        /// rptDeals control.
+        /// </summary>
+        protected global::System.Web.UI.WebControls.Repeater rptDeals;
+
+        /// <summary>
         /// pnlNoItems control.
         /// </summary>
         /// <remarks>

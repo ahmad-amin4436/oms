@@ -445,5 +445,92 @@ BEGIN
 END
 GO
 
+-- ============================================================
+--  PAGE ACCESS  (authorize a page load against nav rights)
+--
+--  Single source of truth: a role may open a page when the nav system
+--  would show it that page. Two cases:
+--    * the URL is a GROUP direct link  -> NavGroupRoles decides.
+--    * the URL is a nav ITEM           -> group must be visible AND the
+--      item-level rights allow it (inherit-unless-overridden).
+--  'All' grants apply to everyone. @CanAccess is 1/0.
+--
+--  URLs are compared by their tail (e.g. 'reports/printinvoice.aspx') so a
+--  stored '~/Reports/PrintInvoice.aspx' matches the page's app-relative path.
+-- ============================================================
+CREATE OR ALTER PROCEDURE dbo.sp_CanRoleAccessUrl
+  @RoleName  NVARCHAR(50),
+  @Url       NVARCHAR(500),
+  @CanAccess BIT OUTPUT
+AS
+BEGIN
+  SET NOCOUNT ON;
+  SET @CanAccess = 0;
+
+  -- Normalise: strip leading ~ and /, lowercase. Compare on the trailing path.
+  DECLARE @needle NVARCHAR(500) = LOWER(LTRIM(RTRIM(@Url)));
+  WHILE LEFT(@needle, 1) IN ('~', '/') SET @needle = SUBSTRING(@needle, 2, 4000);
+
+  -- 1) Group direct-link match (e.g. Dashboard, Analytics, Print Invoice)
+  IF EXISTS (
+        SELECT 1
+        FROM dbo.NavGroups g
+        INNER JOIN dbo.NavGroupRoles ngr ON ngr.GroupID = g.GroupID
+        WHERE g.IsActive = 1
+          AND g.Url IS NOT NULL
+          AND @needle = REPLACE(LOWER(LTRIM(RTRIM(g.Url))), '~/', '')
+          AND (ngr.RoleName = @RoleName OR ngr.RoleName = 'All')
+     )
+  BEGIN
+    SET @CanAccess = 1;
+    RETURN;
+  END
+
+  -- 2) Nav item match — group visible AND item rights allow (inherit-unless-overridden)
+  IF EXISTS (
+        SELECT 1
+        FROM dbo.NavItems i
+        INNER JOIN dbo.NavGroups     g   ON g.GroupID  = i.GroupID AND g.IsActive = 1
+        INNER JOIN dbo.NavGroupRoles ngr ON ngr.GroupID = g.GroupID
+        WHERE i.IsActive = 1
+          AND @needle = REPLACE(LOWER(LTRIM(RTRIM(i.Url))), '~/', '')
+          AND (ngr.RoleName = @RoleName OR ngr.RoleName = 'All')
+          AND (
+                NOT EXISTS (SELECT 1 FROM dbo.NavItemRoles nir WHERE nir.ItemID = i.ItemID)
+                OR EXISTS (SELECT 1 FROM dbo.NavItemRoles nir
+                           WHERE nir.ItemID = i.ItemID
+                             AND (nir.RoleName = @RoleName OR nir.RoleName = 'All'))
+              )
+     )
+  BEGIN
+    SET @CanAccess = 1;
+    RETURN;
+  END
+END
+GO
+
+-- Returns >0 when the URL is registered in the nav (as a group link or item),
+-- regardless of role. Lets the app tell "denied" apart from "not nav-gated".
+CREATE OR ALTER PROCEDURE dbo.sp_UrlExistsInNav
+  @Url NVARCHAR(500)
+AS
+BEGIN
+  SET NOCOUNT ON;
+
+  DECLARE @needle NVARCHAR(500) = LOWER(LTRIM(RTRIM(@Url)));
+  WHILE LEFT(@needle, 1) IN ('~', '/') SET @needle = SUBSTRING(@needle, 2, 4000);
+
+  SELECT COUNT(*) AS HitCount
+  FROM (
+    SELECT REPLACE(LOWER(LTRIM(RTRIM(Url))), '~/', '') AS U
+    FROM dbo.NavGroups WHERE Url IS NOT NULL AND IsActive = 1
+    UNION ALL
+    SELECT REPLACE(LOWER(LTRIM(RTRIM(Url))), '~/', '') AS U
+    FROM dbo.NavItems WHERE IsActive = 1
+  ) x
+  WHERE x.U = @needle;
+END
+GO
+
 PRINT 'Users management + Roles & Rights procedures created successfully.';
 GO

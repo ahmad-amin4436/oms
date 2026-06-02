@@ -23,7 +23,7 @@ namespace OMS.Menu
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            SecurityHelper.RequireRoles("Admin", "Manager");
+            SecurityHelper.RequireUrlAccess();
             if (!IsPostBack)
                 BindAll();
         }
