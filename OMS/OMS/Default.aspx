@@ -27,7 +27,7 @@
                     </div>
                     <div class="card-body p-0">
                       <ul class="mb-0 list-unstyled">
-                        <li class="alert mb-0 rounded-0 py-3 px-x1 alert-warning border-x-0 border-top-0">
+                        <li class="alert mb-0 rounded-0 py-3 px-x1 alert-warning border-x-0 border-top-0" hidden>
                           <div class="row flex-between-center">
                             <div class="col">
                               <div class="d-flex">
@@ -356,9 +356,10 @@
                 <div class="card-header bg-light">
                   <div class="row justify-content-between">
                     <div class="col-auto">
-                      <h6>Returning Customer Rate</h6>
+                      <h6>Daily Orders</h6>
                       <div class="d-flex align-items-center">
-                        <h4 class="text-primary mb-0">Rs. 59.09%</h4><span class="badge rounded-pill ms-3 badge-subtle-primary"><span class="fas fa-caret-up"></span> 3.5%</span>
+                        <h4 class="text-primary mb-0"><asp:Literal ID="litDailyOrdersTotal" runat="server" Text="0" /> orders</h4>
+                        <span class="badge rounded-pill ms-3 badge-subtle-primary fs--2">This month</span>
                       </div>
                     </div>
                     <div class="col-auto"><select class="form-select form-select-sm pe-4" id="select-returning-customer-month">
@@ -378,19 +379,17 @@
                   </div>
                 </div>
                 <div class="card-body">
-                  <!-- Find the JS file for the following chart at: src/js/charts/echarts/returning-customer-rate.js-->
-                  <!-- If you are not using gulp based workflow, you can find the transpiled code at: public/assets/js/theme.js-->
                   <div class="echart-line-returning-customer-rate h-100" data-echart-responsive="true" data-options='{"target":"returning-customer-rate-footer","monthSelect":"select-returning-customer-month","optionOne":"newMonth","optionTwo":"returningMonth"}'></div>
                 </div>
                 <div class="card-footer border-top py-2">
                   <div class="row align-items-center gx-0" id="returning-customer-rate-footer">
                     <div class="col-auto me-2">
-                      <div class="btn btn-sm btn-text d-flex align-items-center p-0 shadow-none" id="newMonth"><span class="fas fa-circle text-primary fs--2 me-1"></span>New </div>
+                      <div class="btn btn-sm btn-text d-flex align-items-center p-0 shadow-none" id="newMonth"><span class="fas fa-circle text-primary fs--2 me-1"></span>Dine In</div>
                     </div>
                     <div class="col-auto">
-                      <div class="btn btn-sm btn-text d-flex align-items-center p-0 shadow-none" id="returningMonth"><span class="fas fa-circle text-warning fs--2 me-1"></span>Returning </div>
+                      <div class="btn btn-sm btn-text d-flex align-items-center p-0 shadow-none" id="returningMonth"><span class="fas fa-circle text-warning fs--2 me-1"></span>Takeaway &amp; Delivery</div>
                     </div>
-                    <div class="col text-end"><a class="btn btn-link btn-sm px-0 fw-medium" href="#!">View report <span class="fas fa-chevron-right fs--2"></span></a></div>
+                    <div class="col text-end"><a class="btn btn-link btn-sm px-0 fw-medium" href="Orders/OrderList.aspx">View orders <span class="fas fa-chevron-right fs--2"></span></a></div>
                   </div>
                 </div>
               </div>
