@@ -405,14 +405,12 @@
                   <table class="table table-borderless font-sans-serif fw-medium fs--1">
                     <tbody>
                       <tr>
-                        <td class="pb-2 pt-0"> <span class="fas fa-circle fs--2 me-1 text-primary"></span>Allocated Budget</td>
-                        <td class="pb-2 pt-0 text-end">Rs. 13,325.98</td>
-                        <td class="pb-2 pt-0 text-end"><span class="me-1 fas fa-caret-up text-success"></span>10%</td>
+                        <td class="pb-2 pt-0"> <span class="fas fa-circle fs--2 me-1 text-primary"></span>This Month</td>
+                        <td class="pb-2 pt-0 text-end"><asp:Literal ID="litRadarThisMonth" runat="server" Text="Rs. 0.00" /></td>
                       </tr>
                       <tr>
-                        <td class="pb-2 pt-0"> <span class="fas fa-circle fs--2 me-1 text-warning"></span>Actual Spending</td>
-                        <td class="pb-2 pt-0 text-end">Rs. 12,348.46</td>
-                        <td class="pb-2 pt-0 text-end"><span class="me-1 fas fa-caret-down text-success"></span>13%</td>
+                        <td class="pb-2 pt-0"> <span class="fas fa-circle fs--2 me-1 text-warning"></span>Last Month</td>
+                        <td class="pb-2 pt-0 text-end"><asp:Literal ID="litRadarLastMonth" runat="server" Text="Rs. 0.00" /></td>
                       </tr>
                     </tbody>
                   </table><!-- Find the JS file for the following chart at: src/js/charts/echarts/sales-by-pos-location.js-->
@@ -553,15 +551,94 @@
         return true;
       }
 
+      // ---- Daily Orders: DineIn vs Takeaway+Delivery, real data for all 12 months ----
+      var dailyOrders = <%= DailyOrdersJson %>;
+      // dailyOrders.dineIn[m] and .takeawayDelivery[m] are arrays per month (0=Jan..11=Dec)
+
+      function applyDailyOrders() {
+        var el = document.querySelector('.echart-line-returning-customer-rate');
+        if (!el || !window.echarts) return false;
+        var chart = window.echarts.getInstanceByDom(el);
+        if (!chart) return false;
+
+        var monthSel = document.getElementById('select-returning-customer-month');
+        var m = monthSel ? parseInt(monthSel.value, 10) : new Date().getMonth();
+
+        chart.setOption({
+          series: [
+            { data: dailyOrders.dineIn[m] },
+            { data: dailyOrders.takeawayDelivery[m] }
+          ]
+        });
+
+        if (monthSel && !monthSel._omsPatched) {
+          monthSel._omsPatched = true;
+          monthSel.addEventListener('change', function (e) {
+            var idx = parseInt(e.currentTarget.value, 10);
+            chart.setOption({
+              series: [
+                { data: dailyOrders.dineIn[idx] },
+                { data: dailyOrders.takeawayDelivery[idx] }
+              ]
+            });
+          });
+        }
+        return true;
+      }
+
+      // ---- Sales by POS location radar: DineIn / Takeaway / Delivery revenue ----
+      var radar = <%= RadarJson %>;
+      // radar.thisMonth = [dineIn, takeaway, delivery], radar.lastMonth = [dineIn, takeaway, delivery]
+
+      function applyRadar() {
+        var el = document.querySelector('.echart-radar-sales-by-pos-location');
+        if (!el || !window.echarts) return false;
+        var chart = window.echarts.getInstanceByDom(el);
+        if (!chart) return false;
+
+        var labels = ['Dine In', 'Takeaway', 'Delivery', 'Pending', 'Preparing', 'Delivered'];
+        var maxVal = Math.max.apply(null, radar.thisMonth.concat(radar.lastMonth).concat([1]));
+        maxVal = Math.ceil(maxVal * 1.25) || 10;
+
+        chart.setOption({
+          radar: {
+            indicator: labels.map(function (l) { return { name: l, max: maxVal }; })
+          },
+          tooltip: {
+            formatter: function (params) {
+              var rows = labels.map(function (l, i) {
+                return '<strong>' + l + '</strong>: ' + params.value[i];
+              }).join('<br>');
+              return '<strong>' + params.name + '</strong><br>' + rows;
+            }
+          },
+          series: [{
+            data: [
+              { value: radar.thisMonth, name: 'This Month' },
+              { value: radar.lastMonth, name: 'Last Month' }
+            ]
+          }]
+        });
+        return true;
+      }
+
       // Theme initialises charts on window load; retry briefly until each is ready.
-      var done = { sales: false, top: false };
+      var done = { sales: false, top: false, daily: false, radar: false };
       var tries = 0;
       var timer = setInterval(function () {
-        if (!done.sales) done.sales = applyTotalSales();
-        if (!done.top)   done.top   = applyTopProducts();
-        if ((done.sales && done.top) || ++tries > 50) clearInterval(timer);
+        if (!done.sales)  done.sales  = applyTotalSales();
+        if (!done.top)    done.top    = applyTopProducts();
+        if (!done.daily)  done.daily  = applyDailyOrders();
+        if (!done.radar)  done.radar  = applyRadar();
+        if ((done.sales && done.top && done.daily && done.radar) || ++tries > 50) clearInterval(timer);
       }, 150);
-      window.addEventListener('load', function () { applyTotalSales(); applyTopProducts(); });
+      // Pre-select the current month in the dropdown on page load.
+      var monthSel = document.getElementById('select-returning-customer-month');
+      if (monthSel) monthSel.value = new Date().getMonth().toString();
+
+      window.addEventListener('load', function () {
+        applyTotalSales(); applyTopProducts(); applyDailyOrders(); applyRadar();
+      });
     })();
   </script>
 </asp:Content>

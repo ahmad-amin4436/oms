@@ -20,6 +20,12 @@ namespace OMS
         // Top Products chart payload (top items: units + revenue).
         protected string TopProductsChartJson = "{\"labels\":[],\"units\":[],\"revenue\":[]}";
 
+        // Daily Orders chart: 12 months × per-day DineIn/TakeawayDelivery counts.
+        protected string DailyOrdersJson = "{\"dineIn\":[],\"takeawayDelivery\":[]}";
+
+        // Radar chart: this-month vs last-month revenue by order type.
+        protected string RadarJson = "{\"thisMonth\":[0,0,0],\"lastMonth\":[0,0,0]}";
+
         protected void Page_Load(object sender, EventArgs e)
         {
             SecurityHelper.RequireLogin();
@@ -34,6 +40,8 @@ namespace OMS
             BindShareCards();
             BindOrderBreakdown();
             BindTotalSalesChart();
+            BindDailyOrdersChart();
+            BindRadarChart();
             BindRecentOrders();
             BindBestSelling();
         }
@@ -225,6 +233,69 @@ namespace OMS
                 case "Cancelled": return "badge-subtle-danger";
                 default:          return "badge-subtle-secondary";
             }
+        }
+
+        // ── Daily Orders line chart (DineIn vs Takeaway+Delivery, all 12 months) ──
+
+        private void BindDailyOrdersChart()
+        {
+            var inv = System.Globalization.CultureInfo.InvariantCulture;
+            var dineInSb  = new System.Text.StringBuilder();
+            var takedSb   = new System.Text.StringBuilder();
+            int thisMonthTotal = 0;
+
+            for (int m = 1; m <= 12; m++)
+            {
+                DataTable dt = DashboardService.DailyOrdersByType(new DateTime(LocalToday.Year, m, 1));
+
+                var diArr = new System.Text.StringBuilder();
+                var tdArr = new System.Text.StringBuilder();
+                foreach (DataRow r in dt.Rows)
+                {
+                    if (diArr.Length > 0) { diArr.Append(','); tdArr.Append(','); }
+                    int di = Convert.ToInt32(r["DineIn"]);
+                    int td = Convert.ToInt32(r["TakeawayDelivery"]);
+                    diArr.Append(di);
+                    tdArr.Append(td);
+                    if (m == LocalToday.Month) thisMonthTotal += di + td;
+                }
+
+                if (dineInSb.Length > 0) { dineInSb.Append(','); takedSb.Append(','); }
+                dineInSb.Append('[').Append(diArr).Append(']');
+                takedSb.Append('[').Append(tdArr).Append(']');
+            }
+
+            DailyOrdersJson = "{\"dineIn\":[" + dineInSb + "],\"takeawayDelivery\":[" + takedSb + "]}";
+            litDailyOrdersTotal.Text = thisMonthTotal.ToString("N0");
+        }
+
+        // ── Sales by POS radar chart — 6 order metrics, this month vs last month ──
+
+        private void BindRadarChart()
+        {
+            DataRow r = DashboardService.RevenueByOrderType(LocalToday);
+            if (r == null) return;
+
+            var inv = System.Globalization.CultureInfo.InvariantCulture;
+            int thisDi  = Convert.ToInt32(r["ThisDineIn"]);
+            int thisTa  = Convert.ToInt32(r["ThisTakeaway"]);
+            int thisDe  = Convert.ToInt32(r["ThisDelivery"]);
+            int thisPe  = Convert.ToInt32(r["ThisPending"]);
+            int thisPr  = Convert.ToInt32(r["ThisPreparing"]);
+            int thisDd  = Convert.ToInt32(r["ThisDelivered"]);
+            int lastDi  = Convert.ToInt32(r["LastDineIn"]);
+            int lastTa  = Convert.ToInt32(r["LastTakeaway"]);
+            int lastDe  = Convert.ToInt32(r["LastDelivery"]);
+            int lastPe  = Convert.ToInt32(r["LastPending"]);
+            int lastPr  = Convert.ToInt32(r["LastPreparing"]);
+            int lastDd  = Convert.ToInt32(r["LastDelivered"]);
+
+            RadarJson =
+                "{\"thisMonth\":[" + thisDi + "," + thisTa + "," + thisDe + "," + thisPe + "," + thisPr + "," + thisDd + "]" +
+                ",\"lastMonth\":[" + lastDi + "," + lastTa + "," + lastDe + "," + lastPe + "," + lastPr + "," + lastDd + "]}";
+
+            litRadarThisMonth.Text = (thisDi + thisTa + thisDe).ToString("N0") + " orders";
+            litRadarLastMonth.Text = (lastDi + lastTa + lastDe).ToString("N0") + " orders";
         }
 
         // ── Best Selling Products table ──────────────────────────────

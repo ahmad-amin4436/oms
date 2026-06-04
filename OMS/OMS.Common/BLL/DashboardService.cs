@@ -59,6 +59,19 @@ namespace OMS.Common.BLL
                 DBHelper.Parameter("@Today", today.Date));
         }
 
+        public static DataTable DailyOrdersByType(DateTime monthStart)
+        {
+            return DBHelper.ExecuteDataTable("sp_GetDailyOrdersByType",
+                DBHelper.Parameter("@MonthStart", new DateTime(monthStart.Year, monthStart.Month, 1)));
+        }
+
+        public static DataRow RevenueByOrderType(DateTime today)
+        {
+            DataTable dt = DBHelper.ExecuteDataTable("sp_GetRevenueByOrderType",
+                DBHelper.Parameter("@Today", today.Date));
+            return dt.Rows.Count > 0 ? dt.Rows[0] : null;
+        }
+
         public static DataTable PaymentAnalytics(DateTime start, DateTime end)
         {
             return DBHelper.ExecuteDataTable("sp_GetPaymentAnalytics", DBHelper.Parameter("@StartDate", start.Date), DBHelper.Parameter("@EndDate", end.Date));

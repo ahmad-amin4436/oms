@@ -81,3 +81,68 @@ GO
 
 PRINT 'sp_GetTwoMonthDailySales created.';
 GO
+
+-- Daily DineIn and Takeaway+Delivery order counts for every day of a given month.
+-- Returns 28-31 rows (one per day); days with no orders return 0.
+CREATE OR ALTER PROCEDURE dbo.sp_GetDailyOrdersByType
+  @MonthStart DATE   -- first day of the desired month (local date)
+AS
+BEGIN
+  SET NOCOUNT ON;
+  DECLARE @NextMonthStart DATE = DATEADD(MONTH, 1, @MonthStart);
+  ;WITH Days AS (
+    SELECT TOP (31) ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS DayNo
+    FROM sys.all_objects
+  )
+  SELECT
+    d.DayNo,
+    DineIn           = ISNULL(SUM(CASE WHEN o.OrderType = 'DineIn'
+                                        AND DAY(CAST(DATEADD(HOUR,5,o.CreatedAt) AS DATE)) = d.DayNo THEN 1 END), 0),
+    TakeawayDelivery = ISNULL(SUM(CASE WHEN o.OrderType IN ('Takeaway','Delivery')
+                                        AND DAY(CAST(DATEADD(HOUR,5,o.CreatedAt) AS DATE)) = d.DayNo THEN 1 END), 0)
+  FROM Days d
+  LEFT JOIN dbo.Orders o
+    ON  CAST(DATEADD(HOUR,5,o.CreatedAt) AS DATE) >= @MonthStart
+    AND CAST(DATEADD(HOUR,5,o.CreatedAt) AS DATE) <  @NextMonthStart
+    AND o.Status <> 'Cancelled'
+  WHERE d.DayNo <= DAY(EOMONTH(@MonthStart))
+  GROUP BY d.DayNo
+  ORDER BY d.DayNo;
+END
+GO
+
+PRINT 'sp_GetDailyOrdersByType created.';
+GO
+
+-- Order counts by type and status for this month and last month.
+-- 6 axes used by the "Sales by POS location" radar chart.
+CREATE OR ALTER PROCEDURE dbo.sp_GetRevenueByOrderType
+  @Today DATE
+AS
+BEGIN
+  SET NOCOUNT ON;
+  DECLARE @ThisStart DATE = DATEFROMPARTS(YEAR(@Today), MONTH(@Today), 1);
+  DECLARE @LastStart DATE = DATEADD(MONTH, -1, @ThisStart);
+  DECLARE @NextStart DATE = DATEADD(MONTH,  1, @ThisStart);
+  SELECT
+    ThisDineIn    = ISNULL(SUM(CASE WHEN LocalDate >= @ThisStart AND LocalDate < @NextStart AND OrderType = 'DineIn'    THEN 1 END), 0),
+    ThisTakeaway  = ISNULL(SUM(CASE WHEN LocalDate >= @ThisStart AND LocalDate < @NextStart AND OrderType = 'Takeaway'  THEN 1 END), 0),
+    ThisDelivery  = ISNULL(SUM(CASE WHEN LocalDate >= @ThisStart AND LocalDate < @NextStart AND OrderType = 'Delivery'  THEN 1 END), 0),
+    ThisPending   = ISNULL(SUM(CASE WHEN LocalDate >= @ThisStart AND LocalDate < @NextStart AND Status = 'Pending'      THEN 1 END), 0),
+    ThisPreparing = ISNULL(SUM(CASE WHEN LocalDate >= @ThisStart AND LocalDate < @NextStart AND Status = 'Preparing'    THEN 1 END), 0),
+    ThisDelivered = ISNULL(SUM(CASE WHEN LocalDate >= @ThisStart AND LocalDate < @NextStart AND Status = 'Delivered'    THEN 1 END), 0),
+    LastDineIn    = ISNULL(SUM(CASE WHEN LocalDate >= @LastStart AND LocalDate < @ThisStart AND OrderType = 'DineIn'    THEN 1 END), 0),
+    LastTakeaway  = ISNULL(SUM(CASE WHEN LocalDate >= @LastStart AND LocalDate < @ThisStart AND OrderType = 'Takeaway'  THEN 1 END), 0),
+    LastDelivery  = ISNULL(SUM(CASE WHEN LocalDate >= @LastStart AND LocalDate < @ThisStart AND OrderType = 'Delivery'  THEN 1 END), 0),
+    LastPending   = ISNULL(SUM(CASE WHEN LocalDate >= @LastStart AND LocalDate < @ThisStart AND Status = 'Pending'      THEN 1 END), 0),
+    LastPreparing = ISNULL(SUM(CASE WHEN LocalDate >= @LastStart AND LocalDate < @ThisStart AND Status = 'Preparing'    THEN 1 END), 0),
+    LastDelivered = ISNULL(SUM(CASE WHEN LocalDate >= @LastStart AND LocalDate < @ThisStart AND Status = 'Delivered'    THEN 1 END), 0)
+  FROM (
+    SELECT CAST(DATEADD(HOUR,5,CreatedAt) AS DATE) AS LocalDate, OrderType, Status
+    FROM dbo.Orders
+  ) s;
+END
+GO
+
+PRINT 'sp_GetRevenueByOrderType created.';
+GO

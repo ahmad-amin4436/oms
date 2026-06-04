@@ -227,6 +227,24 @@ namespace OMS {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Literal litDailyOrdersTotal;
+
+        /// <summary>
+        /// litRadarThisMonth control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litRadarThisMonth;
+
+        /// <summary>
+        /// litRadarLastMonth control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litRadarLastMonth;
         
         /// <summary>
         /// litBestTotalOrders control.
