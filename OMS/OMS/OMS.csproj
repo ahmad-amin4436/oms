@@ -493,13 +493,6 @@
     <Content Include="assets\video\beach.jpg" />
     <Content Include="assets\video\beach.mp4" />
     <Content Include="assets\video\beach.webm" />
-    <Content Include="dashboard\analytics.html" />
-    <Content Include="dashboard\crm.html" />
-    <Content Include="dashboard\e-commerce.html" />
-    <Content Include="dashboard\lms.html" />
-    <Content Include="dashboard\project-management.html" />
-    <Content Include="dashboard\saas.html" />
-    <Content Include="dashboard\support-desk.html" />
     <Content Include="Database\DatabaseSetup.sql" />
     <Content Include="Database\NavMenuSetup.sql" />
     <Content Include="Dashboard.aspx" />
@@ -530,6 +523,7 @@
     <Content Include="fonts\glyphicons-halflings-regular.eot" />
     <Content Include="assets\img\favicons\manifest.json" />
     <Content Include="assets\img\icons\star_on.svg.readme" />
+    <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Scripts\jquery-3.3.1.intellisense.js" />
     <Content Include="Menu\MenuItems.aspx" />
     <Content Include="Menu\MenuPage.aspx" />
