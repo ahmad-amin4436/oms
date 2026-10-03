@@ -83,6 +83,12 @@ namespace OMS {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Literal litNavMenuCombo;
+
+        protected global::System.Web.UI.WebControls.LinkButton lnkMarkAllRead;
+        protected global::System.Web.UI.WebControls.Literal litNotif1;
+        protected global::System.Web.UI.WebControls.Literal litNotif2;
+        protected global::System.Web.UI.WebControls.Literal litNotif3;
+        protected global::System.Web.UI.WebControls.Literal litNotif4;
         
         /// <summary>
         /// MainContent control.

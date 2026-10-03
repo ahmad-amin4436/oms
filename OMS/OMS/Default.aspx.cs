@@ -28,7 +28,8 @@ namespace OMS
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            SecurityHelper.RequireLogin();
+            SecurityHelper.RequireRoles("Admin");
+            if (!SecurityHelper.IsInRole("Admin")) return;   // redirect is queued, stop here
             if (!IsPostBack)
                 BindDashboard();
         }

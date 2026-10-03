@@ -48,6 +48,7 @@
     <Compile Include="Helpers\ImageHelper.cs" />
     <Compile Include="Helpers\PasswordHelper.cs" />
     <Compile Include="Helpers\SecurityHelper.cs" />
+    <Compile Include="Helpers\SettingsHelper.cs" />
     <Compile Include="Helpers\UiHelper.cs" />
     <Compile Include="Interfaces\INavMenuRepository.cs" />
     <Compile Include="Models\AnalyticsSummary.cs" />

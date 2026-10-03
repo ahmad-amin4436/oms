@@ -19,6 +19,16 @@ namespace OMS.Orders
         protected global::System.Web.UI.WebControls.Label          lblSubtotal;
         protected global::System.Web.UI.WebControls.Label          lblDiscount;
         protected global::System.Web.UI.WebControls.Label          lblTax;
+        protected global::System.Web.UI.WebControls.Label          lblTaxLabel;
+        protected global::System.Web.UI.WebControls.Panel          pnlCancelInfo;
+        protected global::System.Web.UI.WebControls.Label          lblCancelledAt;
+        protected global::System.Web.UI.WebControls.Label          lblCancelledBy;
+        protected global::System.Web.UI.WebControls.Label          lblCancelReason;
+        protected global::System.Web.UI.WebControls.Panel          pnlUpdateStatus;
+        protected global::System.Web.UI.WebControls.Panel          pnlCancel;
+        protected global::System.Web.UI.WebControls.TextBox        txtCancelReason;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvCancelReason;
+        protected global::System.Web.UI.WebControls.Button         btnCancelOrder;
         protected global::System.Web.UI.WebControls.Label          lblTotal;
 
         // Order info

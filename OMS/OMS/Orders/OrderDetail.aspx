@@ -76,6 +76,14 @@
                     DataFormatString="Rs.&#160;{0:N0}"
                     HeaderStyle-CssClass="border-0 text-end"
                     ItemStyle-CssClass="align-middle text-end fw-semibold" />
+                  <asp:TemplateField HeaderStyle-CssClass="border-0" ItemStyle-CssClass="align-middle text-end">
+                    <ItemTemplate>
+                      <a href="#" class="btn btn-falcon-default btn-sm px-2 py-0 fs--2" title="Print this dish"
+                         onclick="return printDish(<%# Eval("OrderItemID") %>);">
+                        <span class="fas fa-print"></span> Print
+                      </a>
+                    </ItemTemplate>
+                  </asp:TemplateField>
                 </Columns>
               </asp:GridView>
             </div>
@@ -93,7 +101,7 @@
                     <td class="fw-semi-bold text-danger"><asp:Label ID="lblDiscount" runat="server" /></td>
                   </tr>
                   <tr>
-                    <th class="text-900">Tax (16%):</th>
+                    <th class="text-900"><asp:Label ID="lblTaxLabel" runat="server" Text="Tax" />:</th>
                     <td class="fw-semi-bold"><asp:Label ID="lblTax" runat="server" /></td>
                   </tr>
                   <tr class="border-top">
@@ -166,11 +174,25 @@
               <asp:Label ID="lblCreatedAt" runat="server" />
             </div>
 
+            <%-- Cancellation audit — shown only for cancelled orders --%>
+            <asp:Panel ID="pnlCancelInfo" runat="server" Visible="false"
+              CssClass="border-top pt-2 mt-2 text-danger">
+              <div class="d-flex justify-content-between mb-1">
+                <span>Cancelled</span>
+                <asp:Label ID="lblCancelledAt" runat="server" />
+              </div>
+              <div class="d-flex justify-content-between mb-1">
+                <span>Cancelled by</span>
+                <asp:Label ID="lblCancelledBy" runat="server" />
+              </div>
+              <div>Reason: <asp:Label ID="lblCancelReason" runat="server" /></div>
+            </asp:Panel>
+
           </div>
         </div>
 
-        <%-- Update Status --%>
-        <div class="card">
+        <%-- Update Status (hidden once the order is cancelled) --%>
+        <asp:Panel ID="pnlUpdateStatus" runat="server" CssClass="card mb-3">
           <div class="card-header py-2">
             <h5 class="mb-0 fs-0">Update Status</h5>
           </div>
@@ -184,10 +206,39 @@
               Text="Update Status"
               OnClick="btnUpdateStatus_Click" />
           </div>
-        </div>
+        </asp:Panel>
+
+        <%-- Cancel Order (Admin only; not shown for Cancelled / Delivered orders) --%>
+        <asp:Panel ID="pnlCancel" runat="server" Visible="false" CssClass="card border border-danger">
+          <div class="card-header py-2">
+            <h5 class="mb-0 fs-0 text-danger">Cancel Order</h5>
+          </div>
+          <div class="card-body py-3">
+            <asp:TextBox ID="txtCancelReason" runat="server" TextMode="MultiLine" Rows="2"
+              MaxLength="500" CssClass="form-control form-control-sm mb-2"
+              placeholder="Reason for cancellation (required)" ValidationGroup="CancelOrder" />
+            <asp:RequiredFieldValidator ID="rfvCancelReason" runat="server"
+              ControlToValidate="txtCancelReason" ValidationGroup="CancelOrder"
+              ErrorMessage="Please enter a reason." Display="Dynamic"
+              CssClass="text-danger fs--2 d-block mb-2" />
+            <asp:Button ID="btnCancelOrder" runat="server"
+              CssClass="btn btn-danger btn-sm w-100" Text="Cancel Order"
+              ValidationGroup="CancelOrder"
+              OnClientClick="return confirm('Cancel this order? This cannot be undone.');"
+              OnClick="btnCancelOrder_Click" />
+          </div>
+        </asp:Panel>
 
       </div>
     </div>
   </asp:Panel>
 
+  <script>
+    // One kitchen ticket per dish; the browser print dialog lets the user pick the printer.
+    function printDish(orderItemId) {
+      var url = '<%= ResolveUrl("~/Reports/PrintDish.aspx") %>?id=<%= Server.UrlEncode(Request.QueryString["id"] ?? "") %>&item=' + orderItemId;
+      window.open(url, 'printDish', 'width=420,height=640');
+      return false;
+    }
+  </script>
 </asp:Content>

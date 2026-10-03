@@ -303,7 +303,7 @@
               ErrorMessage="Discount must be between 0 and 100." Display="Dynamic"
               CssClass="text-danger fs--2 d-block text-end mb-1" Text="0–100 only" />
             <div class="d-flex justify-content-between fs--1 mb-2">
-              <span class="text-600">Tax (16%)</span>
+              <asp:Label ID="lblTaxLabel" runat="server" CssClass="text-600" Text="Tax" />
               <asp:Label ID="lblTax" runat="server" Text="Rs. 0" />
             </div>
             <div class="d-flex justify-content-between fw-bold fs-0 border-top pt-2">

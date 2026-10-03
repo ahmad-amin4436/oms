@@ -227,9 +227,11 @@ namespace OMS.Orders
 
             decimal discount = Math.Round(subtotal * discPct / 100m, 2);
             decimal taxable  = subtotal - discount;
-            decimal tax      = Math.Round(taxable * 0.16m, 2);
+            decimal taxPct   = SettingsHelper.TaxPercent;
+            decimal tax      = SettingsHelper.CalcTax(taxable, taxPct);
             decimal total    = taxable + tax;
 
+            lblTaxLabel.Text    = "Tax (" + taxPct.ToString("0.##") + "%)";
             lblSubtotal.Text    = Fmt(subtotal);
             lblDiscountAmt.Text = discount > 0 ? "- " + Fmt(discount) : Fmt(0);
             lblTax.Text         = Fmt(tax);
@@ -443,7 +445,8 @@ namespace OMS.Orders
             decimal subtotal  = cart.Sum(c => c.LineTotal);
             decimal discount  = Math.Round(subtotal * discPct / 100m, 2);
             decimal taxable   = subtotal - discount;
-            decimal tax       = Math.Round(taxable * 0.16m, 2);
+            decimal taxPct    = SettingsHelper.TaxPercent;
+            decimal tax       = SettingsHelper.CalcTax(taxable, taxPct);
             decimal total     = taxable + tax;
 
             string tableNo  = txtTableNo.Text.Trim();
@@ -464,6 +467,7 @@ namespace OMS.Orders
                     DBHelper.Parameter("@SubTotal",       subtotal),
                     DBHelper.Parameter("@DiscountAmount", discount),
                     DBHelper.Parameter("@TaxAmount",      tax),
+                    DBHelper.Parameter("@TaxPercent",     taxPct),
                     DBHelper.Parameter("@TotalAmount",    total),
                     DBHelper.Parameter("@CouponID",       DBNull.Value),
                     DBHelper.Parameter("@Notes",          string.IsNullOrEmpty(txtNotes.Text) ? (object)DBNull.Value : txtNotes.Text),

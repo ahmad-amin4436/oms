@@ -41,6 +41,27 @@
               TextMode="Date" AutoPostBack="true" OnTextChanged="FiltersChanged" />
           </div>
         </div>
+        <asp:Panel runat="server" DefaultButton="btnSearch" CssClass="card-body row g-2 align-items-end pt-0">
+          <div class="col-sm-4 col-md-3">
+            <label class="form-label fs--1 mb-1">O.ID</label>
+            <asp:TextBox ID="txtOrderRef" runat="server" MaxLength="30" CssClass="form-control form-control-sm"
+              placeholder="Order ID or number" />
+          </div>
+          <div class="col-sm-4 col-md-3">
+            <label class="form-label fs--1 mb-1">C.Name</label>
+            <asp:TextBox ID="txtCustomer" runat="server" MaxLength="120" CssClass="form-control form-control-sm"
+              placeholder="Customer name" />
+          </div>
+          <div class="col-sm-4 col-md-3">
+            <label class="form-label fs--1 mb-1">T.B.</label>
+            <asp:TextBox ID="txtTable" runat="server" MaxLength="20" CssClass="form-control form-control-sm"
+              placeholder="Table no." />
+          </div>
+          <div class="col-md-3 d-flex gap-2">
+            <asp:Button ID="btnSearch" runat="server" Text="Search" CssClass="btn btn-primary btn-sm" OnClick="FiltersChanged" />
+            <asp:Button ID="btnClear" runat="server" Text="Clear" CssClass="btn btn-falcon-default btn-sm" OnClick="btnClear_Click" />
+          </div>
+        </asp:Panel>
       </div>
 
       <%-- ── Orders table ── --%>
@@ -65,11 +86,13 @@
                   HeaderStyle-CssClass="ps-3 align-middle white-space-nowrap"
                   ItemStyle-CssClass="ps-3 py-2 align-middle white-space-nowrap">
                   <ItemTemplate>
-                    <strong class="text-primary"><%# Eval("OrderNumber") %></strong>
+                    <span class="text-600">#<%# Eval("OrderID") %></span> <strong class="text-primary"><%# Eval("OrderNumber") %></strong>
                     <span class="text-600"> by </span>
                     <strong><%# OMS.Common.Helpers.UiHelper.HtmlEncode(Eval("CustomerName")) %></strong>
                   </ItemTemplate>
                 </asp:TemplateField>
+                <asp:BoundField DataField="TableNumber" HeaderText="T.B."
+                  HeaderStyle-CssClass="align-middle" ItemStyle-CssClass="py-2 align-middle" NullDisplayText="&mdash;" />
                 <asp:TemplateField HeaderText="Date"
                   HeaderStyle-CssClass="align-middle white-space-nowrap"
                   ItemStyle-CssClass="py-2 align-middle white-space-nowrap text-600">
@@ -111,6 +134,11 @@
               </Columns>
             </asp:GridView>
           </div>
+        </div>
+        <div class="card-footer d-flex justify-content-between align-items-center py-2">
+          <asp:Button ID="btnPrev" runat="server" Text="&laquo; Newer" CssClass="btn btn-falcon-default btn-sm" OnClick="btnPrev_Click" CausesValidation="false" />
+          <span class="fs--1 text-600">Page <asp:Label ID="lblPage" runat="server" Text="1" /></span>
+          <asp:Button ID="btnNext" runat="server" Text="Older &raquo;" CssClass="btn btn-falcon-default btn-sm" OnClick="btnNext_Click" CausesValidation="false" />
         </div>
       </div>
 

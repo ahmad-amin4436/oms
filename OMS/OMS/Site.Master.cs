@@ -20,6 +20,89 @@ namespace OMS
                 RenderNavMenu();
         }
 
+        // ----------------------------------------------------------------
+        // Notifications (bell): unread customer messages + pending orders
+        // ----------------------------------------------------------------
+
+        protected override void OnPreRender(EventArgs e)
+        {
+            base.OnPreRender(e);
+            string html = BuildNotificationsHtml();
+            litNotif1.Text = html;
+            litNotif2.Text = html;
+            litNotif3.Text = html;
+            litNotif4.Text = html;
+        }
+
+        protected void lnkMarkAllRead_Click(object sender, EventArgs e)
+        {
+            if (OMS.Common.Helpers.SecurityHelper.IsInRole("Admin", "Manager"))
+                OMS.Common.DAL.DBHelper.ExecuteNonQuery("sp_MarkAllMessagesRead");
+        }
+
+        private string BuildNotificationsHtml()
+        {
+            if (!OMS.Common.Helpers.SecurityHelper.IsAuthenticated) return string.Empty;
+
+            bool canSeeMessages = OMS.Common.Helpers.SecurityHelper.IsInRole("Admin", "Manager");
+            System.Data.DataTable dt = null;
+            try
+            {
+                dt = OMS.Common.DAL.DBHelper.ExecuteDataTable("sp_GetNotifications",
+                    OMS.Common.DAL.DBHelper.Parameter("@IncludeMessages", canSeeMessages));
+            }
+            catch { /* bell must never break a page (e.g. script not yet applied) */ }
+
+            int count = dt == null ? 0 : dt.Rows.Count;
+            var sb = new StringBuilder();
+            sb.Append("<li class=\"nav-item dropdown\">");
+            sb.Append("<a class=\"nav-link notification-indicator ")
+              .Append(count > 0 ? "notification-indicator-primary " : "")
+              .Append("px-0 fa-icon-wait\" id=\"navbarDropdownNotification\" role=\"button\" data-bs-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\" data-hide-on-body-scroll=\"data-hide-on-body-scroll\">")
+              .Append("<span class=\"fas fa-bell\" data-fa-transform=\"shrink-6\" style=\"font-size: 33px;\"></span></a>");
+            sb.Append("<div class=\"dropdown-menu dropdown-caret dropdown-menu-end dropdown-menu-card dropdown-menu-notification dropdown-caret-bg\" aria-labelledby=\"navbarDropdownNotification\">");
+            sb.Append("<div class=\"card card-notification shadow-none\"><div class=\"card-header\"><div class=\"row justify-content-between align-items-center\">");
+            sb.Append("<div class=\"col-auto\"><h6 class=\"card-header-title mb-0\">Notifications</h6></div>");
+            if (canSeeMessages && count > 0)
+                sb.Append("<div class=\"col-auto ps-0 ps-sm-3\"><a class=\"card-link fw-normal\" href=\"javascript:__doPostBack('")
+                  .Append(lnkMarkAllRead.UniqueID).Append("','')\">Mark all as read</a></div>");
+            sb.Append("</div></div><div class=\"scrollbar-overlay\" style=\"max-height: 19rem\"><div class=\"list-group list-group-flush fw-normal fs--1\">");
+
+            if (count == 0)
+                sb.Append("<div class=\"list-group-item text-center text-500 py-4\">No new notifications</div>");
+            else
+                foreach (System.Data.DataRow r in dt.Rows)
+                {
+                    bool isMsg = Convert.ToString(r["Kind"]) == "Message";
+                    string url = isMsg ? ResolveUrl("~/Admin/Messages.aspx")
+                                       : ResolveUrl("~/Orders/OrderDetail.aspx?id=" + r["RefID"]);
+                    string icon = isMsg ? "fa-envelope text-primary" : "fa-receipt text-warning";
+                    sb.Append("<div class=\"list-group-item\"><a class=\"notification notification-flush notification-unread\" href=\"")
+                      .Append(url).Append("\"><div class=\"notification-avatar\"><div class=\"avatar avatar-2xl me-3\">")
+                      .Append("<div class=\"avatar-name rounded-circle\"><span class=\"fas ").Append(icon).Append("\"></span></div></div></div>")
+                      .Append("<div class=\"notification-body\"><p class=\"mb-1\"><strong>")
+                      .Append(HttpUtility.HtmlEncode(Convert.ToString(r["Title"]))).Append("</strong> ")
+                      .Append(HttpUtility.HtmlEncode(Convert.ToString(r["Detail"]))).Append("</p>")
+                      .Append("<span class=\"notification-time\">")
+                      .Append(TimeAgo(Convert.ToDateTime(r["CreatedAt"]))).Append("</span></div></a></div>");
+                }
+
+            sb.Append("</div></div>");
+            sb.Append("<div class=\"card-footer text-center border-top\"><a class=\"card-link d-block\" href=\"")
+              .Append(ResolveUrl(canSeeMessages ? "~/Admin/Messages.aspx" : "~/Orders/OrderList.aspx"))
+              .Append("\">View all</a></div></div></div></li>");
+            return sb.ToString();
+        }
+
+        private static string TimeAgo(DateTime utc)
+        {
+            var span = DateTime.UtcNow - utc;
+            if (span.TotalMinutes < 1)  return "Just now";
+            if (span.TotalMinutes < 60) return (int)span.TotalMinutes + "m ago";
+            if (span.TotalHours < 24)   return (int)span.TotalHours + "h ago";
+            return (int)span.TotalDays + "d ago";
+        }
+
         // The MSAjax/WebForms ScriptManager NuGet packages register their framework
         // script bundles ("MsAjaxBundle", "WebFormsBundle") so the ScriptManager renders
         // them with an app-RELATIVE <script src> (e.g. "Scripts/WebForms/MsAjax/...").

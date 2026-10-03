@@ -52,6 +52,12 @@ namespace OMS.Reports
             lblTax.Text      = Fmt(tax);
             lblTotal.Text    = Fmt(total);
 
+            // Finalized rate stored on the order, not the current setting.
+            string taxLabel  = SettingsHelper.TaxLabel(row["TaxPercent"], subtotal, discount, tax);
+            lblTaxLabel.Text = taxLabel.Length > 0 ? "Tax (" + taxLabel + ")" : "Tax";
+
+            pnlCancelled.Visible = Convert.ToString(row["Status"]) == "Cancelled";
+
             gvInvoiceItems.DataSource = ds.Tables.Count > 1 ? (object)ds.Tables[1] : null;
             gvInvoiceItems.DataBind();
         }

@@ -22,9 +22,42 @@ namespace OMS.Orders
 
             if (!IsPostBack)
             {
-                foreach (var s in new[] { "Pending", "Confirmed", "Preparing", "Ready", "Delivered", "Cancelled" })
+                // "Cancelled" is deliberately absent: cancelling is the admin-only
+                // Cancel Order action (sp_CancelOrder), not a plain status change.
+                foreach (var s in new[] { "Pending", "Confirmed", "Preparing", "Ready", "Delivered" })
                     ddlStatus.Items.Add(s);
                 BindOrder();
+            }
+        }
+
+        protected void btnCancelOrder_Click(object sender, EventArgs e)
+        {
+            // Server-side authorization — hiding the panel is only a convenience.
+            if (!SecurityHelper.IsInRole("Admin"))
+            {
+                Response.Redirect("~/AccessDenied.aspx", false);
+                return;
+            }
+
+            Page.Validate("CancelOrder");
+            if (!Page.IsValid) return;
+
+            try
+            {
+                DBHelper.ExecuteNonQuery("sp_CancelOrder",
+                    DBHelper.Parameter("@OrderID",     OrderID),
+                    DBHelper.Parameter("@CancelledBy", SecurityHelper.UserID == 0 ? (object)DBNull.Value : SecurityHelper.UserID),
+                    DBHelper.Parameter("@Reason",      txtCancelReason.Text.Trim()));
+
+                txtCancelReason.Text = "";
+                lblStatusMsg.Text    = "Order cancelled.";
+                lblStatusMsg.Visible = true;
+                BindOrder();
+            }
+            catch (Exception ex)
+            {
+                lblError.Text    = "Failed to cancel order: " + ex.Message;
+                lblError.Visible = true;
             }
         }
 
@@ -124,12 +157,28 @@ namespace OMS.Orders
             lblTax.Text      = Fmt(tax);
             lblTotal.Text    = Fmt(total);
 
+            // Rate is the one stored with the order, never the current setting.
+            string taxLabel  = SettingsHelper.TaxLabel(row["TaxPercent"], subtotal, discount, tax);
+            lblTaxLabel.Text = taxLabel.Length > 0 ? "Tax (" + taxLabel + ")" : "Tax";
+
             // Status
             string status        = Convert.ToString(row["Status"]);
             lblStatusBadge.Text  = status;
             _statusBadgeClass    = UiHelper.StatusBadgeClass(status);
             _statusBadgeIcon     = UiHelper.StatusBadgeIcon(status);
             try { ddlStatus.SelectedValue = status; } catch { }
+
+            bool cancelled = status == "Cancelled";
+            pnlUpdateStatus.Visible = !cancelled;
+            pnlCancel.Visible       = !cancelled && status != "Delivered" && SecurityHelper.IsInRole("Admin");
+            pnlCancelInfo.Visible   = cancelled;
+            if (cancelled)
+            {
+                lblCancelledAt.Text = row["CancelledAt"] == DBNull.Value ? "&mdash;"
+                    : Convert.ToDateTime(row["CancelledAt"]).ToString("dd MMM yyyy, hh:mm tt");
+                lblCancelledBy.Text = NullDash(row["CancelledByName"]);
+                lblCancelReason.Text = Server.HtmlEncode(Convert.ToString(row["CancelReason"]));
+            }
 
             // Items
             gvItems.DataSource = ds.Tables.Count > 1 ? (object)ds.Tables[1] : null;
