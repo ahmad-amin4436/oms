@@ -17,8 +17,10 @@ namespace OMS.Orders
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            SecurityHelper.RequireLogin();
+            SecurityHelper.RequireUrlAccess();
             lnkPrint.HRef = "~/Reports/PrintInvoice.aspx?id=" + OrderID;
+            lnkPrint.Visible     = SecurityHelper.CanOpen("~/Reports/PrintInvoice.aspx");
+            lnkAllOrders.Visible = SecurityHelper.CanOpen("~/Orders/OrderList.aspx");
 
             if (!IsPostBack)
             {

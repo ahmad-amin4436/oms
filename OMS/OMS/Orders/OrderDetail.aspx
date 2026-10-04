@@ -14,7 +14,7 @@
     <div class="d-flex gap-2">
       <a runat="server" id="lnkPrint" href="#" target="_blank"
          class="btn btn-sm btn-falcon-default">Print Invoice</a>
-      <a runat="server" href="~/Orders/OrderList.aspx"
+      <a runat="server" id="lnkAllOrders" href="~/Orders/OrderList.aspx"
          class="btn btn-sm btn-falcon-default">&#8592; All Orders</a>
     </div>
   </div>

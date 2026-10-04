@@ -49,5 +49,7 @@ namespace OMS.Orders
         protected global::System.Web.UI.WebControls.Label          lblStatusMsg;
         protected global::System.Web.UI.WebControls.DropDownList   ddlStatus;
         protected global::System.Web.UI.WebControls.Button         btnUpdateStatus;
+    
+        protected global::System.Web.UI.HtmlControls.HtmlAnchor lnkAllOrders;
     }
 }

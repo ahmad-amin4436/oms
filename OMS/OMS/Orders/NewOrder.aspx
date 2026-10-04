@@ -7,10 +7,13 @@
       <h4 class="mb-0">New Order</h4>
       <p class="text-600 fs--1 mb-0">Select menu items, review the cart, then place the order.</p>
     </div>
-    <a href="OrderList.aspx" class="btn btn-sm btn-falcon-default">
+    <a href="OrderList.aspx" class="btn btn-sm btn-falcon-default" runat="server" id="lnkAllOrders">
       <span class="fas fa-list me-1"></span>All Orders
     </a>
   </div>
+
+  <asp:Label ID="lblPlaced" runat="server" CssClass="alert alert-success d-block mb-3"
+    Visible="false" EnableViewState="false" />
 
   <asp:Label ID="lblError" runat="server" CssClass="alert alert-danger d-flex align-items-center mb-3"
     Visible="false" EnableViewState="false" />

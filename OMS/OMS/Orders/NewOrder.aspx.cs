@@ -59,8 +59,18 @@ namespace OMS.Orders
             // controls and swallow the click — that is why the category tabs, search
             // and Add buttons appeared "not working". Each event handler re-binds the
             // parts it changes after updating state.
+            // Hiding is a convenience only; OrderList enforces the right itself.
+            lnkAllOrders.Visible = SecurityHelper.CanOpen("~/Orders/OrderList.aspx");
+
             if (!IsPostBack)
+            {
                 BindAll();
+                if (Request.QueryString["placed"] != null)
+                {
+                    lblPlaced.Text    = "Order placed successfully.";
+                    lblPlaced.Visible = true;
+                }
+            }
         }
 
         // ── Bind helpers ─────────────────────────────────────────────
@@ -485,7 +495,10 @@ namespace OMS.Orders
                         DBHelper.Parameter("@LineTotal", item.LineTotal));
 
                 Cart = new List<CartItem>();
-                Response.Redirect("~/Orders/OrderDetail.aspx?id=" + orderId, false);
+                // Land on the order only if this role may open Order Detail.
+                Response.Redirect(SecurityHelper.CanOpen("~/Orders/OrderDetail.aspx")
+                    ? "~/Orders/OrderDetail.aspx?id=" + orderId
+                    : "~/Orders/NewOrder.aspx?placed=1", false);
                 Context.ApplicationInstance.CompleteRequest();
             }
             catch (Exception ex)

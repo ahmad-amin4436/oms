@@ -8,7 +8,8 @@ namespace OMS.Orders
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            SecurityHelper.RequireLogin();
+            SecurityHelper.RequireUrlAccess();
+            lnkNewOrder.Visible = SecurityHelper.CanOpen("~/Orders/NewOrder.aspx");
             if (!IsPostBack)
             {
                 BindFilters();

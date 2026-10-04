@@ -17,5 +17,7 @@ namespace OMS.Orders
         protected global::System.Web.UI.WebControls.Button btnPrev;
         protected global::System.Web.UI.WebControls.Button btnNext;
         protected global::System.Web.UI.WebControls.Label lblPage;
+    
+        protected global::System.Web.UI.HtmlControls.HtmlAnchor lnkNewOrder;
     }
 }

@@ -43,7 +43,7 @@ namespace OMS.Common.Helpers
             if (!IsAuthenticated || UserID == 0)
             {
                 FormsAuthentication.RedirectToLoginPage();
-                HttpContext.Current.ApplicationInstance.CompleteRequest();
+                HttpContext.Current.Response.End();   // stop the page: no handler may run unauthenticated
             }
         }
 
@@ -52,8 +52,7 @@ namespace OMS.Common.Helpers
             RequireLogin();
             if (!IsInRole(roles))
             {
-                HttpContext.Current.Response.Redirect("~/AccessDenied.aspx", false);
-                HttpContext.Current.ApplicationInstance.CompleteRequest();
+                HttpContext.Current.Response.Redirect("~/AccessDenied.aspx", true);   // ends the request
             }
         }
 
@@ -102,10 +101,20 @@ namespace OMS.Common.Helpers
                 url = HttpContext.Current.Request.AppRelativeCurrentExecutionFilePath; // e.g. ~/Reports/PrintInvoice.aspx
 
             if (!CanAccessUrl(url))
-            {
-                HttpContext.Current.Response.Redirect("~/AccessDenied.aspx", false);
-                HttpContext.Current.ApplicationInstance.CompleteRequest();
-            }
+                HttpContext.Current.Response.Redirect("~/AccessDenied.aspx", true);   // ends the request
+        }
+
+        /// <summary>
+        /// For showing/hiding links and buttons: same rule as <see cref="RequireUrlAccess"/>,
+        /// cached for the request. Hiding is only a convenience; the target page enforces it.
+        /// </summary>
+        public static bool CanOpen(string url)
+        {
+            if (!IsAuthenticated) return false;
+            var cache = HttpContext.Current.Items;
+            string key = "CanOpen:" + url;
+            if (cache[key] == null) cache[key] = CanAccessUrl(url);
+            return (bool)cache[key];
         }
 
         // Is this URL registered anywhere in the nav (group link or item)?

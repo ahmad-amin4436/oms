@@ -9,7 +9,7 @@
       <h4 class="mb-0">All Orders</h4>
       <p class="text-600 fs--1 mb-0">Filter, review, and update restaurant orders.</p>
     </div>
-    <a runat="server" href="~/Orders/NewOrder.aspx" class="btn btn-primary btn-sm">
+    <a runat="server" id="lnkNewOrder" href="~/Orders/NewOrder.aspx" class="btn btn-primary btn-sm">
       + New Order
     </a>
   </div>
@@ -127,6 +127,7 @@
                   ItemStyle-CssClass="text-end pe-3 py-2 align-middle white-space-nowrap">
                   <ItemTemplate>
                     <asp:HyperLink runat="server"
+                      Visible='<%# OMS.Common.Helpers.SecurityHelper.CanOpen("~/Orders/OrderDetail.aspx") %>'
                       NavigateUrl='<%# "~/Orders/OrderDetail.aspx?id=" + Eval("OrderID") %>'
                       CssClass="btn btn-sm btn-falcon-default px-2 py-0 fs--2">View</asp:HyperLink>
                   </ItemTemplate>
