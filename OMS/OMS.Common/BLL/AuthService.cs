@@ -50,14 +50,16 @@ namespace OMS.Common.BLL
 
             var roleName = Convert.ToString(row["RoleName"]);
             var fullName = Convert.ToString(row["FullName"]);
-            var ticket = new FormsAuthenticationTicket(1, email, DateTime.Now, DateTime.Now.AddHours(rememberMe ? 24 * 14 : 8), rememberMe, userId + "|" + roleName, FormsAuthentication.FormsCookiePath);
+            // Users stay signed in until they click Logout: a persistent cookie and a 1-year ticket
+            // (renewed while in use). "Remember me" no longer changes this.
+            var ticket = new FormsAuthenticationTicket(1, email, DateTime.Now, DateTime.Now.AddYears(1), true, userId + "|" + roleName, FormsAuthentication.FormsCookiePath);
             var cookie = new HttpCookie(FormsAuthentication.FormsCookieName, FormsAuthentication.Encrypt(ticket))
             {
                 HttpOnly = true,
                 Secure = HttpContext.Current.Request.IsSecureConnection
             };
 
-            if (rememberMe) cookie.Expires = ticket.Expiration;
+            cookie.Expires = ticket.Expiration;
             HttpContext.Current.Response.Cookies.Add(cookie);
 
             HttpContext.Current.Session["UserID"] = userId;

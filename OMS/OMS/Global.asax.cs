@@ -47,9 +47,13 @@ namespace OMS
             var authCookie = Request.Cookies[FormsAuthentication.FormsCookieName];
             if (authCookie == null) return;
 
-            var ticket = FormsAuthentication.Decrypt(authCookie.Value);
+            FormsAuthenticationTicket ticket;
+            try { ticket = FormsAuthentication.Decrypt(authCookie.Value); }
+            catch { return; }   // an unreadable cookie must not crash the request
             if (ticket == null) return;
 
+            // The login ticket is the source of truth, so an expired/recycled session is simply
+            // rebuilt from it on the next request (the user is not logged out).
             var parts = (ticket.UserData ?? "").Split('|');
             if (parts.Length > 0) Session["UserID"] = parts[0];
             if (parts.Length > 1) Session["UserRole"] = parts[1];
@@ -63,8 +67,10 @@ namespace OMS
 
             page.PreInit += delegate
             {
+                // Tie ViewState to the signed-in user, not the session: when a session expires or the
+                // app restarts, a page left open for a long time still posts back normally.
                 if (Context.User != null && Context.User.Identity.IsAuthenticated)
-                    page.ViewStateUserKey = Session.SessionID;
+                    page.ViewStateUserKey = Context.User.Identity.Name;
             };
         }
 
