@@ -71,8 +71,13 @@ namespace OMS.Orders
             if (!Page.IsValid) return;
 
             int itemId, qty;
-            if (!int.TryParse(ddlAddItem.SelectedValue, out itemId) || !int.TryParse(txtAddQty.Text, out qty))
+            if (!int.TryParse(txtAddQty.Text, out qty)) return;
+            if (!int.TryParse(hfAddItem.Value, out itemId))   // the page script also checks this
+            {
+                lblError.Text    = "Pick a dish from the list.";
+                lblError.Visible = true;
                 return;
+            }
 
             try
             {
@@ -98,17 +103,19 @@ namespace OMS.Orders
             pnlAddDish.Visible = open;
             if (!open) return;
 
-            if (ddlAddItem.Items.Count == 0)
+            if (string.IsNullOrEmpty(litDishList.Text))
             {
-                ddlAddItem.Items.Add(new System.Web.UI.WebControls.ListItem("Select a dish...", ""));
                 var items = DBHelper.ExecuteDataTable("sp_GetMenuItems",
                     DBHelper.Parameter("@CategoryID", DBNull.Value),
                     DBHelper.Parameter("@IsAvailable", true));
+                var sb = new System.Text.StringBuilder();
                 foreach (DataRow r in items.Rows)
-                    ddlAddItem.Items.Add(new System.Web.UI.WebControls.ListItem(
-                        Convert.ToString(r["CategoryName"]) + " - " + Convert.ToString(r["Name"]) +
-                        "  (Rs. " + Convert.ToDecimal(r["BasePrice"]).ToString("N0") + ")",
-                        Convert.ToString(r["ItemID"])));
+                    sb.Append("<option data-id=\"").Append(r["ItemID"]).Append("\" value=\"")
+                      .Append(Server.HtmlEncode(Convert.ToString(r["Name"]) + " (Rs. " +
+                              Convert.ToDecimal(r["BasePrice"]).ToString("N0") + ")  - " +
+                              Convert.ToString(r["CategoryName"])))
+                      .Append("\"></option>");
+                litDishList.Text = sb.ToString();
             }
 
             if (Request.QueryString["added"] != null && !IsPostBack)

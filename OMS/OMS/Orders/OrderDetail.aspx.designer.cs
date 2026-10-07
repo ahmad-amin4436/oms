@@ -12,8 +12,8 @@ namespace OMS.Orders
         // Add dish
         protected global::System.Web.UI.WebControls.Panel          pnlAddDish;
         protected global::System.Web.UI.WebControls.Label          lblAddMsg;
-        protected global::System.Web.UI.WebControls.DropDownList   ddlAddItem;
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvAddItem;
+        protected global::System.Web.UI.WebControls.Literal        litDishList;
+        protected global::System.Web.UI.WebControls.HiddenField    hfAddItem;
         protected global::System.Web.UI.WebControls.TextBox        txtAddQty;
         protected global::System.Web.UI.WebControls.RangeValidator rngAddQty;
         protected global::System.Web.UI.WebControls.Button         btnAddDish;

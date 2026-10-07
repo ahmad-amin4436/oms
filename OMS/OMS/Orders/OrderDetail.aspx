@@ -125,11 +125,12 @@
             <div class="row g-2 align-items-end">
               <div class="col-sm-7">
                 <label class="form-label fs--1 mb-1">Dish</label>
-                <asp:DropDownList ID="ddlAddItem" runat="server" CssClass="form-select form-select-sm"
-                  ValidationGroup="AddDish" />
-                <asp:RequiredFieldValidator ID="rfvAddItem" runat="server" ControlToValidate="ddlAddItem"
-                  InitialValue="" ValidationGroup="AddDish" Display="Dynamic"
-                  ErrorMessage="Choose a dish." CssClass="text-danger fs--2" />
+                <%-- Type to search; pick a suggestion. The chosen ItemID lands in the hidden field. --%>
+                <input type="text" id="txtDishSearch" list="dishList" autocomplete="off"
+                  class="form-control form-control-sm" placeholder="Type to search dishes..." />
+                <datalist id="dishList"><asp:Literal ID="litDishList" runat="server" /></datalist>
+                <asp:HiddenField ID="hfAddItem" runat="server" />
+                <span id="dishPickError" class="text-danger fs--2 d-none">Pick a dish from the list.</span>
               </div>
               <div class="col-5 col-sm-2">
                 <label class="form-label fs--1 mb-1">Qty</label>
@@ -141,7 +142,7 @@
               </div>
               <div class="col-7 col-sm-3">
                 <asp:Button ID="btnAddDish" runat="server" Text="+ Add" CssClass="btn btn-primary btn-sm w-100"
-                  ValidationGroup="AddDish" OnClick="btnAddDish_Click" />
+                  ValidationGroup="AddDish" OnClick="btnAddDish_Click" OnClientClick="return dishPicked();" />
               </div>
             </div>
             <p class="fs--2 text-600 mb-0 mt-2">Totals are recalculated with this order's discount and tax rate.</p>
@@ -268,6 +269,25 @@
   </asp:Panel>
 
   <script>
+    // Add Dish search: map the typed/selected suggestion back to its ItemID.
+    (function () {
+      var box = document.getElementById('txtDishSearch');
+      if (!box) return;
+      var hf = document.getElementById('<%= hfAddItem.ClientID %>');
+      box.addEventListener('input', function () {
+        hf.value = '';
+        var opts = document.getElementById('dishList').options;
+        for (var i = 0; i < opts.length; i++)
+          if (opts[i].value === box.value) { hf.value = opts[i].getAttribute('data-id'); break; }
+        document.getElementById('dishPickError').classList.add('d-none');
+      });
+    })();
+    function dishPicked() {
+      var hf = document.getElementById('<%= hfAddItem.ClientID %>');
+      var ok = hf && hf.value !== '';
+      document.getElementById('dishPickError').classList.toggle('d-none', ok);
+      return ok;
+    }
     // One kitchen ticket per dish; the browser print dialog lets the user pick the printer.
     function printDish(orderItemId) {
       var url = '<%= ResolveUrl("~/Reports/PrintDish.aspx") %>?id=<%= Server.UrlEncode(Request.QueryString["id"] ?? "") %>&item=' + orderItemId;
