@@ -638,6 +638,8 @@
     <Content Include="Orders\NewOrder.aspx" />
     <Content Include="Orders\OrderDetail.aspx" />
     <Content Include="Orders\OrderList.aspx" />
+    <Content Include="Orders\DayClose.aspx" />
+    <Content Include="Database\OrderWorkflow.sql" />
     <Content Include="pages\authentication\card\confirm-mail.html" />
     <Content Include="pages\authentication\card\forgot-password.html" />
     <Content Include="pages\authentication\card\lock-screen.html" />
@@ -937,6 +939,13 @@
     </Compile>
     <Compile Include="Orders\OrderDetail.aspx.designer.cs">
       <DependentUpon>OrderDetail.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Orders\DayClose.aspx.cs">
+      <DependentUpon>DayClose.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Orders\DayClose.aspx.designer.cs">
+      <DependentUpon>DayClose.aspx</DependentUpon>
     </Compile>
     <Compile Include="Orders\OrderList.aspx.cs">
       <DependentUpon>OrderList.aspx</DependentUpon>

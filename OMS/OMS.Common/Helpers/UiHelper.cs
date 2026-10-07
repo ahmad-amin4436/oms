@@ -10,8 +10,8 @@ namespace OMS.Common.Helpers
         {
             switch ((status ?? "").ToLowerInvariant())
             {
-                case "pending": return "badge-subtle-warning";
-                case "confirmed": return "badge-subtle-info";
+                case "pending": return "badge-subtle-warning";       // unpaid
+                case "confirmed": return "badge-subtle-success";     // fully paid
                 case "preparing": return "badge-subtle-primary";
                 case "ready": return "badge-subtle-success";
                 case "delivered": return "badge-subtle-secondary";

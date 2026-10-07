@@ -10,6 +10,8 @@ namespace OMS.Orders
         {
             SecurityHelper.RequireUrlAccess();
             lnkNewOrder.Visible = SecurityHelper.CanOpen("~/Orders/NewOrder.aspx");
+            lnkDayClose.Visible = SecurityHelper.IsInRole("Cashier", "Admin")
+                                  && SecurityHelper.CanOpen("~/Orders/DayClose.aspx");
             if (!IsPostBack)
             {
                 BindFilters();
@@ -34,6 +36,7 @@ namespace OMS.Orders
         protected void btnClear_Click(object sender, EventArgs e)
         {
             txtOrderRef.Text = txtCustomer.Text = txtTable.Text = txtStartDate.Text = txtEndDate.Text = "";
+            chkCurrentDay.Checked = false;
             ddlStatus.SelectedIndex = 0;
             ddlOrderType.SelectedIndex = 0;
             FiltersChanged(sender, e);
@@ -51,7 +54,7 @@ namespace OMS.Orders
         private void BindFilters()
         {
             ddlStatus.Items.Add(new System.Web.UI.WebControls.ListItem("All Statuses", ""));
-            foreach (var status in new[] { "Pending", "Confirmed", "Preparing", "Ready", "Delivered", "Cancelled" }) ddlStatus.Items.Add(status);
+            foreach (var status in new[] { "Pending", "Confirmed", "Cancelled" }) ddlStatus.Items.Add(status);
             ddlOrderType.Items.Add(new System.Web.UI.WebControls.ListItem("All Types", ""));
             foreach (var type in new[] { "DineIn", "Takeaway", "Delivery" }) ddlOrderType.Items.Add(type);
         }
@@ -70,7 +73,8 @@ namespace OMS.Orders
                 DBHelper.Parameter("@CustomerName", OrNull(txtCustomer.Text)),
                 DBHelper.Parameter("@TableNumber", OrNull(txtTable.Text)),
                 DBHelper.Parameter("@PageSize", PageSize),
-                DBHelper.Parameter("@PageNumber", PageNo));
+                DBHelper.Parameter("@PageNumber", PageNo),
+                DBHelper.Parameter("@CurrentDayOnly", chkCurrentDay.Checked));
 
             bool hasNext = dt.Rows.Count > PageSize;
             if (hasNext) dt.Rows.RemoveAt(PageSize);

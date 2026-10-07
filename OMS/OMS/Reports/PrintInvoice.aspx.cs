@@ -36,6 +36,11 @@ namespace OMS.Reports
             lblPhone.Text     = string.IsNullOrEmpty(Convert.ToString(row["CustomerPhone"])) ? "—" : Convert.ToString(row["CustomerPhone"]);
             lblOrderType.Text = Convert.ToString(row["OrderType"]);
 
+            // Receipt shows the payment state only (the order taker is deliberately NOT printed).
+            string st = Convert.ToString(row["Status"]);
+            lblPayment.Text = Convert.ToString(row["PaymentMethod"]) + " - " +
+                              (st == "Confirmed" ? "PAID" : st == "Cancelled" ? "CANCELLED" : "UNPAID");
+
             if (Convert.ToString(row["OrderType"]) == "DineIn" && !string.IsNullOrEmpty(Convert.ToString(row["TableNumber"])))
             {
                 pnlTable.Visible = true;

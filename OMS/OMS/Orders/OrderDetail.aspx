@@ -22,6 +22,9 @@
   <asp:Label ID="lblError" runat="server" CssClass="alert alert-danger d-block mb-3"
     Visible="false" EnableViewState="false" />
 
+  <asp:Label ID="lblStatusMsg" runat="server" EnableViewState="false"
+    Visible="false" CssClass="alert alert-success d-block mb-3" />
+
   <asp:Panel ID="pnlNotFound" runat="server" Visible="false"
     CssClass="alert alert-warning">Order not found.</asp:Panel>
 
@@ -209,9 +212,17 @@
               <asp:Label ID="lblNotes" runat="server" CssClass="d-block text-700" />
             </asp:Panel>
 
-            <div class="d-flex justify-content-between border-top pt-2 mt-1">
+            <div class="d-flex justify-content-between border-top pt-2 mt-1 mb-2">
               <span class="text-600">Placed</span>
               <asp:Label ID="lblCreatedAt" runat="server" />
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-600">Order Taker</span>
+              <asp:Label ID="lblTaker" runat="server" CssClass="text-end fw-semi-bold" />
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-600">Business Day</span>
+              <asp:Label ID="lblBusinessDay" runat="server" />
             </div>
 
             <%-- Cancellation audit — shown only for cancelled orders --%>
@@ -231,24 +242,41 @@
           </div>
         </div>
 
-        <%-- Update Status (hidden once the order is cancelled) --%>
-        <asp:Panel ID="pnlUpdateStatus" runat="server" CssClass="card mb-3">
+        <%-- Payment: Pending (unpaid) -> Confirmed (paid). Only a Cashier/Admin can confirm. --%>
+        <asp:Panel ID="pnlPayment" runat="server" CssClass="card mb-3">
           <div class="card-header py-2">
-            <h5 class="mb-0 fs-0">Update Status</h5>
+            <h5 class="mb-0 fs-0">Payment</h5>
           </div>
-          <div class="card-body py-3">
-            <asp:Label ID="lblStatusMsg" runat="server" EnableViewState="false"
-              Visible="false" CssClass="alert alert-success d-block mb-2 py-2 fs--1" />
-            <asp:DropDownList ID="ddlStatus" runat="server"
-              CssClass="form-select form-select-sm mb-2" />
-            <asp:Button ID="btnUpdateStatus" runat="server"
-              CssClass="btn btn-primary btn-sm w-100"
-              Text="Update Status"
-              OnClick="btnUpdateStatus_Click" />
+          <div class="card-body py-3 fs--1">
+
+            <%-- Cashier/Admin on an unpaid order --%>
+            <asp:Panel ID="pnlConfirm" runat="server" Visible="false">
+              <label class="form-label fs--1 mb-1">Paid by</label>
+              <asp:DropDownList ID="ddlPayMethod" runat="server" CssClass="form-select form-select-sm mb-2">
+                <asp:ListItem Value="Cash">Cash</asp:ListItem>
+                <asp:ListItem Value="Card">Card</asp:ListItem>
+                <asp:ListItem Value="Wallet">Wallet</asp:ListItem>
+                <asp:ListItem Value="BankTransfer">Bank Transfer</asp:ListItem>
+              </asp:DropDownList>
+              <asp:Button ID="btnConfirmPayment" runat="server" CssClass="btn btn-success btn-sm w-100"
+                Text="Confirm Payment (Mark Paid)" OnClick="btnConfirmPayment_Click" />
+              <p class="fs--2 text-600 mb-0 mt-2">Confirms the order as fully paid. Changing the method re-prices tax at that method's rate.</p>
+            </asp:Panel>
+
+            <%-- Anyone else on an unpaid order --%>
+            <asp:Panel ID="pnlAwaiting" runat="server" Visible="false" CssClass="text-700">
+              Awaiting payment. Only a Cashier can confirm payment.
+            </asp:Panel>
+
+            <%-- Paid --%>
+            <asp:Panel ID="pnlPaidInfo" runat="server" Visible="false" CssClass="text-success">
+              <span class="fas fa-check-circle me-1"></span><asp:Label ID="lblPaidInfo" runat="server" />
+            </asp:Panel>
+
           </div>
         </asp:Panel>
 
-        <%-- Cancel Order (Admin only; not shown for Cancelled / Delivered orders) --%>
+        <%-- Cancel Order (Admin only; not for cancelled orders, nor paid orders of a closed day) --%>
         <asp:Panel ID="pnlCancel" runat="server" Visible="false" CssClass="card border border-danger">
           <div class="card-header py-2">
             <h5 class="mb-0 fs-0 text-danger">Cancel Order</h5>

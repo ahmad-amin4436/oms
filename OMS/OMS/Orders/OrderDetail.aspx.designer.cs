@@ -33,7 +33,6 @@ namespace OMS.Orders
         protected global::System.Web.UI.WebControls.Label          lblCancelledAt;
         protected global::System.Web.UI.WebControls.Label          lblCancelledBy;
         protected global::System.Web.UI.WebControls.Label          lblCancelReason;
-        protected global::System.Web.UI.WebControls.Panel          pnlUpdateStatus;
         protected global::System.Web.UI.WebControls.Panel          pnlCancel;
         protected global::System.Web.UI.WebControls.TextBox        txtCancelReason;
         protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvCancelReason;
@@ -54,11 +53,19 @@ namespace OMS.Orders
         protected global::System.Web.UI.WebControls.Label          lblNotes;
         protected global::System.Web.UI.WebControls.Label          lblCreatedAt;
 
-        // Status update
+        protected global::System.Web.UI.WebControls.Label          lblTaker;
+        protected global::System.Web.UI.WebControls.Label          lblBusinessDay;
+
+        // Payment (Pending -> Confirmed)
         protected global::System.Web.UI.WebControls.Label          lblStatusMsg;
-        protected global::System.Web.UI.WebControls.DropDownList   ddlStatus;
-        protected global::System.Web.UI.WebControls.Button         btnUpdateStatus;
-    
+        protected global::System.Web.UI.WebControls.Panel          pnlPayment;
+        protected global::System.Web.UI.WebControls.Panel          pnlConfirm;
+        protected global::System.Web.UI.WebControls.DropDownList   ddlPayMethod;
+        protected global::System.Web.UI.WebControls.Button         btnConfirmPayment;
+        protected global::System.Web.UI.WebControls.Panel          pnlAwaiting;
+        protected global::System.Web.UI.WebControls.Panel          pnlPaidInfo;
+        protected global::System.Web.UI.WebControls.Label          lblPaidInfo;
+
         protected global::System.Web.UI.HtmlControls.HtmlAnchor lnkAllOrders;
     }
 }

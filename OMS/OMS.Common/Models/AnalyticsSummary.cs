@@ -8,8 +8,8 @@ namespace OMS.Common.Models
     {
         public decimal TotalRevenue    { get; set; }
         public int     TotalOrders     { get; set; }
-        public int     CompletedOrders { get; set; }   // Status = Delivered
-        public int     ActiveOrders    { get; set; }   // in progress (not Delivered/Cancelled)
+        public int     CompletedOrders { get; set; }   // Status = Confirmed (paid)
+        public int     ActiveOrders    { get; set; }   // Status = Pending (unpaid)
         public decimal AvgOrderValue   { get; set; }
 
         // Cancelled orders are NOT part of the figures above; reported on their own.

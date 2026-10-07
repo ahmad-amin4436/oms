@@ -454,6 +454,14 @@ namespace OMS.Orders
                 return;
             }
 
+            // Every order records who took it; never create one without a signed-in user.
+            int takerId = SecurityHelper.UserID;
+            if (takerId == 0)
+            {
+                ShowError("Your session has expired. Please sign in again before placing the order.");
+                return;
+            }
+
             decimal discPct = 0m;
             decimal.TryParse(txtDiscountPct.Text, out discPct);
             discPct = Math.Max(0m, Math.Min(100m, discPct));
@@ -487,7 +495,7 @@ namespace OMS.Orders
                     DBHelper.Parameter("@TotalAmount",    total),
                     DBHelper.Parameter("@CouponID",       DBNull.Value),
                     DBHelper.Parameter("@Notes",          string.IsNullOrEmpty(txtNotes.Text) ? (object)DBNull.Value : txtNotes.Text),
-                    DBHelper.Parameter("@CreatedBy",      SecurityHelper.UserID == 0 ? (object)DBNull.Value : SecurityHelper.UserID),
+                    DBHelper.Parameter("@CreatedBy",      takerId),
                     outId);
 
                 int orderId = Convert.ToInt32(outId.Value);

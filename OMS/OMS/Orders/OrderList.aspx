@@ -9,9 +9,14 @@
       <h4 class="mb-0">All Orders</h4>
       <p class="text-600 fs--1 mb-0">Filter, review, and update restaurant orders.</p>
     </div>
-    <a runat="server" id="lnkNewOrder" href="~/Orders/NewOrder.aspx" class="btn btn-primary btn-sm">
-      + New Order
-    </a>
+    <div class="d-flex gap-2">
+      <a runat="server" id="lnkDayClose" href="~/Orders/DayClose.aspx" class="btn btn-falcon-default btn-sm">
+        Day Close
+      </a>
+      <a runat="server" id="lnkNewOrder" href="~/Orders/NewOrder.aspx" class="btn btn-primary btn-sm">
+        + New Order
+      </a>
+    </div>
   </div>
 
   <asp:UpdatePanel ID="updOrders" runat="server">
@@ -57,6 +62,12 @@
             <asp:TextBox ID="txtTable" runat="server" MaxLength="20" CssClass="form-control form-control-sm"
               placeholder="Table no." />
           </div>
+          <div class="col-sm-6 col-md-3">
+            <div class="form-check mb-1">
+              <asp:CheckBox ID="chkCurrentDay" runat="server" CssClass="form-check-input-wrap"
+                Text="&nbsp;Open business day only" AutoPostBack="true" OnCheckedChanged="FiltersChanged" />
+            </div>
+          </div>
           <div class="col-md-3 d-flex gap-2">
             <asp:Button ID="btnSearch" runat="server" Text="Search" CssClass="btn btn-primary btn-sm" OnClick="FiltersChanged" />
             <asp:Button ID="btnClear" runat="server" Text="Clear" CssClass="btn btn-falcon-default btn-sm" OnClick="btnClear_Click" />
@@ -91,6 +102,9 @@
                     <strong><%# OMS.Common.Helpers.UiHelper.HtmlEncode(Eval("CustomerName")) %></strong>
                   </ItemTemplate>
                 </asp:TemplateField>
+                <asp:BoundField DataField="CreatedByName" HeaderText="Order Taker"
+                  HeaderStyle-CssClass="align-middle white-space-nowrap"
+                  ItemStyle-CssClass="py-2 align-middle white-space-nowrap" NullDisplayText="&mdash;" />
                 <asp:BoundField DataField="TableNumber" HeaderText="T.B."
                   HeaderStyle-CssClass="align-middle" ItemStyle-CssClass="py-2 align-middle" NullDisplayText="&mdash;" />
                 <asp:TemplateField HeaderText="Date"

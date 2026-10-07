@@ -24,10 +24,7 @@ namespace OMS.Orders
 
             if (!IsPostBack)
             {
-                // "Cancelled" is deliberately absent: cancelling is the admin-only
-                // Cancel Order action (sp_CancelOrder), not a plain status change.
-                foreach (var s in new[] { "Pending", "Confirmed", "Preparing", "Ready", "Delivered" })
-                    ddlStatus.Items.Add(s);
+                // Status follows payment (Pending/Confirmed); cancelling is the admin-only Cancel Order.
                 BindOrder();
             }
         }
@@ -137,22 +134,42 @@ namespace OMS.Orders
             }
         }
 
-        protected void btnUpdateStatus_Click(object sender, EventArgs e)
+        // Pending -> Confirmed (paid). Server-side role check: hiding the panel is only a convenience,
+        // and Order Takers/other roles must never be able to mark an order paid.
+        protected void btnConfirmPayment_Click(object sender, EventArgs e)
         {
+            if (!SecurityHelper.IsInRole("Cashier", "Admin"))
+            {
+                Response.Redirect("~/AccessDenied.aspx", false);
+                Context.ApplicationInstance.CompleteRequest();
+                return;
+            }
+
+            int cashierId = SecurityHelper.UserID;
+            if (cashierId == 0) { SecurityHelper.RequireLogin(); return; }
+
+            string method = ddlPayMethod.SelectedValue;
             try
             {
-                DBHelper.ExecuteNonQuery("sp_UpdateOrderStatus",
-                    DBHelper.Parameter("@OrderID",   OrderID),
-                    DBHelper.Parameter("@Status",    ddlStatus.SelectedValue),
-                    DBHelper.Parameter("@UpdatedBy", SecurityHelper.UserID));
+                // If the customer pays differently than the order was taken, re-price tax at that
+                // method's rate (the order's stored rate is kept when the method is unchanged).
+                var cur = DBHelper.ExecuteDataSet("sp_GetOrderByID", DBHelper.Parameter("@OrderID", OrderID));
+                string orderMethod = cur.Tables[0].Rows.Count > 0 ? Convert.ToString(cur.Tables[0].Rows[0]["PaymentMethod"]) : "";
+                object taxPct = method != orderMethod ? (object)SettingsHelper.TaxPercentFor(method) : DBNull.Value;
 
-                lblStatusMsg.Text    = "Status updated to \"" + ddlStatus.SelectedValue + "\".";
+                DBHelper.ExecuteNonQuery("sp_ConfirmOrder",
+                    DBHelper.Parameter("@OrderID",       OrderID),
+                    DBHelper.Parameter("@ConfirmedBy",   cashierId),
+                    DBHelper.Parameter("@PaymentMethod", method),
+                    DBHelper.Parameter("@TaxPercent",    taxPct));
+
+                lblStatusMsg.Text    = "Payment confirmed. The order is now Confirmed (paid).";
                 lblStatusMsg.Visible = true;
                 BindOrder();
             }
             catch (Exception ex)
             {
-                lblError.Text    = "Failed to update status: " + ex.Message;
+                lblError.Text    = "Could not confirm payment: " + ex.Message;
                 lblError.Visible = true;
             }
         }
@@ -242,13 +259,44 @@ namespace OMS.Orders
             lblStatusBadge.Text  = status;
             _statusBadgeClass    = UiHelper.StatusBadgeClass(status);
             _statusBadgeIcon     = UiHelper.StatusBadgeIcon(status);
-            try { ddlStatus.SelectedValue = status; } catch { }
+
+            // Order taker and business day (the order's day, not today's).
+            lblTaker.Text = NullDash(row["CreatedByName"]);
+            lblBusinessDay.Text = row["BusinessDate"] == DBNull.Value ? "&mdash;"
+                : Convert.ToDateTime(row["BusinessDate"]).ToString("dd MMM yyyy");
 
             bool cancelled = status == "Cancelled";
-            pnlUpdateStatus.Visible = !cancelled;
-            pnlCancel.Visible       = !cancelled && status != "Delivered" && SecurityHelper.IsInRole("Admin");
+            bool pending   = status == "Pending";
+            bool confirmed = status == "Confirmed";
+            bool dayClosed = Convert.ToInt32(row["DayClosed"]) == 1;
+            bool canConfirm = SecurityHelper.IsInRole("Cashier", "Admin");
+
+            // Payment panel: Cashier/Admin can confirm an unpaid order; others see its state.
+            pnlPayment.Visible  = !cancelled;
+            pnlConfirm.Visible  = pending && !dayClosed && canConfirm;
+            pnlAwaiting.Visible = pending && !canConfirm;
+            pnlPaidInfo.Visible = confirmed;
+            if (pending && dayClosed && canConfirm)
+            {
+                pnlAwaiting.Visible = true;   // an unpaid order from a closed day can no longer be confirmed
+            }
+            if (pnlConfirm.Visible)
+            {
+                try { ddlPayMethod.SelectedValue = Convert.ToString(row["PaymentMethod"]); } catch { }
+                btnConfirmPayment.OnClientClick = "return confirm('Confirm that " + Fmt(total) + " was received?');";
+            }
+            if (confirmed)
+            {
+                string when = row["PaidAt"] == DBNull.Value ? "" : " on " + Convert.ToDateTime(row["PaidAt"]).ToString("dd MMM yyyy, hh:mm tt");
+                string who  = string.IsNullOrEmpty(Convert.ToString(row["ConfirmedByName"])) ? "" : " - confirmed by " + Server.HtmlEncode(Convert.ToString(row["ConfirmedByName"]));
+                lblPaidInfo.Text = "Paid" + when + who;
+            }
+
+            // Cancel: Admin only; paid orders of a closed business day are final.
+            pnlCancel.Visible       = !cancelled && SecurityHelper.IsInRole("Admin") && !(confirmed && dayClosed);
             pnlCancelInfo.Visible   = cancelled;
-            BindAddDish(!cancelled && status != "Delivered");
+            // Dishes can only be added while the order is unpaid and its day is open.
+            BindAddDish(pending && !dayClosed);
             if (cancelled)
             {
                 lblCancelledAt.Text = row["CancelledAt"] == DBNull.Value ? "&mdash;"

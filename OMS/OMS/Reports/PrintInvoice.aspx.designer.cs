@@ -7,6 +7,7 @@ namespace OMS.Reports
         protected global::System.Web.UI.WebControls.Label    lblCustomer;
         protected global::System.Web.UI.WebControls.Label    lblPhone;
         protected global::System.Web.UI.WebControls.Label    lblOrderType;
+        protected global::System.Web.UI.WebControls.Label    lblPayment;
         protected global::System.Web.UI.HtmlControls.HtmlTableRow pnlTable;
         protected global::System.Web.UI.WebControls.Panel    pnlCancelled;
         protected global::System.Web.UI.WebControls.Label    lblTaxLabel;

@@ -91,7 +91,7 @@
                         <div class="card-body d-flex flex-column justify-content-end">
                           <div class="row align-items-end">
                             <div class="col">
-                              <p class="font-sans-serif lh-1 mb-1 fs-2"><asp:Literal ID="litCompletionPct" runat="server" Text="0%" /></p><span class="badge badge-subtle-success rounded-pill">Delivered</span>
+                              <p class="font-sans-serif lh-1 mb-1 fs-2"><asp:Literal ID="litCompletionPct" runat="server" Text="0%" /></p><span class="badge badge-subtle-success rounded-pill">Confirmed</span>
                             </div>
                             <div class="col-auto ps-0"><canvas class="my-n5" id="marketShareDoughnut" width="112" height="112"></canvas>
                               <p class="mb-0 text-center fs--2 mt-4 text-500">Target: <span class="text-800">100%</span></p>
@@ -191,7 +191,7 @@
                       </div>
                     </div>
                     <div class="col-6 col-md-4 pb-0 pt-4 ps-3">
-                      <h6 class="pb-1 text-700">Processing </h6>
+                      <h6 class="pb-1 text-700">Pending (unpaid) </h6>
                       <p class="font-sans-serif lh-1 mb-1 fs-2"><asp:Literal ID="litProcessing" runat="server" Text="0" /></p>
                       <div class="d-flex align-items-center">
                         <h6 class="fs--2 mb-0 text-info">In progress</h6>
@@ -596,7 +596,7 @@
         var chart = window.echarts.getInstanceByDom(el);
         if (!chart) return false;
 
-        var labels = ['Dine In', 'Takeaway', 'Delivery', 'Pending', 'Preparing', 'Delivered'];
+        var labels = ['Dine In', 'Takeaway', 'Delivery', 'Pending', 'Confirmed', 'Cancelled'];
         var maxVal = Math.max.apply(null, radar.thisMonth.concat(radar.lastMonth).concat([1]));
         maxVal = Math.ceil(maxVal * 1.25) || 10;
 

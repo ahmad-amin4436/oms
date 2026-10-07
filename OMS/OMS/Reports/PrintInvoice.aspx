@@ -78,6 +78,7 @@
         <tr><td class="bold">Customer</td><td><asp:Label ID="lblCustomer" runat="server" /></td></tr>
         <tr><td class="bold">Phone</td><td><asp:Label ID="lblPhone" runat="server" /></td></tr>
         <tr><td class="bold">Type</td><td><asp:Label ID="lblOrderType" runat="server" /></td></tr>
+        <tr><td class="bold">Payment</td><td><asp:Label ID="lblPayment" runat="server" /></td></tr>
         <tr id="pnlTable" runat="server" visible="false"><td class="bold">Table</td><td><asp:Label ID="lblTable" runat="server" /></td></tr>
       </table>
 

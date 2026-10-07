@@ -50,7 +50,7 @@
             <h4 class="mb-0 text-primary"><asp:Literal ID="litRevenue" runat="server" Text="Rs. 0" /></h4>
             <asp:Literal ID="litRevenueDelta" runat="server" />
           </div>
-          <p class="fs--2 text-600 mb-0 mt-1">Excludes cancelled orders</p>
+          <p class="fs--2 text-600 mb-0 mt-1">Paid (Confirmed) orders, by business day</p>
         </div>
       </div>
     </div>
@@ -78,13 +78,13 @@
     <div class="col-sm-6 col-xl">
       <div class="card h-100">
         <div class="card-body">
-          <h6 class="text-600 fs--2 text-uppercase mb-2">Completed / Active</h6>
+          <h6 class="text-600 fs--2 text-uppercase mb-2">Paid / Pending</h6>
           <h4 class="mb-0">
             <span class="text-success"><asp:Literal ID="litCompleted" runat="server" Text="0" /></span>
             <span class="text-400 fs-0">/</span>
             <span class="text-warning"><asp:Literal ID="litActive" runat="server" Text="0" /></span>
           </h4>
-          <p class="fs--2 text-600 mb-0 mt-1">Delivered vs in-progress orders</p>
+          <p class="fs--2 text-600 mb-0 mt-1">Confirmed (paid) vs Pending (unpaid)</p>
         </div>
       </div>
     </div>

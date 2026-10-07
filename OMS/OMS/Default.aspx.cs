@@ -49,14 +49,11 @@ namespace OMS
 
         // ── "Order Breakdown" card (count + share per order status) ───
 
-        // Statuses in workflow order, each with a progress-bar colour.
+        // Pending = unpaid, Confirmed = fully paid (Cancelled is the admin-only void).
         private static readonly (string Status, string BarClass)[] StatusFlow =
         {
-            ("Pending",   "bg-secondary"),
-            ("Confirmed", "bg-info"),
-            ("Preparing", "bg-warning"),
-            ("Ready",     "bg-primary"),
-            ("Delivered", "bg-success"),
+            ("Pending",   "bg-warning"),
+            ("Confirmed", "bg-success"),
             ("Cancelled", "bg-danger"),
         };
 
@@ -120,8 +117,8 @@ namespace OMS
             DataTable orders = DBHelper.ExecuteDataTable("sp_GetOrders");
             int total = orders.Rows.Count;
 
-            // Order Completion = Delivered / total
-            int delivered = orders.AsEnumerable().Count(r => Convert.ToString(r["Status"]) == "Delivered");
+            // Order Completion = Confirmed (paid) / total
+            int delivered = orders.AsEnumerable().Count(r => Convert.ToString(r["Status"]) == "Confirmed");
             int completionPct = total == 0 ? 0 : (int)Math.Round(delivered * 100m / total);
             litCompletionPct.Text = completionPct + "%";
 
@@ -164,14 +161,14 @@ namespace OMS
 
             int totalOrders   = allOrders.Rows.Count;
             int itemsSold     = TotalItemsSold();
-            decimal grossSale = allOrders.AsEnumerable().Sum(r => Convert.ToDecimal(r["TotalAmount"]));
+            // Sales = paid (Confirmed) orders only; Pending and Cancelled are not sales.
+            decimal grossSale = allOrders.AsEnumerable()
+                .Where(r => Convert.ToString(r["Status"]) == "Confirmed")
+                .Sum(r => Convert.ToDecimal(r["TotalAmount"]));
             int cancelled     = allOrders.AsEnumerable().Count(r => Convert.ToString(r["Status"]) == "Cancelled");
-            int processing    = allOrders.AsEnumerable().Count(r =>
-            {
-                string s = Convert.ToString(r["Status"]);
-                return s != "Delivered" && s != "Cancelled";
-            });
-            decimal avgOrder  = totalOrders == 0 ? 0 : Math.Round(grossSale / totalOrders, 2);
+            int processing    = allOrders.AsEnumerable().Count(r => Convert.ToString(r["Status"]) == "Pending");   // unpaid
+            int confirmedCount = allOrders.AsEnumerable().Count(r => Convert.ToString(r["Status"]) == "Confirmed");
+            decimal avgOrder  = confirmedCount == 0 ? 0 : Math.Round(grossSale / confirmedCount, 2);
 
             // "Weekly sales" + "Total order" mini-cards
             decimal weekSales = WeekRevenue();
@@ -226,11 +223,8 @@ namespace OMS
         {
             switch (Convert.ToString(status))
             {
-                case "Delivered": return "badge-subtle-success";
-                case "Ready":     return "badge-subtle-primary";
-                case "Preparing": return "badge-subtle-warning";
-                case "Confirmed": return "badge-subtle-info";
-                case "Pending":   return "badge-subtle-secondary";
+                case "Confirmed": return "badge-subtle-success";
+                case "Pending":   return "badge-subtle-warning";
                 case "Cancelled": return "badge-subtle-danger";
                 default:          return "badge-subtle-secondary";
             }
@@ -282,14 +276,14 @@ namespace OMS
             int thisTa  = Convert.ToInt32(r["ThisTakeaway"]);
             int thisDe  = Convert.ToInt32(r["ThisDelivery"]);
             int thisPe  = Convert.ToInt32(r["ThisPending"]);
-            int thisPr  = Convert.ToInt32(r["ThisPreparing"]);
-            int thisDd  = Convert.ToInt32(r["ThisDelivered"]);
+            int thisPr  = Convert.ToInt32(r["ThisConfirmed"]);
+            int thisDd  = Convert.ToInt32(r["ThisCancelled"]);
             int lastDi  = Convert.ToInt32(r["LastDineIn"]);
             int lastTa  = Convert.ToInt32(r["LastTakeaway"]);
             int lastDe  = Convert.ToInt32(r["LastDelivery"]);
             int lastPe  = Convert.ToInt32(r["LastPending"]);
-            int lastPr  = Convert.ToInt32(r["LastPreparing"]);
-            int lastDd  = Convert.ToInt32(r["LastDelivered"]);
+            int lastPr  = Convert.ToInt32(r["LastConfirmed"]);
+            int lastDd  = Convert.ToInt32(r["LastCancelled"]);
 
             RadarJson =
                 "{\"thisMonth\":[" + thisDi + "," + thisTa + "," + thisDe + "," + thisPe + "," + thisPr + "," + thisDd + "]" +
