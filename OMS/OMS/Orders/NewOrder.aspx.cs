@@ -237,7 +237,7 @@ namespace OMS.Orders
 
             decimal discount = Math.Round(subtotal * discPct / 100m, 2);
             decimal taxable  = subtotal - discount;
-            decimal taxPct   = SettingsHelper.TaxPercent;
+            decimal taxPct   = SettingsHelper.TaxPercentFor(ddlPaymentMethod.SelectedValue);
             decimal tax      = SettingsHelper.CalcTax(taxable, taxPct);
             decimal total    = taxable + tax;
 
@@ -426,6 +426,12 @@ namespace OMS.Orders
             ApplyLayout();
         }
 
+        // Each payment method has its own tax rate (Settings), so totals follow the selection.
+        protected void ddlPaymentMethod_Changed(object sender, EventArgs e)
+        {
+            BindCart();
+        }
+
         protected void txtDiscountPct_Changed(object sender, EventArgs e)
         {
             BindCart();
@@ -455,7 +461,7 @@ namespace OMS.Orders
             decimal subtotal  = cart.Sum(c => c.LineTotal);
             decimal discount  = Math.Round(subtotal * discPct / 100m, 2);
             decimal taxable   = subtotal - discount;
-            decimal taxPct    = SettingsHelper.TaxPercent;
+            decimal taxPct    = SettingsHelper.TaxPercentFor(ddlPaymentMethod.SelectedValue);
             decimal tax       = SettingsHelper.CalcTax(taxable, taxPct);
             decimal total     = taxable + tax;
 

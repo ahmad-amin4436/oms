@@ -24,6 +24,41 @@ namespace OMS.Common.Helpers
             }
         }
 
+        /// <summary>Payment methods that can carry their own tax rate (value, display name).
+        /// Cash uses the original "TaxPercent" setting, which is also the fallback for any method
+        /// without a rate of its own.</summary>
+        public static readonly string[][] TaxPaymentMethods =
+        {
+            new[] { "Cash",         "Cash" },
+            new[] { "Card",         "Card" },
+            new[] { "Wallet",       "Wallet" },
+            new[] { "BankTransfer", "Bank Transfer" }
+        };
+
+        private static string KeyFor(string method)
+        {
+            return string.IsNullOrEmpty(method) || method == "Cash" ? TaxKey : TaxKey + "." + method;
+        }
+
+        /// <summary>Tax rate in percent for a payment method.</summary>
+        public static decimal TaxPercentFor(string method)
+        {
+            var value = DBHelper.ExecuteScalar("sp_GetSetting", DBHelper.Parameter("@SettingKey", KeyFor(method)));
+            decimal pct;
+            if (value != null && decimal.TryParse(Convert.ToString(value), NumberStyles.Number,
+                    CultureInfo.InvariantCulture, out pct) && pct >= 0m && pct <= 100m)
+                return pct;
+            return TaxPercent;   // no rate of its own: use the default (Cash) rate
+        }
+
+        public static void SetTaxPercentFor(string method, decimal percent, int updatedBy)
+        {
+            DBHelper.ExecuteNonQuery("sp_SetSetting",
+                DBHelper.Parameter("@SettingKey",   KeyFor(method)),
+                DBHelper.Parameter("@SettingValue", Math.Round(percent, 2).ToString(CultureInfo.InvariantCulture)),
+                DBHelper.Parameter("@UpdatedBy",    updatedBy == 0 ? (object)DBNull.Value : updatedBy));
+        }
+
         public static void SetTaxPercent(decimal percent, int updatedBy)
         {
             DBHelper.ExecuteNonQuery("sp_SetSetting",

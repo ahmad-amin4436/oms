@@ -15,23 +15,53 @@
 
   <div class="card" style="max-width:480px;">
     <div class="card-header py-2">
-      <h5 class="mb-0 fs-0">Tax</h5>
+      <h5 class="mb-0 fs-0">Tax by payment method</h5>
     </div>
     <div class="card-body">
-      <label for="<%= txtTaxPercent.ClientID %>" class="form-label fs--1">Tax percentage (%)</label>
+
+      <label class="form-label fs--1 mb-1">Cash</label>
       <div class="input-group input-group-sm mb-1">
-        <asp:TextBox ID="txtTaxPercent" runat="server" CssClass="form-control" MaxLength="6" />
+        <asp:TextBox ID="txtTaxCash" runat="server" CssClass="form-control" MaxLength="6" />
         <span class="input-group-text">%</span>
       </div>
-      <asp:RangeValidator ID="rngTax" runat="server" ControlToValidate="txtTaxPercent"
-        MinimumValue="0" MaximumValue="100" Type="Double" ValidationGroup="Settings"
-        ErrorMessage="Enter a number between 0 and 100." Display="Dynamic"
-        CssClass="text-danger fs--2 d-block mb-1" />
-      <asp:RequiredFieldValidator ID="rfvTax" runat="server" ControlToValidate="txtTaxPercent"
-        ValidationGroup="Settings" ErrorMessage="Tax percentage is required." Display="Dynamic"
-        CssClass="text-danger fs--2 d-block mb-1" />
-      <p class="fs--2 text-600 mb-3">
-        Applies to new orders only. Orders already placed keep the tax they were created with.
+      <asp:RangeValidator ID="rngCash" runat="server" ControlToValidate="txtTaxCash" MinimumValue="0" MaximumValue="100"
+        Type="Double" ValidationGroup="Settings" ErrorMessage="Cash: enter 0 to 100." Display="Dynamic" CssClass="text-danger fs--2 d-block" />
+      <asp:RequiredFieldValidator ID="rfvCash" runat="server" ControlToValidate="txtTaxCash" ValidationGroup="Settings"
+        ErrorMessage="Cash rate is required." Display="Dynamic" CssClass="text-danger fs--2 d-block" />
+
+      <label class="form-label fs--1 mb-1 mt-2">Card</label>
+      <div class="input-group input-group-sm mb-1">
+        <asp:TextBox ID="txtTaxCard" runat="server" CssClass="form-control" MaxLength="6" />
+        <span class="input-group-text">%</span>
+      </div>
+      <asp:RangeValidator ID="rngCard" runat="server" ControlToValidate="txtTaxCard" MinimumValue="0" MaximumValue="100"
+        Type="Double" ValidationGroup="Settings" ErrorMessage="Card: enter 0 to 100." Display="Dynamic" CssClass="text-danger fs--2 d-block" />
+      <asp:RequiredFieldValidator ID="rfvCard" runat="server" ControlToValidate="txtTaxCard" ValidationGroup="Settings"
+        ErrorMessage="Card rate is required." Display="Dynamic" CssClass="text-danger fs--2 d-block" />
+
+      <label class="form-label fs--1 mb-1 mt-2">Wallet</label>
+      <div class="input-group input-group-sm mb-1">
+        <asp:TextBox ID="txtTaxWallet" runat="server" CssClass="form-control" MaxLength="6" />
+        <span class="input-group-text">%</span>
+      </div>
+      <asp:RangeValidator ID="rngWallet" runat="server" ControlToValidate="txtTaxWallet" MinimumValue="0" MaximumValue="100"
+        Type="Double" ValidationGroup="Settings" ErrorMessage="Wallet: enter 0 to 100." Display="Dynamic" CssClass="text-danger fs--2 d-block" />
+      <asp:RequiredFieldValidator ID="rfvWallet" runat="server" ControlToValidate="txtTaxWallet" ValidationGroup="Settings"
+        ErrorMessage="Wallet rate is required." Display="Dynamic" CssClass="text-danger fs--2 d-block" />
+
+      <label class="form-label fs--1 mb-1 mt-2">Bank Transfer</label>
+      <div class="input-group input-group-sm mb-1">
+        <asp:TextBox ID="txtTaxBank" runat="server" CssClass="form-control" MaxLength="6" />
+        <span class="input-group-text">%</span>
+      </div>
+      <asp:RangeValidator ID="rngBank" runat="server" ControlToValidate="txtTaxBank" MinimumValue="0" MaximumValue="100"
+        Type="Double" ValidationGroup="Settings" ErrorMessage="Bank Transfer: enter 0 to 100." Display="Dynamic" CssClass="text-danger fs--2 d-block" />
+      <asp:RequiredFieldValidator ID="rfvBank" runat="server" ControlToValidate="txtTaxBank" ValidationGroup="Settings"
+        ErrorMessage="Bank Transfer rate is required." Display="Dynamic" CssClass="text-danger fs--2 d-block" />
+
+      <p class="fs--2 text-600 mb-3 mt-2">
+        The order's payment method decides which rate applies. Applies to new orders only: orders already
+        placed keep the tax they were created with.
       </p>
       <asp:Button ID="btnSave" runat="server" Text="Save" ValidationGroup="Settings"
         CssClass="btn btn-primary btn-sm" OnClick="btnSave_Click" />

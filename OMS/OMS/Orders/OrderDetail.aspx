@@ -125,10 +125,15 @@
             <div class="row g-2 align-items-end">
               <div class="col-sm-7">
                 <label class="form-label fs--1 mb-1">Dish</label>
-                <%-- Type to search; pick a suggestion. The chosen ItemID lands in the hidden field. --%>
-                <input type="text" id="txtDishSearch" list="dishList" autocomplete="off"
-                  class="form-control form-control-sm" placeholder="Type to search dishes..." />
-                <datalist id="dishList"><asp:Literal ID="litDishList" runat="server" /></datalist>
+                <%-- Click to see the whole menu, type to narrow it. The chosen ItemID lands in the hidden field. --%>
+                <div class="position-relative">
+                  <input type="text" id="txtDishSearch" autocomplete="off"
+                    class="form-control form-control-sm" placeholder="Click to browse, or type to search dishes..." />
+                  <div id="dishMenu" class="list-group shadow position-absolute w-100 d-none"
+                    style="max-height:280px;overflow-y:auto;z-index:1050;">
+                    <asp:Literal ID="litDishList" runat="server" />
+                  </div>
+                </div>
                 <asp:HiddenField ID="hfAddItem" runat="server" />
                 <span id="dishPickError" class="text-danger fs--2 d-none">Pick a dish from the list.</span>
               </div>
@@ -269,17 +274,57 @@
   </asp:Panel>
 
   <script>
-    // Add Dish search: map the typed/selected suggestion back to its ItemID.
+    // Add Dish picker: the full menu opens on click/focus; typing narrows it; choosing sets the ItemID.
     (function () {
       var box = document.getElementById('txtDishSearch');
-      if (!box) return;
+      var menu = document.getElementById('dishMenu');
+      if (!box || !menu) return;
       var hf = document.getElementById('<%= hfAddItem.ClientID %>');
+      var rows = menu.children;                      // category headers + dish buttons, in menu order
+
+      function filter() {
+        var q = box.value.trim().toLowerCase(), header = null, headerHasMatch = false;
+        for (var i = 0; i < rows.length; i++) {
+          var r = rows[i];
+          if (r.getAttribute('data-header')) {       // a category header: show only if a dish under it matches
+            if (header) header.classList.toggle('d-none', !headerHasMatch);
+            header = r; headerHasMatch = false;
+          } else {
+            var show = q === '' || r.textContent.toLowerCase().indexOf(q) !== -1;
+            r.classList.toggle('d-none', !show);
+            if (show) headerHasMatch = true;
+          }
+        }
+        if (header) header.classList.toggle('d-none', !headerHasMatch);
+      }
+      function open()  { filter(); menu.classList.remove('d-none'); }
+      function close() { menu.classList.add('d-none'); }
+
+      box.addEventListener('focus', open);
+      box.addEventListener('click', open);
       box.addEventListener('input', function () {
-        hf.value = '';
-        var opts = document.getElementById('dishList').options;
-        for (var i = 0; i < opts.length; i++)
-          if (opts[i].value === box.value) { hf.value = opts[i].getAttribute('data-id'); break; }
+        hf.value = '';                               // typing invalidates the previous choice
         document.getElementById('dishPickError').classList.add('d-none');
+        open();
+      });
+      box.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') close();
+        if (e.key === 'Enter') {                     // Enter picks the first match; never submits the page
+          e.preventDefault();
+          for (var i = 0; i < rows.length; i++)
+            if (!rows[i].getAttribute('data-header') && !rows[i].classList.contains('d-none')) { rows[i].click(); break; }
+        }
+      });
+      menu.addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-id]');
+        if (!b) return;
+        hf.value = b.getAttribute('data-id');
+        box.value = b.getAttribute('data-label');
+        document.getElementById('dishPickError').classList.add('d-none');
+        close();
+      });
+      document.addEventListener('click', function (e) {
+        if (e.target !== box && !menu.contains(e.target)) close();
       });
     })();
     function dishPicked() {

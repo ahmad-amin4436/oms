@@ -320,7 +320,8 @@
             <div class="col-12">
               <label class="form-label fs--1 mb-1">Payment Method</label>
               <asp:DropDownList ID="ddlPaymentMethod" runat="server"
-                CssClass="form-select form-select-sm">
+                CssClass="form-select form-select-sm"
+                AutoPostBack="true" CausesValidation="false" OnSelectedIndexChanged="ddlPaymentMethod_Changed">
                 <asp:ListItem Value="Cash">Cash</asp:ListItem>
                 <asp:ListItem Value="Card">Card</asp:ListItem>
                 <asp:ListItem Value="Wallet">Wallet</asp:ListItem>

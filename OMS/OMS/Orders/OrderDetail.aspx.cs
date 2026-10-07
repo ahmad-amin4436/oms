@@ -108,13 +108,25 @@ namespace OMS.Orders
                 var items = DBHelper.ExecuteDataTable("sp_GetMenuItems",
                     DBHelper.Parameter("@CategoryID", DBNull.Value),
                     DBHelper.Parameter("@IsAvailable", true));
+                // Whole menu, grouped by category (sp_GetMenuItems already returns it in menu order).
                 var sb = new System.Text.StringBuilder();
+                string lastCat = null;
                 foreach (DataRow r in items.Rows)
-                    sb.Append("<option data-id=\"").Append(r["ItemID"]).Append("\" value=\"")
-                      .Append(Server.HtmlEncode(Convert.ToString(r["Name"]) + " (Rs. " +
-                              Convert.ToDecimal(r["BasePrice"]).ToString("N0") + ")  - " +
-                              Convert.ToString(r["CategoryName"])))
-                      .Append("\"></option>");
+                {
+                    string cat = Convert.ToString(r["CategoryName"]);
+                    if (cat != lastCat)
+                    {
+                        sb.Append("<div data-header=\"1\" class=\"list-group-item bg-200 text-600 fs--2 text-uppercase py-1\">")
+                          .Append(Server.HtmlEncode(cat)).Append("</div>");
+                        lastCat = cat;
+                    }
+                    string price = Convert.ToDecimal(r["BasePrice"]).ToString("N0");
+                    string label = Convert.ToString(r["Name"]) + " (Rs. " + price + ")";
+                    sb.Append("<button type=\"button\" class=\"list-group-item list-group-item-action d-flex justify-content-between py-1 fs--1\" data-id=\"")
+                      .Append(r["ItemID"]).Append("\" data-label=\"").Append(Server.HtmlEncode(label)).Append("\">")
+                      .Append("<span>").Append(Server.HtmlEncode(Convert.ToString(r["Name"]))).Append("</span>")
+                      .Append("<span class=\"text-600\">Rs. ").Append(price).Append("</span></button>");
+                }
                 litDishList.Text = sb.ToString();
             }
 
