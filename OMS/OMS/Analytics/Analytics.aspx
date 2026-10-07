@@ -42,7 +42,7 @@
 
   <%-- ── KPI summary cards ── --%>
   <div class="row g-3 mb-1">
-    <div class="col-sm-6 col-xl-3">
+    <div class="col-sm-6 col-xl">
       <div class="card h-100">
         <div class="card-body">
           <h6 class="text-600 fs--2 text-uppercase mb-2">Total Revenue</h6>
@@ -50,11 +50,11 @@
             <h4 class="mb-0 text-primary"><asp:Literal ID="litRevenue" runat="server" Text="Rs. 0" /></h4>
             <asp:Literal ID="litRevenueDelta" runat="server" />
           </div>
-          <p class="fs--2 text-600 mb-0 mt-1">Gross, all orders</p>
+          <p class="fs--2 text-600 mb-0 mt-1">Excludes cancelled orders</p>
         </div>
       </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
+    <div class="col-sm-6 col-xl">
       <div class="card h-100">
         <div class="card-body">
           <h6 class="text-600 fs--2 text-uppercase mb-2">Total Orders</h6>
@@ -62,11 +62,11 @@
             <h4 class="mb-0"><asp:Literal ID="litOrders" runat="server" Text="0" /></h4>
             <asp:Literal ID="litOrdersDelta" runat="server" />
           </div>
-          <p class="fs--2 text-600 mb-0 mt-1">All statuses</p>
+          <p class="fs--2 text-600 mb-0 mt-1">Excludes cancelled</p>
         </div>
       </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
+    <div class="col-sm-6 col-xl">
       <div class="card h-100">
         <div class="card-body">
           <h6 class="text-600 fs--2 text-uppercase mb-2">Avg Order Value</h6>
@@ -75,7 +75,7 @@
         </div>
       </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
+    <div class="col-sm-6 col-xl">
       <div class="card h-100">
         <div class="card-body">
           <h6 class="text-600 fs--2 text-uppercase mb-2">Completed / Active</h6>
@@ -85,6 +85,15 @@
             <span class="text-warning"><asp:Literal ID="litActive" runat="server" Text="0" /></span>
           </h4>
           <p class="fs--2 text-600 mb-0 mt-1">Delivered vs in-progress orders</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl">
+      <div class="card h-100">
+        <div class="card-body">
+          <h6 class="text-600 fs--2 text-uppercase mb-2">Cancelled</h6>
+          <h4 class="mb-0 text-danger"><asp:Literal ID="litCancelled" runat="server" Text="0" /></h4>
+          <p class="fs--2 text-600 mb-0 mt-1"><asp:Literal ID="litCancelledAmount" runat="server" Text="Rs. 0" /></p>
         </div>
       </div>
     </div>

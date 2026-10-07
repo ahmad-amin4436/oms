@@ -114,6 +114,40 @@
           </div>
         </div>
 
+        <%-- Add dishes: allowed until the order is Delivered/Cancelled; dishes can only be added, never removed --%>
+        <asp:Panel ID="pnlAddDish" runat="server" CssClass="card mb-3">
+          <div class="card-header py-2">
+            <h5 class="mb-0 fs-0">Add Dish</h5>
+          </div>
+          <div class="card-body">
+            <asp:Label ID="lblAddMsg" runat="server" Visible="false" EnableViewState="false"
+              CssClass="alert alert-success d-block py-2 fs--1" />
+            <div class="row g-2 align-items-end">
+              <div class="col-sm-7">
+                <label class="form-label fs--1 mb-1">Dish</label>
+                <asp:DropDownList ID="ddlAddItem" runat="server" CssClass="form-select form-select-sm"
+                  ValidationGroup="AddDish" />
+                <asp:RequiredFieldValidator ID="rfvAddItem" runat="server" ControlToValidate="ddlAddItem"
+                  InitialValue="" ValidationGroup="AddDish" Display="Dynamic"
+                  ErrorMessage="Choose a dish." CssClass="text-danger fs--2" />
+              </div>
+              <div class="col-5 col-sm-2">
+                <label class="form-label fs--1 mb-1">Qty</label>
+                <asp:TextBox ID="txtAddQty" runat="server" Text="1" TextMode="Number" CssClass="form-control form-control-sm"
+                  ValidationGroup="AddDish" />
+                <asp:RangeValidator ID="rngAddQty" runat="server" ControlToValidate="txtAddQty" Type="Integer"
+                  MinimumValue="1" MaximumValue="100" ValidationGroup="AddDish" Display="Dynamic"
+                  ErrorMessage="1-100" CssClass="text-danger fs--2" />
+              </div>
+              <div class="col-7 col-sm-3">
+                <asp:Button ID="btnAddDish" runat="server" Text="+ Add" CssClass="btn btn-primary btn-sm w-100"
+                  ValidationGroup="AddDish" OnClick="btnAddDish_Click" />
+              </div>
+            </div>
+            <p class="fs--2 text-600 mb-0 mt-2">Totals are recalculated with this order's discount and tax rate.</p>
+          </div>
+        </asp:Panel>
+
       </div>
 
       <%-- ══ RIGHT: Order Info + Status ══ --%>

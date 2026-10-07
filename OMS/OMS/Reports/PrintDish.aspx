@@ -11,7 +11,7 @@
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; background: #fff; color: #000; }
     body { font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.3; }
-    .ticket { width: 72mm; margin: 0 auto; padding: 3mm 0; }
+    .ticket { width: 64mm; margin: 0 auto; padding: 3mm 0; }   /* thermal heads clip the outer edges */
     .center { text-align: center; }
     .bold { font-weight: bold; }
     .rule { border: 0; border-top: 1px dashed #000; margin: 2mm 0; }

@@ -63,6 +63,61 @@ namespace OMS.Orders
             }
         }
 
+        // Dishes can be added to an open order but never removed. The price and the
+        // status rule are enforced in sp_AddOrderItem, not trusted from the page.
+        protected void btnAddDish_Click(object sender, EventArgs e)
+        {
+            Page.Validate("AddDish");
+            if (!Page.IsValid) return;
+
+            int itemId, qty;
+            if (!int.TryParse(ddlAddItem.SelectedValue, out itemId) || !int.TryParse(txtAddQty.Text, out qty))
+                return;
+
+            try
+            {
+                DBHelper.ExecuteNonQuery("sp_AddOrderItem",
+                    DBHelper.Parameter("@OrderID",  OrderID),
+                    DBHelper.Parameter("@ItemID",   itemId),
+                    DBHelper.Parameter("@Quantity", qty),
+                    DBHelper.Parameter("@AddedBy",  SecurityHelper.UserID == 0 ? (object)DBNull.Value : SecurityHelper.UserID));
+
+                // Redirect so a browser refresh cannot add the dish twice.
+                Response.Redirect("~/Orders/OrderDetail.aspx?id=" + OrderID + "&added=1", false);
+                Context.ApplicationInstance.CompleteRequest();
+            }
+            catch (Exception ex)
+            {
+                lblError.Text    = "Could not add the dish: " + ex.Message;
+                lblError.Visible = true;
+            }
+        }
+
+        private void BindAddDish(bool open)
+        {
+            pnlAddDish.Visible = open;
+            if (!open) return;
+
+            if (ddlAddItem.Items.Count == 0)
+            {
+                ddlAddItem.Items.Add(new System.Web.UI.WebControls.ListItem("Select a dish...", ""));
+                var items = DBHelper.ExecuteDataTable("sp_GetMenuItems",
+                    DBHelper.Parameter("@CategoryID", DBNull.Value),
+                    DBHelper.Parameter("@IsAvailable", true));
+                foreach (DataRow r in items.Rows)
+                    ddlAddItem.Items.Add(new System.Web.UI.WebControls.ListItem(
+                        Convert.ToString(r["CategoryName"]) + " - " + Convert.ToString(r["Name"]) +
+                        "  (Rs. " + Convert.ToDecimal(r["BasePrice"]).ToString("N0") + ")",
+                        Convert.ToString(r["ItemID"])));
+            }
+
+            if (Request.QueryString["added"] != null && !IsPostBack)
+            {
+                lblAddMsg.Text    = "Dish added. Totals updated.";
+                lblAddMsg.Visible = true;
+            }
+        }
+
         protected void btnUpdateStatus_Click(object sender, EventArgs e)
         {
             try
@@ -174,6 +229,7 @@ namespace OMS.Orders
             pnlUpdateStatus.Visible = !cancelled;
             pnlCancel.Visible       = !cancelled && status != "Delivered" && SecurityHelper.IsInRole("Admin");
             pnlCancelInfo.Visible   = cancelled;
+            BindAddDish(!cancelled && status != "Delivered");
             if (cancelled)
             {
                 lblCancelledAt.Text = row["CancelledAt"] == DBNull.Value ? "&mdash;"

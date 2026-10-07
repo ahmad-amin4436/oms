@@ -79,6 +79,8 @@ namespace OMS.Analytics
             litAov.Text       = "Rs. " + s.AvgOrderValue.ToString("N0");
             litCompleted.Text = s.CompletedOrders.ToString("N0");
             litActive.Text    = s.ActiveOrders.ToString("N0");
+            litCancelled.Text       = s.CancelledOrders.ToString("N0");
+            litCancelledAmount.Text = "Rs. " + s.CancelledAmount.ToString("N0") + " not counted as revenue";
 
             litRevenueDelta.Text = DeltaBadge(s.RevenueChangePct);
             litOrdersDelta.Text  = DeltaBadge(s.OrdersChangePct);

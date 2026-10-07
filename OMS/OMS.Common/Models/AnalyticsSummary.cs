@@ -12,6 +12,10 @@ namespace OMS.Common.Models
         public int     ActiveOrders    { get; set; }   // in progress (not Delivered/Cancelled)
         public decimal AvgOrderValue   { get; set; }
 
+        // Cancelled orders are NOT part of the figures above; reported on their own.
+        public int     CancelledOrders { get; set; }
+        public decimal CancelledAmount { get; set; }
+
         public decimal PrevRevenue   { get; set; }
         public int     PrevOrders    { get; set; }
 

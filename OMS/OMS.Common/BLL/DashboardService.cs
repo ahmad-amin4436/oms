@@ -92,6 +92,8 @@ namespace OMS.Common.BLL
                 s.CompletedOrders = Convert.ToInt32(r["CompletedOrders"]);
                 s.ActiveOrders    = Convert.ToInt32(r["ActiveOrders"]);
                 s.AvgOrderValue   = Convert.ToDecimal(r["AvgOrderValue"]);
+                s.CancelledOrders = Convert.ToInt32(r["CancelledOrders"]);
+                s.CancelledAmount = Convert.ToDecimal(r["CancelledAmount"]);
             }
             if (ds.Tables.Count > 1 && ds.Tables[1].Rows.Count > 0)
             {

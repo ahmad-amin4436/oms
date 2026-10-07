@@ -17,6 +17,8 @@ namespace OMS.Analytics
         protected global::System.Web.UI.WebControls.Literal    litAov;
         protected global::System.Web.UI.WebControls.Literal    litCompleted;
         protected global::System.Web.UI.WebControls.Literal    litActive;
+        protected global::System.Web.UI.WebControls.Literal    litCancelled;
+        protected global::System.Web.UI.WebControls.Literal    litCancelledAmount;
 
         protected global::System.Web.UI.WebControls.GridView   gvRevenue;
         protected global::System.Web.UI.WebControls.GridView   gvTopItems;

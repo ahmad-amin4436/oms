@@ -16,7 +16,8 @@
     html, body { margin: 0; padding: 0; background: #fff; color: #000; }
     body { font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 1.3; }
 
-    .receipt { width: 72mm; margin: 0 auto; padding: 3mm 0; }
+    /* 80 mm roll, but thermal heads clip the outer edges: keep content to 64 mm, centred. */
+    .receipt { width: 64mm; margin: 0 auto; padding: 3mm 0; }
     .center  { text-align: center; }
     .right   { text-align: right; }
     .bold    { font-weight: bold; }
@@ -29,7 +30,7 @@
     table { width: 100%; border-collapse: collapse; }
     td, th { padding: 0.6mm 0; vertical-align: top; }
     th { font-weight: bold; text-align: left; border-bottom: 1px solid #000; }
-    th.right, td.right { text-align: right; white-space: nowrap; padding-left: 2mm; }
+    th.right, td.right { text-align: right; white-space: nowrap; padding-left: 2mm; padding-right: 1mm; }
     .item-name { word-break: break-word; }
     .item-sub  { font-size: 10px; }
 
@@ -47,7 +48,7 @@
     }
     @media print {
       .no-print { display: none !important; }
-      .receipt { width: 72mm; margin: 0 auto; padding: 2mm 0; }
+      .receipt { width: 64mm; margin: 0 auto; padding: 2mm 0; }
     }
   </style>
 </head>
