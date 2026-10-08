@@ -216,7 +216,7 @@ Sys.WebForms.MenuItem.prototype = {
         this.container.focused = true;
         this._anchor.focus();
     },
-    get_highlighted: function() { return /(^|\s)highlighted(\s|Rs. )/.test(this._anchor.className); },
+    get_highlighted: function() { return /(^|\s)highlighted(\s|$)/.test(this._anchor.className); },
     getTabIndex: function() { return this._anchor.tabIndex; },
     highlight: function(highlighting) {
         if (highlighting) {
@@ -436,7 +436,7 @@ Sys.WebForms.Menu._domHelper = {
             setString(value);
             return;
         }
-        var regex = this._regexes.getRegex('(^| )' + value + '(Rs. | )');
+        var regex = this._regexes.getRegex('(^| )' + value + '($| )');
         if (regex.test(currentValue)) {
             return;
         }
@@ -509,7 +509,7 @@ Sys.WebForms.Menu._domHelper = {
     removeString: function(getString, setString, valueToRemove) {
         var currentValue = getString();
         if (currentValue) {
-            var regex = this._regexes.getRegex('(\\s|\\b)' + valueToRemove + 'Rs. |\\b' + valueToRemove + '\\s+');
+            var regex = this._regexes.getRegex('(\\s|\\b)' + valueToRemove + '$|\\b' + valueToRemove + '\\s+');
             setString(currentValue.replace(regex, ''));
         }
     },

@@ -3,7 +3,7 @@ var Page_ValidationVer = "125";
 var Page_IsValid = true;
 var Page_BlockSubmit = false;
 var Page_InvalidControlToBeFocused = null;
-var Page_TextTypes = /^(text|password|file|search|tel|url|email|number|range|color|datetime|date|month|week|time|datetime-local)Rs. /i;
+var Page_TextTypes = /^(text|password|file|search|tel|url|email|number|range|color|datetime|date|month|week|time|datetime-local)$/i;
 function ValidatorUpdateDisplay(val) {
     if (typeof(val.display) == "string") {
         if (val.display == "None") {
@@ -313,14 +313,14 @@ function ValidatorConvert(op, dataType, val) {
     }
     var num, cleanInput, m, exp;
     if (dataType == "Integer") {
-        exp = /^\s*[-\+]?\d+\s*Rs. /;
+        exp = /^\s*[-\+]?\d+\s*$/;
         if (op.match(exp) == null)
             return null;
         num = parseInt(op, 10);
         return (isNaN(num) ? null : num);
     }
     else if(dataType == "Double") {
-        exp = new RegExp("^\\s*([-\\+])?(\\d*)\\" + val.decimalchar + "?(\\d*)\\s*Rs. ");
+        exp = new RegExp("^\\s*([-\\+])?(\\d*)\\" + val.decimalchar + "?(\\d*)\\s*$");
         m = op.match(exp);
         if (m == null)
             return null;
@@ -343,7 +343,7 @@ function ValidatorConvert(op, dataType, val) {
         }
         exp = new RegExp("^\\s*([-\\+])?((\\d" + beginGroupSize + "(\\" + val.groupchar + "\\d" + subsequentGroupSize + ")+)|\\d*)"
                         + (hasDigits ? "\\" + val.decimalchar + "?(\\d{0," + val.digits + "})" : "")
-                        + "\\s*Rs. ");
+                        + "\\s*$");
         m = op.match(exp);
         if (m == null)
             return null;
@@ -354,7 +354,7 @@ function ValidatorConvert(op, dataType, val) {
         return (isNaN(num) ? null : num);
     }
     else if (dataType == "Date") {
-        var yearFirstExp = new RegExp("^\\s*((\\d{4})|(\\d{2}))([-/]|\\. ?)(\\d{1,2})\\4(\\d{1,2})\\.?\\s*Rs. ");
+        var yearFirstExp = new RegExp("^\\s*((\\d{4})|(\\d{2}))([-/]|\\. ?)(\\d{1,2})\\4(\\d{1,2})\\.?\\s*$");
         m = op.match(yearFirstExp);
         var day, month, year;
         if (m != null && (((typeof(m[2]) != "undefined") && (m[2].length == 4)) || val.dateorder == "ymd")) {
@@ -366,7 +366,7 @@ function ValidatorConvert(op, dataType, val) {
             if (val.dateorder == "ymd"){
                 return null;
             }
-            var yearLastExp = new RegExp("^\\s*(\\d{1,2})([-/]|\\. ?)(\\d{1,2})(?:\\s|\\2)((\\d{4})|(\\d{2}))(?:\\s\u0433\\.|\\.)?\\s*Rs. ");
+            var yearLastExp = new RegExp("^\\s*(\\d{1,2})([-/]|\\. ?)(\\d{1,2})(?:\\s|\\2)((\\d{4})|(\\d{2}))(?:\\s\u0433\\.|\\.)?\\s*$");
             m = op.match(yearLastExp);
             if (m == null) {
                 return null;
@@ -461,7 +461,7 @@ function RegularExpressionValidatorEvaluateIsValid(val) {
     return (matches != null && value == matches[0]);
 }
 function ValidatorTrim(s) {
-    var m = s.match(/^\s*(\S+(\s+\S+)*)\s*Rs. /);
+    var m = s.match(/^\s*(\S+(\s+\S+)*)\s*$/);
     return (m == null) ? "" : m[1];
 }
 function RequiredFieldValidatorEvaluateIsValid(val) {
@@ -562,7 +562,7 @@ function ValidationSummaryOnSubmit(validationGroup) {
     }
 }
 if (window.jQuery) {
-    (function (Rs. ) {
+    (function ($) {
         var dataValidationAttribute = "data-val",
             dataValidationSummaryAttribute = "data-valsummary",
             normalizedAttributes = { validationgroup: "validationGroup", focusonerror: "focusOnError" };
@@ -588,12 +588,12 @@ if (window.jQuery) {
         }
         function addValidationExpando(element) {
             var attributes = getAttributesWithPrefix(element, dataValidationAttribute + "-");
-            Rs. .each(attributes, function (key, value) {
+            $.each(attributes, function (key, value) {
                 element[normalizeKey(key)] = value;
             });
         }
         function dispose(element) {
-            var index = Rs. .inArray(element, Page_Validators);
+            var index = $.inArray(element, Page_Validators);
             if (index >= 0) {
                 Page_Validators.splice(index, 1);
             }
@@ -602,10 +602,10 @@ if (window.jQuery) {
             normalizedAttributes[name.toLowerCase()] = normalizedName;
         }
         function parseSpecificAttribute(selector, attribute, validatorsArray) {
-            return Rs. (selector).find("[" + attribute + "='true']").each(function (index, element) {
+            return $(selector).find("[" + attribute + "='true']").each(function (index, element) {
                 addValidationExpando(element);
                 element.dispose = function () { dispose(element); element.dispose = null; };
-                if (Rs. .inArray(element, validatorsArray) === -1) {
+                if ($.inArray(element, validatorsArray) === -1) {
                     validatorsArray.push(element);
                 }
             }).length;
@@ -661,7 +661,7 @@ if (window.jQuery) {
                 });
             }
         }
-        Rs. (function () {
+        $(function () {
             if (typeof (Page_Validators) === "undefined") {
                 window.Page_Validators = [];
             }
@@ -671,7 +671,7 @@ if (window.jQuery) {
             if (typeof (Page_ValidationActive) === "undefined") {
                 window.Page_ValidationActive = false;
             }
-            Rs. .WebFormValidator = {
+            $.WebFormValidator = {
                 addNormalizedAttribute: addNormalizedAttribute,
                 parse: parse
             };

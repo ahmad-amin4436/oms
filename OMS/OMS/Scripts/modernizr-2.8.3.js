@@ -599,7 +599,7 @@ window.Modernizr = (function( window, document, undefined ) {
         // The non-literal . in this regex is intentional:
         //   German Chrome returns this value as 0,55
         // github.com/Modernizr/Modernizr/issues/#issue/59/comment/516632
-        return (/^0.55Rs. /).test(mStyle.opacity);
+        return (/^0.55$/).test(mStyle.opacity);
     };
 
 
@@ -732,12 +732,12 @@ window.Modernizr = (function( window, document, undefined ) {
         try {
             if ( bool = !!elem.canPlayType ) {
                 bool      = new Boolean(bool);
-                bool.ogg  = elem.canPlayType('video/ogg; codecs="theora"')      .replace(/^noRs. /,'');
+                bool.ogg  = elem.canPlayType('video/ogg; codecs="theora"')      .replace(/^no$/,'');
 
                 // Without QuickTime, this value will be `undefined`. github.com/Modernizr/Modernizr/issues/546
-                bool.h264 = elem.canPlayType('video/mp4; codecs="avc1.42E01E"') .replace(/^noRs. /,'');
+                bool.h264 = elem.canPlayType('video/mp4; codecs="avc1.42E01E"') .replace(/^no$/,'');
 
-                bool.webm = elem.canPlayType('video/webm; codecs="vp8, vorbis"').replace(/^noRs. /,'');
+                bool.webm = elem.canPlayType('video/webm; codecs="vp8, vorbis"').replace(/^no$/,'');
             }
 
         } catch(e) { }
@@ -752,15 +752,15 @@ window.Modernizr = (function( window, document, undefined ) {
         try {
             if ( bool = !!elem.canPlayType ) {
                 bool      = new Boolean(bool);
-                bool.ogg  = elem.canPlayType('audio/ogg; codecs="vorbis"').replace(/^noRs. /,'');
-                bool.mp3  = elem.canPlayType('audio/mpeg;')               .replace(/^noRs. /,'');
+                bool.ogg  = elem.canPlayType('audio/ogg; codecs="vorbis"').replace(/^no$/,'');
+                bool.mp3  = elem.canPlayType('audio/mpeg;')               .replace(/^no$/,'');
 
                 // Mimetypes accepted:
                 //   developer.mozilla.org/En/Media_formats_supported_by_the_audio_and_video_elements
                 //   bit.ly/iphoneoscodecs
-                bool.wav  = elem.canPlayType('audio/wav; codecs="1"')     .replace(/^noRs. /,'');
+                bool.wav  = elem.canPlayType('audio/wav; codecs="1"')     .replace(/^no$/,'');
                 bool.m4a  = ( elem.canPlayType('audio/x-m4a;')            ||
-                              elem.canPlayType('audio/aac;'))             .replace(/^noRs. /,'');
+                              elem.canPlayType('audio/aac;'))             .replace(/^no$/,'');
             }
         } catch(e) { }
 
@@ -893,7 +893,7 @@ window.Modernizr = (function( window, document, undefined ) {
                     inputElem.value         = smile;
                     inputElem.style.cssText = 'position:absolute;visibility:hidden;';
 
-                    if ( /^rangeRs. /.test(inputElemType) && inputElem.style.WebkitAppearance !== undefined ) {
+                    if ( /^range$/.test(inputElemType) && inputElem.style.WebkitAppearance !== undefined ) {
 
                       docElement.appendChild(inputElem);
                       defaultView = document.defaultView;
@@ -907,14 +907,14 @@ window.Modernizr = (function( window, document, undefined ) {
 
                       docElement.removeChild(inputElem);
 
-                    } else if ( /^(search|tel)Rs. /.test(inputElemType) ){
+                    } else if ( /^(search|tel)$/.test(inputElemType) ){
                       // Spec doesn't define any special parsing or detectable UI
                       //   behaviors so we pass these through as true
 
                       // Interestingly, opera fails the earlier test, so it doesn't
                       //  even make it here.
 
-                    } else if ( /^(url|email)Rs. /.test(inputElemType) ) {
+                    } else if ( /^(url|email)$/.test(inputElemType) ) {
                       // Real url and email support comes with prebaked validation.
                       bool = inputElem.checkValidity && inputElem.checkValidity() === false;
 
@@ -1016,10 +1016,10 @@ window.Modernizr = (function( window, document, undefined ) {
         var options = window.html5 || {};
 
         /** Used to skip problem elements */
-        var reSkip = /^<|^(?:button|map|select|textarea|object|iframe|option|optgroup)Rs. /i;
+        var reSkip = /^<|^(?:button|map|select|textarea|object|iframe|option|optgroup)$/i;
 
         /** Not all elements can be cloned in IE **/
-        var saveClones = /^(?:a|b|code|div|fieldset|h1|h2|h3|h4|h5|h6|i|label|li|ol|p|q|span|strong|style|table|tbody|td|th|tr|ul)Rs. /i;
+        var saveClones = /^(?:a|b|code|div|fieldset|h1|h2|h3|h4|h5|h6|i|label|li|ol|p|q|span|strong|style|table|tbody|td|th|tr|ul)$/i;
 
         /** Detect whether the browser supports default html5 styles */
         var supportsHtml5Styles;
@@ -1395,7 +1395,7 @@ window.Modernizr = (function( window, document, undefined ) {
 
     /*>>cssclasses*/
     // Remove "no-js" class from <html> element, if it exists:
-    docElement.className = docElement.className.replace(/(^|\s)no-js(\s|Rs. )/, 'Rs. 1Rs. 2') +
+    docElement.className = docElement.className.replace(/(^|\s)no-js(\s|$)/, '$1$2') +
 
                             // Add the new classes to the <html> element.
                             (enableClasses ? ' js ' + classes.join(' ') : '');

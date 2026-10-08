@@ -106,6 +106,9 @@ namespace OMS
         // ScriptManager's own ResourceMapping at the physical files with a ROOT-relative
         // ("~/") path — set per request so it always wins over the package defaults —
         // makes the <script src> render correctly from any folder depth.
+        // Bump when a script file is repaired/replaced so browsers fetch it instead of reusing a cached copy.
+        private const string ScriptVersion = "?v=2";
+
         private void FixScriptManagerPaths()
         {
             var map = ScriptManager.ScriptResourceMapping;
@@ -121,13 +124,27 @@ namespace OMS
             {
                 map.AddDefinition(name, new System.Web.UI.ScriptResourceDefinition
                 {
-                    Path = root + localFile,
-                    DebugPath = root + localFile
+                    Path = root + localFile + ScriptVersion,
+                    DebugPath = root + localFile + ScriptVersion
                 });
             }
 
             Map("MsAjaxBundle",   "/Scripts/WebForms/MsAjax/MicrosoftAjax.js");
             Map("WebFormsBundle", "/Scripts/WebForms/WebForms.js");
+
+            // The Ajax framework scripts are registered per file name; version each one as well.
+            foreach (var f in new[] { "MicrosoftAjax.js", "MicrosoftAjaxApplicationServices.js", "MicrosoftAjaxComponentModel.js",
+                "MicrosoftAjaxCore.js", "MicrosoftAjaxGlobalization.js", "MicrosoftAjaxHistory.js", "MicrosoftAjaxNetwork.js",
+                "MicrosoftAjaxSerialization.js", "MicrosoftAjaxTimer.js", "MicrosoftAjaxWebForms.js", "MicrosoftAjaxWebServices.js" })
+                Map(f, "/Scripts/WebForms/MsAjax/" + f);
+
+            // jQuery too (the default registration has no version, so a browser keeps the old file it cached).
+            map.AddDefinition("jquery", new System.Web.UI.ScriptResourceDefinition
+            {
+                Path = root + "/Scripts/jquery-3.3.1.min.js" + ScriptVersion,
+                DebugPath = root + "/Scripts/jquery-3.3.1.js" + ScriptVersion,
+                LoadSuccessExpression = "window.jQuery"
+            });
         }
 
         // ----------------------------------------------------------------

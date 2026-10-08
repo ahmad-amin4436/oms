@@ -236,7 +236,7 @@ function WebForm_FillFirstAvailableSlot(array, element) {
 var __nonMSDOMBrowser = (window.navigator.appName.toLowerCase().indexOf('explorer') == -1);
 var __theFormPostData = "";
 var __theFormPostCollection = new Array();
-var __callbackTextTypes = /^(text|password|hidden|search|tel|url|email|number|range|color|datetime|date|month|week|time|datetime-local)Rs. /i;
+var __callbackTextTypes = /^(text|password|hidden|search|tel|url|email|number|range|color|datetime|date|month|week|time|datetime-local)$/i;
 function WebForm_InitCallback() {
     var formElements = theForm.elements,
         count = formElements.length,
@@ -434,7 +434,7 @@ function WebForm_TextBoxKeyHandler(event) {
     return true;
 }
 function WebForm_TrimString(value) {
-    return value.replace(/^\s+|\s+Rs. /g, '')
+    return value.replace(/^\s+|\s+$/g, '')
 }
 function WebForm_AppendToClassName(element, className) {
     var currentClassName = ' ' + WebForm_TrimString(element.className) + ' ';
