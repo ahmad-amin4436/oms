@@ -85,6 +85,11 @@
             <div class="col-4 col-sm-auto d-flex align-items-center pe-0">
               <h5 class="fs-0 mb-0 text-nowrap py-2 py-xl-0">Orders</h5>
             </div>
+            <%-- Total of every order the current search/filters match (all pages) --%>
+            <div class="col-auto text-end">
+              <span class="fs--1 text-600">Total (<asp:Label ID="lblTotalOrders" runat="server" Text="0" /> orders)</span>
+              <strong class="fs-1 text-primary ms-1"><asp:Label ID="lblTotalAmount" runat="server" Text="Rs. 0" /></strong>
+            </div>
           </div>
         </div>
         <div class="card-body p-0">
@@ -105,6 +110,9 @@
                     <strong><%# OMS.Common.Helpers.UiHelper.HtmlEncode(Eval("CustomerName")) %></strong>
                   </ItemTemplate>
                 </asp:TemplateField>
+                <asp:BoundField DataField="ConfirmedByName" HeaderText="Cashier"
+                  HeaderStyle-CssClass="align-middle white-space-nowrap"
+                  ItemStyle-CssClass="py-2 align-middle white-space-nowrap" NullDisplayText="&mdash;" />
                 <asp:BoundField DataField="CreatedByName" HeaderText="Order Taker"
                   HeaderStyle-CssClass="align-middle white-space-nowrap"
                   ItemStyle-CssClass="py-2 align-middle white-space-nowrap" NullDisplayText="&mdash;" />

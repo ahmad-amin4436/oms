@@ -137,6 +137,20 @@ namespace OMS.Orders
                 DBHelper.Parameter("@PageNumber", PageNo),
                 DBHelper.Parameter("@CurrentDayOnly", chkCurrentDay.Checked));
 
+            // Total over ALL pages for the current filters (cancelled excluded unless filtering on Cancelled).
+            var tot = DBHelper.ExecuteDataTable("sp_GetOrdersTotal",
+                DBHelper.Parameter("@Status", string.IsNullOrEmpty(ddlStatus.SelectedValue) ? (object)DBNull.Value : ddlStatus.SelectedValue),
+                DBHelper.Parameter("@StartDate", DateTime.TryParse(txtStartDate.Text, out start) ? (object)start.Date : DBNull.Value),
+                DBHelper.Parameter("@EndDate", DateTime.TryParse(txtEndDate.Text, out end) ? (object)end.Date : DBNull.Value),
+                DBHelper.Parameter("@OrderType", string.IsNullOrEmpty(ddlOrderType.SelectedValue) ? (object)DBNull.Value : ddlOrderType.SelectedValue),
+                DBHelper.Parameter("@PaymentMethod", DBNull.Value),
+                DBHelper.Parameter("@OrderRef", OrNull(txtOrderRef.Text)),
+                DBHelper.Parameter("@CustomerName", OrNull(txtCustomer.Text)),
+                DBHelper.Parameter("@TableNumber", OrNull(txtTable.Text)),
+                DBHelper.Parameter("@CurrentDayOnly", chkCurrentDay.Checked));
+            lblTotalOrders.Text = tot.Rows.Count > 0 ? Convert.ToInt32(tot.Rows[0]["Orders"]).ToString("N0") : "0";
+            lblTotalAmount.Text = "Rs. " + (tot.Rows.Count > 0 ? Convert.ToDecimal(tot.Rows[0]["TotalAmount"]) : 0m).ToString("N0");
+
             bool hasNext = dt.Rows.Count > PageSize;
             if (hasNext) dt.Rows.RemoveAt(PageSize);
 

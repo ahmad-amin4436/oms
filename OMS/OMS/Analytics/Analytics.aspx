@@ -20,16 +20,19 @@
   <div class="card mb-3">
     <div class="card-body row g-2 align-items-end">
       <div class="col-sm-4 col-md-3">
-        <label class="form-label fs--1 mb-1">From Date</label>
-        <asp:TextBox ID="txtStart" runat="server" CssClass="form-control form-control-sm" TextMode="Date" />
+        <label class="form-label fs--1 mb-1">From (date &amp; time)</label>
+        <asp:TextBox ID="txtStart" runat="server" CssClass="form-control form-control-sm" TextMode="DateTimeLocal" />
       </div>
       <div class="col-sm-4 col-md-3">
-        <label class="form-label fs--1 mb-1">To Date</label>
-        <asp:TextBox ID="txtEnd" runat="server" CssClass="form-control form-control-sm" TextMode="Date" />
+        <label class="form-label fs--1 mb-1">To (date &amp; time)</label>
+        <asp:TextBox ID="txtEnd" runat="server" CssClass="form-control form-control-sm" TextMode="DateTimeLocal" />
       </div>
       <div class="col-auto">
         <asp:Button ID="btnApply" runat="server" CssClass="btn btn-primary btn-sm"
           Text="Apply" OnClick="btnApply_Click" />
+      </div>
+      <div class="col-12 order-last">
+        <span class="fs--2 text-600">Leave the times at 12:00 AM and 11:59 PM to report by business day. Set other times (for example 10:00 AM to 2:00 PM) to see only the orders placed in that window.</span>
       </div>
       <div class="col-auto d-flex gap-1">
         <asp:LinkButton ID="lb7" runat="server" CssClass="btn btn-falcon-default btn-sm"

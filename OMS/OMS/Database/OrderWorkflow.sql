@@ -395,10 +395,11 @@ BEGIN
   DECLARE @Take INT = CASE WHEN @PageSize IS NULL THEN 500 ELSE @PageSize + 1 END;
   DECLARE @Skip INT = CASE WHEN @PageSize IS NULL THEN 0 ELSE (CASE WHEN @PageNumber < 1 THEN 0 ELSE @PageNumber - 1 END) * @PageSize END;
 
-  SELECT o.*, CreatedByName = u.FullName, bd.BusinessDate,
+  SELECT o.*, CreatedByName = u.FullName, ConfirmedByName = cf.FullName, bd.BusinessDate,
          DayClosed = CASE WHEN bd.ClosedAt IS NOT NULL THEN 1 ELSE 0 END
   FROM dbo.Orders o
   LEFT JOIN dbo.Users u         ON u.UserID = o.CreatedBy
+  LEFT JOIN dbo.Users cf        ON cf.UserID = o.ConfirmedBy
   LEFT JOIN dbo.BusinessDays bd ON bd.BusinessDayID = o.BusinessDayID
   WHERE (@Status IS NULL OR o.Status = @Status)
     AND (@OrderType IS NULL OR o.OrderType = @OrderType)
@@ -682,112 +683,6 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_GetRevenueByDay
-  @StartDate DATE,
-  @EndDate   DATE
-AS
-BEGIN
-  SET NOCOUNT ON;
-  SELECT BizDate AS SaleDate,
-         COUNT(*)                    AS OrderCount,
-         ISNULL(SUM(TotalAmount), 0) AS Revenue
-  FROM dbo.vw_OrdersBiz
-  WHERE Status = 'Confirmed' AND BizDate BETWEEN @StartDate AND @EndDate
-  GROUP BY BizDate
-  ORDER BY SaleDate;
-END
-GO
-
-CREATE OR ALTER PROCEDURE dbo.sp_GetOrdersByHour
-  @Date    DATE,
-  @EndDate DATE = NULL
-AS
-BEGIN
-  SET NOCOUNT ON;
-  DECLARE @end DATE = ISNULL(@EndDate, @Date);
-
-  SELECT HourLabel =
-           RIGHT('0' + CAST(DATEPART(HOUR, DATEADD(HOUR,5,CreatedAt)) AS VARCHAR(2)), 2) + ':00'
-           + ' - '
-           + RIGHT('0' + CAST((DATEPART(HOUR, DATEADD(HOUR,5,CreatedAt)) + 1) % 24 AS VARCHAR(2)), 2) + ':00',
-         OrderCount = COUNT(*),
-         Revenue    = ISNULL(SUM(TotalAmount), 0)
-  FROM dbo.vw_OrdersBiz
-  WHERE Status = 'Confirmed' AND BizDate BETWEEN @Date AND @end
-  GROUP BY DATEPART(HOUR, DATEADD(HOUR, 5, CreatedAt))
-  ORDER BY DATEPART(HOUR, DATEADD(HOUR, 5, CreatedAt));
-END
-GO
-
-CREATE OR ALTER PROCEDURE dbo.sp_GetTopMenuItems
-  @StartDate DATE,
-  @EndDate   DATE,
-  @TopN INT = 5
-AS
-BEGIN
-  SET NOCOUNT ON;
-  SELECT TOP (@TopN)
-         mi.Name           AS ItemName,
-         SUM(oi.Quantity)  AS OrderCount,
-         SUM(oi.LineTotal) AS Revenue
-  FROM dbo.OrderItems oi
-  INNER JOIN dbo.MenuItems mi ON oi.ItemID  = mi.ItemID
-  INNER JOIN dbo.vw_OrdersBiz o ON oi.OrderID = o.OrderID
-  WHERE o.Status = 'Confirmed' AND o.BizDate BETWEEN @StartDate AND @EndDate
-  GROUP BY mi.ItemID, mi.Name
-  ORDER BY SUM(oi.Quantity) DESC;
-END
-GO
-
-CREATE OR ALTER PROCEDURE dbo.sp_GetPaymentAnalytics
-  @StartDate DATE,
-  @EndDate   DATE
-AS
-BEGIN
-  SET NOCOUNT ON;
-  SELECT PaymentMethod,
-         Orders  = COUNT(*),
-         Revenue = ISNULL(SUM(TotalAmount), 0)
-  FROM dbo.vw_OrdersBiz
-  WHERE Status = 'Confirmed' AND BizDate BETWEEN @StartDate AND @EndDate
-  GROUP BY PaymentMethod;
-END
-GO
-
--- Revenue = Confirmed (paid) orders. TotalOrders = all non-cancelled. Completed = Confirmed, Active =
--- Pending (unpaid). Cancelled are reported on their own.
-CREATE OR ALTER PROCEDURE dbo.sp_GetAnalyticsSummary
-  @StartDate DATE,
-  @EndDate   DATE
-AS
-BEGIN
-  SET NOCOUNT ON;
-
-  DECLARE @days INT = DATEDIFF(DAY, @StartDate, @EndDate) + 1;
-  DECLARE @prevStart DATE = DATEADD(DAY, -@days, @StartDate);
-  DECLARE @prevEnd   DATE = DATEADD(DAY, -1, @StartDate);
-
-  SELECT
-    TotalRevenue    = ISNULL(SUM(CASE WHEN Status = 'Confirmed' THEN TotalAmount END), 0),
-    TotalOrders     = COUNT(CASE WHEN Status <> 'Cancelled' THEN 1 END),
-    CompletedOrders = COUNT(CASE WHEN Status = 'Confirmed' THEN 1 END),
-    ActiveOrders    = COUNT(CASE WHEN Status = 'Pending' THEN 1 END),
-    AvgOrderValue   = CASE WHEN COUNT(CASE WHEN Status = 'Confirmed' THEN 1 END) = 0 THEN 0
-                           ELSE ISNULL(SUM(CASE WHEN Status = 'Confirmed' THEN TotalAmount END), 0)
-                                / COUNT(CASE WHEN Status = 'Confirmed' THEN 1 END) END,
-    CancelledOrders = COUNT(CASE WHEN Status = 'Cancelled' THEN 1 END),
-    CancelledAmount = ISNULL(SUM(CASE WHEN Status = 'Cancelled' THEN TotalAmount END), 0)
-  FROM dbo.vw_OrdersBiz
-  WHERE BizDate BETWEEN @StartDate AND @EndDate;
-
-  SELECT
-    PrevRevenue = ISNULL(SUM(CASE WHEN Status = 'Confirmed' THEN TotalAmount END), 0),
-    PrevOrders  = COUNT(CASE WHEN Status <> 'Cancelled' THEN 1 END)
-  FROM dbo.vw_OrdersBiz
-  WHERE BizDate BETWEEN @prevStart AND @prevEnd;
-END
-GO
-
 -- ============================================================
 --  8. NAV: "Day Close" under Orders, Cashier + Admin only
 -- ============================================================
@@ -812,4 +707,266 @@ END
 GO
 
 PRINT 'Order workflow applied: two statuses, payment confirmation, business days.';
+GO
+
+-- ============================================================
+--  9. ANALYTICS WITH A TIME RANGE
+--     @FromTime/@ToTime are LOCAL (UTC+5) date-times. When they are NULL the report uses whole
+--     business days (@StartDate..@EndDate) as before; when given, exactly the orders placed in
+--     that time window are reported (e.g. 10:00 AM to 2:00 PM).
+-- ============================================================
+
+CREATE OR ALTER PROCEDURE dbo.sp_GetRevenueByDay
+  @StartDate DATE,
+  @EndDate   DATE,
+  @FromTime  DATETIME2 = NULL,
+  @ToTime    DATETIME2 = NULL
+AS
+BEGIN
+  SET NOCOUNT ON;
+  SELECT x.d AS SaleDate,
+         COUNT(*)                    AS OrderCount,
+         ISNULL(SUM(o.TotalAmount), 0) AS Revenue
+  FROM dbo.vw_OrdersBiz o
+  CROSS APPLY (SELECT d = CASE WHEN @FromTime IS NULL THEN o.BizDate
+                               ELSE CAST(DATEADD(HOUR, 5, o.CreatedAt) AS DATE) END) x
+  WHERE o.Status = 'Confirmed'
+    AND ( (@FromTime IS NULL AND o.BizDate BETWEEN @StartDate AND @EndDate)
+       OR (@FromTime IS NOT NULL AND DATEADD(HOUR, 5, o.CreatedAt) BETWEEN @FromTime AND @ToTime) )
+  GROUP BY x.d
+  ORDER BY SaleDate;
+END
+GO
+
+CREATE OR ALTER PROCEDURE dbo.sp_GetOrdersByHour
+  @Date     DATE,
+  @EndDate  DATE = NULL,
+  @FromTime DATETIME2 = NULL,
+  @ToTime   DATETIME2 = NULL
+AS
+BEGIN
+  SET NOCOUNT ON;
+  DECLARE @end DATE = ISNULL(@EndDate, @Date);
+
+  SELECT HourLabel =
+           RIGHT('0' + CAST(DATEPART(HOUR, DATEADD(HOUR,5,CreatedAt)) AS VARCHAR(2)), 2) + ':00'
+           + ' - '
+           + RIGHT('0' + CAST((DATEPART(HOUR, DATEADD(HOUR,5,CreatedAt)) + 1) % 24 AS VARCHAR(2)), 2) + ':00',
+         OrderCount = COUNT(*),
+         Revenue    = ISNULL(SUM(TotalAmount), 0)
+  FROM dbo.vw_OrdersBiz
+  WHERE Status = 'Confirmed'
+    AND ( (@FromTime IS NULL AND BizDate BETWEEN @Date AND @end)
+       OR (@FromTime IS NOT NULL AND DATEADD(HOUR, 5, CreatedAt) BETWEEN @FromTime AND @ToTime) )
+  GROUP BY DATEPART(HOUR, DATEADD(HOUR, 5, CreatedAt))
+  ORDER BY DATEPART(HOUR, DATEADD(HOUR, 5, CreatedAt));
+END
+GO
+
+CREATE OR ALTER PROCEDURE dbo.sp_GetTopMenuItems
+  @StartDate DATE,
+  @EndDate   DATE,
+  @TopN      INT = 5,
+  @FromTime  DATETIME2 = NULL,
+  @ToTime    DATETIME2 = NULL
+AS
+BEGIN
+  SET NOCOUNT ON;
+  SELECT TOP (@TopN)
+         mi.Name           AS ItemName,
+         SUM(oi.Quantity)  AS OrderCount,
+         SUM(oi.LineTotal) AS Revenue
+  FROM dbo.OrderItems oi
+  INNER JOIN dbo.MenuItems mi ON oi.ItemID  = mi.ItemID
+  INNER JOIN dbo.vw_OrdersBiz o ON oi.OrderID = o.OrderID
+  WHERE o.Status = 'Confirmed'
+    AND ( (@FromTime IS NULL AND o.BizDate BETWEEN @StartDate AND @EndDate)
+       OR (@FromTime IS NOT NULL AND DATEADD(HOUR, 5, o.CreatedAt) BETWEEN @FromTime AND @ToTime) )
+  GROUP BY mi.ItemID, mi.Name
+  ORDER BY SUM(oi.Quantity) DESC;
+END
+GO
+
+CREATE OR ALTER PROCEDURE dbo.sp_GetPaymentAnalytics
+  @StartDate DATE,
+  @EndDate   DATE,
+  @FromTime  DATETIME2 = NULL,
+  @ToTime    DATETIME2 = NULL
+AS
+BEGIN
+  SET NOCOUNT ON;
+  SELECT PaymentMethod,
+         Orders  = COUNT(*),
+         Revenue = ISNULL(SUM(TotalAmount), 0)
+  FROM dbo.vw_OrdersBiz
+  WHERE Status = 'Confirmed'
+    AND ( (@FromTime IS NULL AND BizDate BETWEEN @StartDate AND @EndDate)
+       OR (@FromTime IS NOT NULL AND DATEADD(HOUR, 5, CreatedAt) BETWEEN @FromTime AND @ToTime) )
+  GROUP BY PaymentMethod;
+END
+GO
+
+-- Revenue = Confirmed (paid). TotalOrders = non-cancelled. Completed = Confirmed, Active = Pending.
+-- The comparison period is the preceding range of the same length.
+CREATE OR ALTER PROCEDURE dbo.sp_GetAnalyticsSummary
+  @StartDate DATE,
+  @EndDate   DATE,
+  @FromTime  DATETIME2 = NULL,
+  @ToTime    DATETIME2 = NULL
+AS
+BEGIN
+  SET NOCOUNT ON;
+
+  DECLARE @days INT = DATEDIFF(DAY, @StartDate, @EndDate) + 1;
+  DECLARE @prevStart DATE = DATEADD(DAY, -@days, @StartDate);
+  DECLARE @prevEnd   DATE = DATEADD(DAY, -1, @StartDate);
+  DECLARE @span INT = CASE WHEN @FromTime IS NULL THEN 0 ELSE DATEDIFF(SECOND, @FromTime, @ToTime) + 1 END;
+  DECLARE @prevFrom DATETIME2 = CASE WHEN @FromTime IS NULL THEN NULL ELSE DATEADD(SECOND, -@span, @FromTime) END;
+  DECLARE @prevTo   DATETIME2 = CASE WHEN @FromTime IS NULL THEN NULL ELSE DATEADD(SECOND, -1, @FromTime) END;
+
+  SELECT
+    TotalRevenue    = ISNULL(SUM(CASE WHEN Status = 'Confirmed' THEN TotalAmount END), 0),
+    TotalOrders     = COUNT(CASE WHEN Status <> 'Cancelled' THEN 1 END),
+    CompletedOrders = COUNT(CASE WHEN Status = 'Confirmed' THEN 1 END),
+    ActiveOrders    = COUNT(CASE WHEN Status = 'Pending' THEN 1 END),
+    AvgOrderValue   = CASE WHEN COUNT(CASE WHEN Status = 'Confirmed' THEN 1 END) = 0 THEN 0
+                           ELSE ISNULL(SUM(CASE WHEN Status = 'Confirmed' THEN TotalAmount END), 0)
+                                / COUNT(CASE WHEN Status = 'Confirmed' THEN 1 END) END,
+    CancelledOrders = COUNT(CASE WHEN Status = 'Cancelled' THEN 1 END),
+    CancelledAmount = ISNULL(SUM(CASE WHEN Status = 'Cancelled' THEN TotalAmount END), 0)
+  FROM dbo.vw_OrdersBiz
+  WHERE (@FromTime IS NULL AND BizDate BETWEEN @StartDate AND @EndDate)
+     OR (@FromTime IS NOT NULL AND DATEADD(HOUR, 5, CreatedAt) BETWEEN @FromTime AND @ToTime);
+
+  SELECT
+    PrevRevenue = ISNULL(SUM(CASE WHEN Status = 'Confirmed' THEN TotalAmount END), 0),
+    PrevOrders  = COUNT(CASE WHEN Status <> 'Cancelled' THEN 1 END)
+  FROM dbo.vw_OrdersBiz
+  WHERE (@FromTime IS NULL AND BizDate BETWEEN @prevStart AND @prevEnd)
+     OR (@FromTime IS NOT NULL AND DATEADD(HOUR, 5, CreatedAt) BETWEEN @prevFrom AND @prevTo);
+END
+GO
+
+-- ============================================================
+--  10. ORDER LIST: total of everything the current search/filters match (all pages)
+--      Cancelled orders are left out of the total unless the Status filter is Cancelled.
+-- ============================================================
+IF OBJECT_ID('dbo.sp_GetOrdersTotal', 'P') IS NULL EXEC('CREATE PROCEDURE dbo.sp_GetOrdersTotal AS SELECT 1');
+GO
+ALTER PROCEDURE dbo.sp_GetOrdersTotal
+  @Status NVARCHAR(20) = NULL,
+  @StartDate DATE = NULL,
+  @EndDate DATE = NULL,
+  @OrderType NVARCHAR(20) = NULL,
+  @PaymentMethod NVARCHAR(20) = NULL,
+  @OrderRef NVARCHAR(30) = NULL,
+  @CustomerName NVARCHAR(120) = NULL,
+  @TableNumber NVARCHAR(20) = NULL,
+  @CurrentDayOnly BIT = 0
+AS
+BEGIN
+  SET NOCOUNT ON;
+  DECLARE @OrderID INT = TRY_CONVERT(INT, @OrderRef);
+
+  SELECT Orders      = COUNT(*),
+         TotalAmount = ISNULL(SUM(o.TotalAmount), 0)
+  FROM dbo.Orders o
+  LEFT JOIN dbo.BusinessDays bd ON bd.BusinessDayID = o.BusinessDayID
+  WHERE (@Status IS NULL OR o.Status = @Status)
+    AND (@Status = 'Cancelled' OR o.Status <> 'Cancelled')
+    AND (@OrderType IS NULL OR o.OrderType = @OrderType)
+    AND (@PaymentMethod IS NULL OR o.PaymentMethod = @PaymentMethod)
+    AND (@StartDate IS NULL OR o.CreatedAt >= @StartDate)
+    AND (@EndDate IS NULL OR o.CreatedAt < DATEADD(DAY, 1, @EndDate))
+    AND (@OrderRef IS NULL OR o.OrderID = @OrderID OR o.OrderNumber LIKE '%' + @OrderRef + '%')
+    AND (@CustomerName IS NULL OR o.CustomerName LIKE '%' + @CustomerName + '%')
+    AND (@TableNumber IS NULL OR o.TableNumber = @TableNumber)
+    AND (@CurrentDayOnly = 0 OR bd.OpenSlot = 1)
+  OPTION (RECOMPILE);
+END
+GO
+
+-- ============================================================
+--  11. KITCHEN SCREEN
+--      Every ordered dish has a kitchen status: Preparing (new) -> Done (chef pressed Done).
+--      Dishes that existed before this feature are marked Done so the screen starts empty.
+-- ============================================================
+IF COL_LENGTH('dbo.OrderItems', 'KitchenStatus') IS NULL
+BEGIN
+  ALTER TABLE dbo.OrderItems ADD KitchenStatus NVARCHAR(12) NOT NULL CONSTRAINT DF_OrderItems_Kitchen DEFAULT 'Done';
+  ALTER TABLE dbo.OrderItems DROP CONSTRAINT DF_OrderItems_Kitchen;
+  ALTER TABLE dbo.OrderItems ADD CONSTRAINT DF_OrderItems_Kitchen DEFAULT 'Preparing' FOR KitchenStatus;
+END
+IF COL_LENGTH('dbo.OrderItems', 'DoneAt') IS NULL ALTER TABLE dbo.OrderItems ADD DoneAt DATETIME2 NULL;
+IF COL_LENGTH('dbo.OrderItems', 'DoneBy') IS NULL ALTER TABLE dbo.OrderItems ADD DoneBy INT NULL;
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_OrderItems_DoneBy')
+  ALTER TABLE dbo.OrderItems ADD CONSTRAINT FK_OrderItems_DoneBy FOREIGN KEY (DoneBy) REFERENCES dbo.Users(UserID);
+-- Small index: only dishes still being prepared.
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_OrderItems_Preparing' AND object_id = OBJECT_ID('dbo.OrderItems'))
+  CREATE INDEX IX_OrderItems_Preparing ON dbo.OrderItems (OrderID) WHERE KitchenStatus = 'Preparing';
+GO
+
+IF OBJECT_ID('dbo.sp_GetKitchenItems', 'P') IS NULL EXEC('CREATE PROCEDURE dbo.sp_GetKitchenItems AS SELECT 1');
+GO
+-- Dishes still being prepared (cancelled orders drop off), oldest order first.
+ALTER PROCEDURE dbo.sp_GetKitchenItems
+AS
+BEGIN
+  SET NOCOUNT ON;
+  SELECT oi.OrderItemID, oi.OrderID, o.OrderNumber, o.TableNumber, o.OrderType,
+         ItemName = mi.Name, oi.Quantity, s.SizeName, oi.SpecialInstructions,
+         c.CategoryID, CategoryName = c.Name,
+         AgeSeconds = DATEDIFF(SECOND, o.CreatedAt, SYSUTCDATETIME())
+  FROM dbo.OrderItems oi
+  INNER JOIN dbo.Orders o     ON o.OrderID = oi.OrderID
+  INNER JOIN dbo.MenuItems mi ON mi.ItemID = oi.ItemID
+  INNER JOIN dbo.Categories c ON c.CategoryID = mi.CategoryID
+  LEFT JOIN dbo.Sizes s       ON s.SizeID = oi.SizeID
+  WHERE oi.KitchenStatus = 'Preparing' AND o.Status <> 'Cancelled'
+  ORDER BY o.CreatedAt, oi.OrderItemID;
+END
+GO
+
+IF OBJECT_ID('dbo.sp_MarkItemDone', 'P') IS NULL EXEC('CREATE PROCEDURE dbo.sp_MarkItemDone AS SELECT 1');
+GO
+-- Chef pressed Done. Pressing it twice (or on a dish another screen already finished) is harmless.
+ALTER PROCEDURE dbo.sp_MarkItemDone
+  @OrderItemID INT,
+  @DoneBy INT
+AS
+BEGIN
+  SET NOCOUNT ON;
+  IF @DoneBy IS NULL OR NOT EXISTS (SELECT 1 FROM dbo.Users WHERE UserID = @DoneBy)
+    THROW 50050, 'The user could not be identified. Please sign in again.', 1;
+
+  UPDATE dbo.OrderItems
+  SET KitchenStatus = 'Done', DoneAt = SYSUTCDATETIME(), DoneBy = @DoneBy
+  WHERE OrderItemID = @OrderItemID AND KitchenStatus = 'Preparing';
+
+  SELECT Updated = @@ROWCOUNT;
+END
+GO
+
+-- Nav: top-level "Kitchen" link for Admin, Manager and every kitchen role.
+IF NOT EXISTS (SELECT 1 FROM dbo.NavGroups WHERE Url = '~/Kitchen/KitchenOrders.aspx')
+BEGIN
+  DECLARE @sec INT = (SELECT TOP 1 SectionID FROM dbo.NavGroups WHERE GroupName = 'Analytics' ORDER BY GroupID);
+  INSERT INTO dbo.NavGroups (SectionID, GroupName, IconClass, Url, CollapseId, SortOrder)
+  VALUES (@sec, 'Kitchen', '', '~/Kitchen/KitchenOrders.aspx', NULL, 12);
+END
+GO
+
+DECLARE @kg INT = (SELECT TOP 1 GroupID FROM dbo.NavGroups WHERE Url = '~/Kitchen/KitchenOrders.aspx');
+IF @kg IS NOT NULL
+BEGIN
+  INSERT INTO dbo.NavGroupRoles (GroupID, RoleName)
+  SELECT @kg, r.RoleName
+  FROM (SELECT 'Admin' AS RoleName UNION SELECT 'Manager'
+        UNION SELECT RoleName FROM dbo.Roles WHERE RoleName LIKE 'kitchen%') r
+  WHERE NOT EXISTS (SELECT 1 FROM dbo.NavGroupRoles x WHERE x.GroupID = @kg AND x.RoleName = r.RoleName);
+END
+GO
+
+PRINT 'Cashier column, order totals, analytics time range and kitchen applied.';
 GO

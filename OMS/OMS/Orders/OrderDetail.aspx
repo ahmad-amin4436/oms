@@ -81,6 +81,13 @@
                     DataFormatString="Rs.&#160;{0:N0}"
                     HeaderStyle-CssClass="border-0 text-end"
                     ItemStyle-CssClass="align-middle text-end fw-semibold" />
+                  <asp:TemplateField HeaderText="Kitchen" HeaderStyle-CssClass="border-0 text-center" ItemStyle-CssClass="align-middle text-center">
+                    <ItemTemplate>
+                      <span class='badge <%# Convert.ToString(Eval("KitchenStatus")) == "Done" ? "badge-subtle-success" : "badge-subtle-warning" %>'>
+                        <%# Convert.ToString(Eval("KitchenStatus")) == "Done" ? "Done" : "Preparing" %>
+                      </span>
+                    </ItemTemplate>
+                  </asp:TemplateField>
                   <asp:TemplateField HeaderStyle-CssClass="border-0" ItemStyle-CssClass="align-middle text-end">
                     <ItemTemplate>
                       <a href="#" class="btn btn-falcon-default btn-sm px-2 py-0 fs--2" title="Print this dish"
@@ -254,12 +261,14 @@
             <%-- Cashier/Admin on an unpaid order --%>
             <asp:Panel ID="pnlConfirm" runat="server" Visible="false">
               <label class="form-label fs--1 mb-1">Paid by</label>
-              <asp:DropDownList ID="ddlPayMethod" runat="server" CssClass="form-select form-select-sm mb-2">
+              <asp:DropDownList ID="ddlPayMethod" runat="server" CssClass="form-select form-select-sm mb-2"
+                AutoPostBack="true" CausesValidation="false" OnSelectedIndexChanged="ddlPayMethod_Changed">
                 <asp:ListItem Value="Cash">Cash</asp:ListItem>
                 <asp:ListItem Value="Card">Card</asp:ListItem>
                 <asp:ListItem Value="Wallet">Wallet</asp:ListItem>
                 <asp:ListItem Value="BankTransfer">Bank Transfer</asp:ListItem>
               </asp:DropDownList>
+              <asp:Label ID="lblPayHint" runat="server" CssClass="d-block fs--2 text-warning mb-2" />
               <asp:Button ID="btnConfirmPayment" runat="server" CssClass="btn btn-success btn-sm w-100"
                 Text="Confirm Payment (Mark Paid)" OnClick="btnConfirmPayment_Click" />
               <p class="fs--2 text-600 mb-0 mt-2">Confirms the order as fully paid. Changing the method re-prices tax at that method's rate. An order from a closed business day is counted in the current business day.</p>

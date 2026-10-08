@@ -21,11 +21,18 @@ namespace OMS.Analytics
             if (!IsPostBack)
             {
                 var today = LocalToday();
-                txtStart.Text = today.AddDays(-29).ToString("yyyy-MM-dd");
-                txtEnd.Text   = today.ToString("yyyy-MM-dd");
+                txtStart.Text = today.AddDays(-29).ToString(StartFmt);
+                txtEnd.Text   = today.ToString(EndFmt);
                 BindAll();
             }
         }
+
+        // Full-day defaults for the date-and-time pickers (value format of <input type=datetime-local>).
+        private const string StartFmt = "yyyy-MM-dd'T'00:00";
+        private const string EndFmt   = "yyyy-MM-dd'T'23:59";
+
+        // Exact time window (local time) when the user narrowed the times; otherwise null = whole business days.
+        private DateTime? _from, _to;
 
         protected void btnApply_Click(object sender, EventArgs e) => BindAll();
 
@@ -37,8 +44,8 @@ namespace OMS.Analytics
             if (days <= 0) days = 30;
 
             var today = LocalToday();
-            txtStart.Text = today.AddDays(-(days - 1)).ToString("yyyy-MM-dd");
-            txtEnd.Text   = today.ToString("yyyy-MM-dd");
+            txtStart.Text = today.AddDays(-(days - 1)).ToString(StartFmt);
+            txtEnd.Text   = today.ToString(EndFmt);
             BindAll();
         }
 
@@ -46,20 +53,29 @@ namespace OMS.Analytics
         {
             var today = LocalToday();
             DateTime start, end;
-            start = DateTime.TryParse(txtStart.Text, out start) ? start.Date : today.AddDays(-29);
-            end   = DateTime.TryParse(txtEnd.Text,   out end)   ? end.Date   : today;
+            DateTime s0, e0;
+            s0 = DateTime.TryParse(txtStart.Text, out s0) ? s0 : today.AddDays(-29);
+            e0 = DateTime.TryParse(txtEnd.Text,   out e0) ? e0 : today.AddHours(23).AddMinutes(59);
 
             // Guard against an inverted range.
-            if (end < start) { var t = start; start = end; end = t; }
+            if (e0 < s0) { var t = s0; s0 = e0; e0 = t; }
 
-            litRangeLabel.Text = start.ToString("dd MMM yyyy") + " – " + end.ToString("dd MMM yyyy");
+            // Full days (00:00 to 23:59) = report by business day. Anything narrower = exact time window.
+            bool exact = !(s0.TimeOfDay == TimeSpan.Zero && e0.TimeOfDay >= new TimeSpan(23, 59, 0));
+            _from = exact ? (DateTime?)s0 : null;
+            _to   = exact ? (DateTime?)e0.AddSeconds(59) : null;   // the picker has minute precision: include the whole last minute
+            start = s0.Date; end = e0.Date;
+
+            litRangeLabel.Text = exact
+                ? s0.ToString("dd MMM yyyy, hh:mm tt") + " – " + e0.ToString("dd MMM yyyy, hh:mm tt")
+                : start.ToString("dd MMM yyyy") + " – " + end.ToString("dd MMM yyyy");
 
             BindSummary(start, end);
 
-            DataTable revenue  = DashboardService.RevenueByDay(start, end);
-            DataTable topItems = DashboardService.TopMenuItems(start, end, 10);
-            DataTable payments = DashboardService.PaymentAnalytics(start, end);
-            DataTable hourly   = DashboardService.OrdersByHour(start, end);
+            DataTable revenue  = DashboardService.RevenueByDay(start, end, _from, _to);
+            DataTable topItems = DashboardService.TopMenuItems(start, end, 10, _from, _to);
+            DataTable payments = DashboardService.PaymentAnalytics(start, end, _from, _to);
+            DataTable hourly   = DashboardService.OrdersByHour(start, end, _from, _to);
 
             gvRevenue.DataSource  = revenue;  gvRevenue.DataBind();
             gvTopItems.DataSource = topItems; gvTopItems.DataBind();
@@ -76,7 +92,7 @@ namespace OMS.Analytics
 
         private void BindSummary(DateTime start, DateTime end)
         {
-            AnalyticsSummary s = DashboardService.AnalyticsSummary(start, end);
+            AnalyticsSummary s = DashboardService.AnalyticsSummary(start, end, _from, _to);
 
             litRevenue.Text   = "Rs. " + s.TotalRevenue.ToString("N0");
             litOrders.Text    = s.TotalOrders.ToString("N0");

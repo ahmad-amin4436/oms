@@ -62,6 +62,38 @@ namespace OMS.Orders
 
         // Dishes can be added to an open order but never removed. The price and the
         // status rule are enforced in sp_AddOrderItem, not trusted from the page.
+        // The cashier picks how the customer is paying: show the tax and total at THAT method's rate
+        // right away. Nothing is saved until Confirm Payment is pressed (which uses the same rate).
+        protected void ddlPayMethod_Changed(object sender, EventArgs e)
+        {
+            if (!SecurityHelper.IsInRole("Cashier", "Admin")) return;
+
+            var ds = DBHelper.ExecuteDataSet("sp_GetOrderByID", DBHelper.Parameter("@OrderID", OrderID));
+            if (ds.Tables.Count == 0 || ds.Tables[0].Rows.Count == 0) return;
+            DataRow row = ds.Tables[0].Rows[0];
+            if (Convert.ToString(row["Status"]) != "Pending") return;
+
+            string method = ddlPayMethod.SelectedValue;
+            lblPayHint.Text = "";
+            if (method == Convert.ToString(row["PaymentMethod"]))
+            {
+                BindOrder();                          // back to the order's own saved tax
+                return;
+            }
+
+            decimal sub  = Convert.ToDecimal(row["SubTotal"]);
+            decimal disc = Convert.ToDecimal(row["DiscountAmount"]);
+            decimal pct  = SettingsHelper.TaxPercentFor(method);
+            decimal tax  = SettingsHelper.CalcTax(sub - disc, pct);
+            decimal total = sub - disc + tax;
+
+            lblTaxLabel.Text = "Tax (" + pct.ToString("0.##") + "%)";
+            lblTax.Text      = Fmt(tax);
+            lblTotal.Text    = Fmt(total);
+            btnConfirmPayment.OnClientClick = "return confirm('Confirm that " + Fmt(total) + " was received?');";
+            lblPayHint.Text  = "Tax shown at the " + ddlPayMethod.SelectedItem.Text + " rate (" + pct.ToString("0.##") + "%). It is saved when you confirm payment.";
+        }
+
         protected void btnAddDish_Click(object sender, EventArgs e)
         {
             Page.Validate("AddDish");

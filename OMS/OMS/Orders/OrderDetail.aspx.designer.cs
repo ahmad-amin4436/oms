@@ -62,6 +62,7 @@ namespace OMS.Orders
         protected global::System.Web.UI.WebControls.Panel          pnlConfirm;
         protected global::System.Web.UI.WebControls.DropDownList   ddlPayMethod;
         protected global::System.Web.UI.WebControls.Button         btnConfirmPayment;
+        protected global::System.Web.UI.WebControls.Label          lblPayHint;
         protected global::System.Web.UI.WebControls.Panel          pnlAwaiting;
         protected global::System.Web.UI.WebControls.Panel          pnlPaidInfo;
         protected global::System.Web.UI.WebControls.Label          lblPaidInfo;

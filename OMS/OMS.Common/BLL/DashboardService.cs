@@ -30,9 +30,13 @@ namespace OMS.Common.BLL
             return summary;
         }
 
-        public static DataTable RevenueByDay(DateTime start, DateTime end)
+        private static object T(DateTime? t) { return t.HasValue ? (object)t.Value : DBNull.Value; }
+
+        // fromTime/toTime (local date-times) switch the report from whole business days to an exact time window.
+        public static DataTable RevenueByDay(DateTime start, DateTime end, DateTime? fromTime = null, DateTime? toTime = null)
         {
-            return DBHelper.ExecuteDataTable("sp_GetRevenueByDay", DBHelper.Parameter("@StartDate", start.Date), DBHelper.Parameter("@EndDate", end.Date));
+            return DBHelper.ExecuteDataTable("sp_GetRevenueByDay", DBHelper.Parameter("@StartDate", start.Date), DBHelper.Parameter("@EndDate", end.Date),
+                DBHelper.Parameter("@FromTime", T(fromTime)), DBHelper.Parameter("@ToTime", T(toTime)));
         }
 
         public static DataTable OrdersByHour(DateTime date)
@@ -41,16 +45,18 @@ namespace OMS.Common.BLL
         }
 
         // Hourly distribution across a date range (inclusive).
-        public static DataTable OrdersByHour(DateTime start, DateTime end)
+        public static DataTable OrdersByHour(DateTime start, DateTime end, DateTime? fromTime = null, DateTime? toTime = null)
         {
             return DBHelper.ExecuteDataTable("sp_GetOrdersByHour",
                 DBHelper.Parameter("@Date", start.Date),
-                DBHelper.Parameter("@EndDate", end.Date));
+                DBHelper.Parameter("@EndDate", end.Date),
+                DBHelper.Parameter("@FromTime", T(fromTime)), DBHelper.Parameter("@ToTime", T(toTime)));
         }
 
-        public static DataTable TopMenuItems(DateTime start, DateTime end, int top)
+        public static DataTable TopMenuItems(DateTime start, DateTime end, int top, DateTime? fromTime = null, DateTime? toTime = null)
         {
-            return DBHelper.ExecuteDataTable("sp_GetTopMenuItems", DBHelper.Parameter("@StartDate", start.Date), DBHelper.Parameter("@EndDate", end.Date), DBHelper.Parameter("@TopN", top));
+            return DBHelper.ExecuteDataTable("sp_GetTopMenuItems", DBHelper.Parameter("@StartDate", start.Date), DBHelper.Parameter("@EndDate", end.Date), DBHelper.Parameter("@TopN", top),
+                DBHelper.Parameter("@FromTime", T(fromTime)), DBHelper.Parameter("@ToTime", T(toTime)));
         }
 
         public static DataTable TwoMonthDailySales(DateTime today)
@@ -72,16 +78,18 @@ namespace OMS.Common.BLL
             return dt.Rows.Count > 0 ? dt.Rows[0] : null;
         }
 
-        public static DataTable PaymentAnalytics(DateTime start, DateTime end)
+        public static DataTable PaymentAnalytics(DateTime start, DateTime end, DateTime? fromTime = null, DateTime? toTime = null)
         {
-            return DBHelper.ExecuteDataTable("sp_GetPaymentAnalytics", DBHelper.Parameter("@StartDate", start.Date), DBHelper.Parameter("@EndDate", end.Date));
+            return DBHelper.ExecuteDataTable("sp_GetPaymentAnalytics", DBHelper.Parameter("@StartDate", start.Date), DBHelper.Parameter("@EndDate", end.Date),
+                DBHelper.Parameter("@FromTime", T(fromTime)), DBHelper.Parameter("@ToTime", T(toTime)));
         }
 
-        public static AnalyticsSummary AnalyticsSummary(DateTime start, DateTime end)
+        public static AnalyticsSummary AnalyticsSummary(DateTime start, DateTime end, DateTime? fromTime = null, DateTime? toTime = null)
         {
             var ds = DBHelper.ExecuteDataSet("sp_GetAnalyticsSummary",
                 DBHelper.Parameter("@StartDate", start.Date),
-                DBHelper.Parameter("@EndDate", end.Date));
+                DBHelper.Parameter("@EndDate", end.Date),
+                DBHelper.Parameter("@FromTime", T(fromTime)), DBHelper.Parameter("@ToTime", T(toTime)));
 
             var s = new AnalyticsSummary();
             if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)

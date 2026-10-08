@@ -21,6 +21,8 @@ namespace OMS.Orders
         protected global::System.Web.UI.HtmlControls.HtmlAnchor lnkNewOrder;
         protected global::System.Web.UI.HtmlControls.HtmlAnchor lnkDayClose;
         protected global::System.Web.UI.WebControls.Label lblListMsg;
+        protected global::System.Web.UI.WebControls.Label lblTotalOrders;
+        protected global::System.Web.UI.WebControls.Label lblTotalAmount;
         protected global::System.Web.UI.WebControls.Label lblListError;
         protected global::System.Web.UI.WebControls.CheckBox chkCurrentDay;
     }
