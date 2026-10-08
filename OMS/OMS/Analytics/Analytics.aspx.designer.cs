@@ -23,5 +23,6 @@ namespace OMS.Analytics
         protected global::System.Web.UI.WebControls.GridView   gvRevenue;
         protected global::System.Web.UI.WebControls.GridView   gvTopItems;
         protected global::System.Web.UI.WebControls.GridView   gvHourly;
+            protected global::System.Web.UI.UpdatePanel updAnalytics;
     }
 }

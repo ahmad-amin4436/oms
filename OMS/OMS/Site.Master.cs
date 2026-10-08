@@ -34,12 +34,7 @@ namespace OMS
             litNotif4.Text = html;
         }
 
-        protected void lnkMarkAllRead_Click(object sender, EventArgs e)
-        {
-            if (OMS.Common.Helpers.SecurityHelper.IsInRole("Admin", "Manager"))
-                OMS.Common.DAL.DBHelper.ExecuteNonQuery("sp_MarkAllMessagesRead");
-        }
-
+        
         private string BuildNotificationsHtml()
         {
             if (!OMS.Common.Helpers.SecurityHelper.IsAuthenticated) return string.Empty;
@@ -64,8 +59,7 @@ namespace OMS
             sb.Append("<div class=\"card card-notification shadow-none\"><div class=\"card-header\"><div class=\"row justify-content-between align-items-center\">");
             sb.Append("<div class=\"col-auto\"><h6 class=\"card-header-title mb-0\">Notifications</h6></div>");
             if (canSeeMessages && count > 0)
-                sb.Append("<div class=\"col-auto ps-0 ps-sm-3\"><a class=\"card-link fw-normal\" href=\"javascript:__doPostBack('")
-                  .Append(lnkMarkAllRead.UniqueID).Append("','')\">Mark all as read</a></div>");
+                sb.Append("<div class=\"col-auto ps-0 ps-sm-3\"><a class=\"card-link fw-normal\" href=\"#\" data-mark-read=\"1\">Mark all as read</a></div>");
             sb.Append("</div></div><div class=\"scrollbar-overlay\" style=\"max-height: 19rem\"><div class=\"list-group list-group-flush fw-normal fs--1\">");
 
             if (count == 0)
@@ -77,7 +71,7 @@ namespace OMS
                     string url = isMsg ? ResolveUrl("~/Admin/Messages.aspx")
                                        : ResolveUrl("~/Orders/OrderDetail.aspx?id=" + r["RefID"]);
                     string icon = isMsg ? "fa-envelope text-primary" : "fa-receipt text-warning";
-                    sb.Append("<div class=\"list-group-item\"><a class=\"notification notification-flush notification-unread\" href=\"")
+                    sb.Append("<div class=\"list-group-item").Append(isMsg ? " notif-msg" : "").Append("\"><a class=\"notification notification-flush notification-unread\" href=\"")
                       .Append(url).Append("\"><div class=\"notification-avatar\"><div class=\"avatar avatar-2xl me-3\">")
                       .Append("<div class=\"avatar-name rounded-circle\"><span class=\"fas ").Append(icon).Append("\"></span></div></div></div>")
                       .Append("<div class=\"notification-body\"><p class=\"mb-1\"><strong>")

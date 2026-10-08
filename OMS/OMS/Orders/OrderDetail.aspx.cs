@@ -84,9 +84,13 @@ namespace OMS.Orders
                     DBHelper.Parameter("@Quantity", qty),
                     DBHelper.Parameter("@AddedBy",  SecurityHelper.UserID == 0 ? (object)DBNull.Value : SecurityHelper.UserID));
 
-                // Redirect so a browser refresh cannot add the dish twice.
-                Response.Redirect("~/Orders/OrderDetail.aspx?id=" + OrderID + "&added=1", false);
-                Context.ApplicationInstance.CompleteRequest();
+                // Partial-page update: refresh the order in place (no reload). A browser refresh cannot
+                // re-post this, because the document itself is never replaced by a partial postback.
+                hfAddItem.Value = "";
+                txtAddQty.Text  = "1";
+                BindOrder();
+                lblAddMsg.Text    = "Dish added. Totals updated.";
+                lblAddMsg.Visible = true;
             }
             catch (Exception ex)
             {
@@ -273,13 +277,9 @@ namespace OMS.Orders
 
             // Payment panel: Cashier/Admin can confirm an unpaid order; others see its state.
             pnlPayment.Visible  = !cancelled;
-            pnlConfirm.Visible  = pending && !dayClosed && canConfirm;
+            pnlConfirm.Visible  = pending && canConfirm;   // an order from a closed day is settled into the current day
             pnlAwaiting.Visible = pending && !canConfirm;
             pnlPaidInfo.Visible = confirmed;
-            if (pending && dayClosed && canConfirm)
-            {
-                pnlAwaiting.Visible = true;   // an unpaid order from a closed day can no longer be confirmed
-            }
             if (pnlConfirm.Visible)
             {
                 try { ddlPayMethod.SelectedValue = Convert.ToString(row["PaymentMethod"]); } catch { }

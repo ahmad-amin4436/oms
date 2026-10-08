@@ -22,6 +22,9 @@
   <asp:UpdatePanel ID="updOrders" runat="server">
     <ContentTemplate>
 
+      <asp:Label ID="lblListMsg" runat="server" Visible="false" EnableViewState="false" CssClass="alert alert-success d-block mb-3 py-2 fs--1" />
+      <asp:Label ID="lblListError" runat="server" Visible="false" EnableViewState="false" CssClass="alert alert-danger d-block mb-3 py-2 fs--1" />
+
       <%-- ── Filters ── --%>
       <div class="card mb-3">
         <div class="card-body row g-2 align-items-end">
@@ -49,17 +52,17 @@
         <asp:Panel runat="server" DefaultButton="btnSearch" CssClass="card-body row g-2 align-items-end pt-0">
           <div class="col-sm-4 col-md-3">
             <label class="form-label fs--1 mb-1">O.ID</label>
-            <asp:TextBox ID="txtOrderRef" runat="server" MaxLength="30" CssClass="form-control form-control-sm"
+            <asp:TextBox ID="txtOrderRef" runat="server" autocomplete="off" MaxLength="30" CssClass="form-control form-control-sm"
               placeholder="Order ID or number" />
           </div>
           <div class="col-sm-4 col-md-3">
             <label class="form-label fs--1 mb-1">C.Name</label>
-            <asp:TextBox ID="txtCustomer" runat="server" MaxLength="120" CssClass="form-control form-control-sm"
+            <asp:TextBox ID="txtCustomer" runat="server" autocomplete="off" MaxLength="120" CssClass="form-control form-control-sm"
               placeholder="Customer name" />
           </div>
           <div class="col-sm-4 col-md-3">
             <label class="form-label fs--1 mb-1">T.B.</label>
-            <asp:TextBox ID="txtTable" runat="server" MaxLength="20" CssClass="form-control form-control-sm"
+            <asp:TextBox ID="txtTable" runat="server" autocomplete="off" MaxLength="20" CssClass="form-control form-control-sm"
               placeholder="Table no." />
           </div>
           <div class="col-sm-6 col-md-3">
@@ -89,7 +92,7 @@
             <asp:GridView ID="gvOrders" runat="server"
               CssClass="table table-sm table-striped fs--1 mb-0 overflow-hidden align-middle"
               AutoGenerateColumns="False" GridLines="None"
-              EmptyDataText="No orders found.">
+              EmptyDataText="No orders found." OnRowCommand="gvOrders_RowCommand">
               <EmptyDataRowStyle CssClass="text-center text-600 py-4 fs--1" />
               <HeaderStyle CssClass="bg-200 text-900" />
               <Columns>
@@ -140,6 +143,10 @@
                   HeaderStyle-CssClass="text-end pe-3 align-middle"
                   ItemStyle-CssClass="text-end pe-3 py-2 align-middle white-space-nowrap">
                   <ItemTemplate>
+                    <asp:LinkButton runat="server" CommandName="Settle" CommandArgument='<%# Eval("OrderID") %>' CausesValidation="false"
+                      Visible='<%# ShowSettle(Eval("Status")) %>'
+                      OnClientClick='<%# SettleConfirm(Eval("OrderNumber"), Eval("TotalAmount"), Eval("PaymentMethod"), Eval("DayClosed")) %>'
+                      CssClass="btn btn-sm btn-success px-2 py-0 fs--2 me-1">Settle</asp:LinkButton>
                     <asp:HyperLink runat="server"
                       Visible='<%# OMS.Common.Helpers.SecurityHelper.CanOpen("~/Orders/OrderDetail.aspx") %>'
                       NavigateUrl='<%# "~/Orders/OrderDetail.aspx?id=" + Eval("OrderID") %>'

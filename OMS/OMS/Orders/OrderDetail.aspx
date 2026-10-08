@@ -2,6 +2,8 @@
    CodeBehind="OrderDetail.aspx.cs" Inherits="OMS.Orders.OrderDetail" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
+  <%-- Partial-page updates: actions refresh this panel only, never the whole page. --%>
+  <asp:UpdatePanel ID="updOrderDetail" runat="server" UpdateMode="Always"><ContentTemplate>
 
   <%-- ── Page header ── --%>
   <div class="d-flex align-items-center justify-content-between mb-3">
@@ -260,7 +262,7 @@
               </asp:DropDownList>
               <asp:Button ID="btnConfirmPayment" runat="server" CssClass="btn btn-success btn-sm w-100"
                 Text="Confirm Payment (Mark Paid)" OnClick="btnConfirmPayment_Click" />
-              <p class="fs--2 text-600 mb-0 mt-2">Confirms the order as fully paid. Changing the method re-prices tax at that method's rate.</p>
+              <p class="fs--2 text-600 mb-0 mt-2">Confirms the order as fully paid. Changing the method re-prices tax at that method's rate. An order from a closed business day is counted in the current business day.</p>
             </asp:Panel>
 
             <%-- Anyone else on an unpaid order --%>
@@ -301,9 +303,13 @@
     </div>
   </asp:Panel>
 
+  </ContentTemplate></asp:UpdatePanel>
+
   <script>
     // Add Dish picker: the full menu opens on click/focus; typing narrows it; choosing sets the ItemID.
-    (function () {
+    // Runs on first load AND after every partial (UpdatePanel) refresh, because the panel's
+    // elements are replaced each time; each fresh element gets its handlers once.
+    function initDishPicker() {
       var box = document.getElementById('txtDishSearch');
       var menu = document.getElementById('dishMenu');
       if (!box || !menu) return;
@@ -351,10 +357,15 @@
         document.getElementById('dishPickError').classList.add('d-none');
         close();
       });
+    }
+    if (!window.__dishDocClick) {                    // document-level handler: bound once, looks elements up live
+      window.__dishDocClick = true;
       document.addEventListener('click', function (e) {
-        if (e.target !== box && !menu.contains(e.target)) close();
+        var b = document.getElementById('txtDishSearch'), m = document.getElementById('dishMenu');
+        if (b && m && e.target !== b && !m.contains(e.target)) m.classList.add('d-none');
       });
-    })();
+    }
+    Sys.Application.add_load(initDishPicker);
     function dishPicked() {
       var hf = document.getElementById('<%= hfAddItem.ClientID %>');
       var ok = hf && hf.value !== '';

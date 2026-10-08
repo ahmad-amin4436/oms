@@ -1,5 +1,7 @@
 <%@ Page Title="New Order" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="NewOrder.aspx.cs" Inherits="OMS.Orders.NewOrder" %>
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
+  <%-- Partial-page updates: actions refresh this panel only, never the whole page. --%>
+  <asp:UpdatePanel ID="updNewOrder" runat="server" UpdateMode="Always"><ContentTemplate>
 
   <%-- ── Page header ── --%>
   <div class="d-flex align-items-center justify-content-between mb-3">
@@ -170,12 +172,12 @@
           <div class="row g-2 mb-3 pb-3 border-bottom">
             <div class="col-6">
               <label class="form-label fs--1 mb-1">Customer Name</label>
-              <asp:TextBox ID="txtCustomerName" runat="server"
+              <asp:TextBox ID="txtCustomerName" runat="server" autocomplete="off"
                 CssClass="form-control form-control-sm" placeholder="Optional" MaxLength="120" />
             </div>
             <div class="col-6">
               <label class="form-label fs--1 mb-1">Phone</label>
-              <asp:TextBox ID="txtPhone" runat="server"
+              <asp:TextBox ID="txtPhone" runat="server" autocomplete="off"
                 CssClass="form-control form-control-sm" placeholder="03xx-xxxxxxx"
                 TextMode="Phone" MaxLength="30" />
               <asp:RegularExpressionValidator ID="revPhone" runat="server"
@@ -200,7 +202,7 @@
               <label class="form-label fs--1 mb-1">
                 Table No.<span class="text-danger ms-1">*</span>
               </label>
-              <asp:TextBox ID="txtTableNo" runat="server"
+              <asp:TextBox ID="txtTableNo" runat="server" autocomplete="off"
                 CssClass="form-control form-control-sm" placeholder="e.g. 5" MaxLength="20" />
               <asp:RequiredFieldValidator ID="rfvTableNo" runat="server"
                 ControlToValidate="txtTableNo" ValidationGroup="PlaceOrder"
@@ -212,7 +214,7 @@
               <label class="form-label fs--1 mb-1">
                 Delivery Address<span class="text-danger ms-1">*</span>
               </label>
-              <asp:TextBox ID="txtAddress" runat="server"
+              <asp:TextBox ID="txtAddress" runat="server" autocomplete="off"
                 CssClass="form-control form-control-sm"
                 TextMode="MultiLine" Rows="2" placeholder="Street, area..." MaxLength="300" />
               <asp:RequiredFieldValidator ID="rfvAddress" runat="server"
@@ -351,5 +353,7 @@
     </div>
 
   </div>
+
+  </ContentTemplate></asp:UpdatePanel>
 
 </asp:Content>

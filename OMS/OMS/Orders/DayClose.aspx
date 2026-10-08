@@ -2,6 +2,8 @@
    CodeBehind="DayClose.aspx.cs" Inherits="OMS.Orders.DayClose" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
+  <%-- Partial-page updates: actions refresh this panel only, never the whole page. --%>
+  <asp:UpdatePanel ID="updDayClose" runat="server" UpdateMode="Always"><ContentTemplate>
 
   <div class="d-flex align-items-center justify-content-between mb-3">
     <div>
@@ -132,5 +134,7 @@
       </asp:GridView>
     </div>
   </div>
+
+  </ContentTemplate></asp:UpdatePanel>
 
 </asp:Content>

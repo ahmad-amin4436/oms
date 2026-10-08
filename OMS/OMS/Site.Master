@@ -42,7 +42,6 @@
 <body>
     <form runat="server">
         <asp:ScriptManager runat="server" />
-        <asp:LinkButton ID="lnkMarkAllRead" runat="server" CausesValidation="false" OnClick="lnkMarkAllRead_Click" Style="display:none" />
 <main class="main" id="top">
       <div class="container" data-layout="container">
         <script>
@@ -561,6 +560,55 @@
     <script src="/vendors/lodash/lodash.min.js"></script>
     <script src="/vendors/list.js/list.min.js"></script>
     <script src="/assets/js/theme.js"></script>
+        <%-- Page-wide behaviour for partial-page updates (UpdatePanel): a thin progress bar while a
+             request runs, and no second request while one is still in flight (stops double clicks
+             on Settle / Confirm / Close). Pages never reload for an action; only real navigation does. --%>
+        <div id="ajaxBar" style="position:fixed;top:0;left:0;height:3px;width:0;background:#2c7be5;z-index:2000;transition:width .4s;opacity:0;"></div>
+        <script>
+          (function () {
+            var bar = document.getElementById('ajaxBar');
+            function show() { bar.style.opacity = '1'; bar.style.width = '70%'; document.body.style.cursor = 'progress'; }
+            function hide() { bar.style.width = '100%'; document.body.style.cursor = ''; setTimeout(function () { bar.style.opacity = '0'; bar.style.width = '0'; }, 250); }
+
+            Sys.Application.add_load(function () {
+              if (window.__ajaxHooked) return;
+              window.__ajaxHooked = true;
+              var prm = Sys.WebForms.PageRequestManager.getInstance();
+              prm.add_initializeRequest(function (s, e) { if (prm.get_isInAsyncPostBack()) e.set_cancel(true); });
+              prm.add_beginRequest(show);
+              prm.add_endRequest(function (s, e) {
+                hide();
+                if (e.get_error()) {                       // show server errors without breaking the page
+                  e.set_errorHandled(true);
+                  alert('Something went wrong. Please try again. If it keeps happening, reload the page.');
+                }
+              });
+            });
+
+            // "Mark all as read" in the notification bell: background call, update the list in place.
+            document.addEventListener('click', function (ev) {
+              var a = ev.target.closest ? ev.target.closest('[data-mark-read]') : null;
+              if (!a) return;
+              ev.preventDefault();
+              fetch('<%= ResolveUrl("~/MarkNotificationsRead.ashx") %>', {
+                method: 'POST', credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' }
+              }).then(function (r) {
+                if (!r.ok) return;
+                document.querySelectorAll('.notif-msg').forEach(function (n) { n.remove(); });
+                document.querySelectorAll('.dropdown-menu-notification').forEach(function (menu) {
+                  var list = menu.querySelector('.list-group');
+                  if (list && !list.querySelector('.list-group-item')) {
+                    list.innerHTML = '<div class="list-group-item text-center text-500 py-4">No new notifications</div>';
+                    var link = menu.querySelector('[data-mark-read]'); if (link) link.parentNode.remove();
+                  }
+                });
+                document.querySelectorAll('#navbarDropdownNotification').forEach(function (b) {
+                  if (!document.querySelector('.notification')) b.classList.remove('notification-indicator-primary');
+                });
+              });
+            });
+          })();
+        </script>
       </form>
 </body>
 </html>

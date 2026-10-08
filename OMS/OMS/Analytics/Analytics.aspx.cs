@@ -68,6 +68,10 @@ namespace OMS.Analytics
             RevenueChartJson  = BuildChartJson(revenue,  "SaleDate", "Revenue",    isDate: true);
             TopItemsChartJson = BuildChartJson(topItems, "ItemName", "OrderCount", isDate: false);
             PaymentChartJson  = BuildChartJson(payments, "PaymentMethod", "Revenue", isDate: false);
+
+            // Draw the charts with the data just bound - also during partial-page refreshes.
+            System.Web.UI.ScriptManager.RegisterStartupScript(updAnalytics, typeof(System.Web.UI.UpdatePanel), "renderCharts",
+                "renderCharts(" + RevenueChartJson + "," + PaymentChartJson + "," + TopItemsChartJson + ");", true);
         }
 
         private void BindSummary(DateTime start, DateTime end)

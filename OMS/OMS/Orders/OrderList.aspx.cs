@@ -10,6 +10,15 @@ namespace OMS.Orders
         {
             SecurityHelper.RequireUrlAccess();
             lnkNewOrder.Visible = SecurityHelper.CanOpen("~/Orders/NewOrder.aspx");
+
+            // Browsers pre-fill a saved login (e.g. an email) into the first text box. Keeping the
+            // search boxes read-only until they are clicked stops that; typing and posting work normally.
+            foreach (var tb in new[] { txtOrderRef, txtCustomer, txtTable })
+            {
+                tb.Attributes["readonly"] = "readonly";
+                tb.Attributes["onfocus"]  = "this.removeAttribute('readonly');";
+                tb.Attributes["data-lpignore"] = "true";
+            }
             lnkDayClose.Visible = SecurityHelper.IsInRole("Cashier", "Admin")
                                   && SecurityHelper.CanOpen("~/Orders/DayClose.aspx");
             if (!IsPostBack)
@@ -40,6 +49,58 @@ namespace OMS.Orders
             ddlStatus.SelectedIndex = 0;
             ddlOrderType.SelectedIndex = 0;
             FiltersChanged(sender, e);
+        }
+
+        // ── Settle (= confirm payment) straight from the list ────────────────
+        // Only a Cashier/Admin, only for an unpaid (Pending) order. An order from an already-closed day can still be
+        // settled: the payment is counted in the current business day (the closed day is not changed).
+        protected bool ShowSettle(object status)
+        {
+            return SecurityHelper.IsInRole("Cashier", "Admin")
+                   && Convert.ToString(status) == "Pending";
+        }
+
+        protected string SettleConfirm(object orderNumber, object total, object method, object dayClosed)
+        {
+            string text = "Settle " + Convert.ToString(orderNumber) + " - Rs. " + Convert.ToDecimal(total).ToString("N0") +
+                          " (" + Convert.ToString(method) + ") as paid?";
+            if (Convert.ToInt32(dayClosed) == 1)
+                text += " It is from a closed business day, so the payment will count in the current business day.";
+            return "return confirm('" + text.Replace("'", "") + "');";
+        }
+
+        protected void gvOrders_RowCommand(object sender, System.Web.UI.WebControls.GridViewCommandEventArgs e)
+        {
+            if (e.CommandName != "Settle") return;
+
+            // Server-side authorization: the button being visible proves nothing.
+            if (!SecurityHelper.IsInRole("Cashier", "Admin"))
+            {
+                Response.Redirect("~/AccessDenied.aspx", false);
+                Context.ApplicationInstance.CompleteRequest();
+                return;
+            }
+
+            int orderId, cashierId = SecurityHelper.UserID;
+            if (cashierId == 0 || !int.TryParse(Convert.ToString(e.CommandArgument), out orderId)) return;
+
+            try
+            {
+                // Settles with the order's own payment method and tax; use Order Detail to change the method.
+                DBHelper.ExecuteNonQuery("sp_ConfirmOrder",
+                    DBHelper.Parameter("@OrderID",       orderId),
+                    DBHelper.Parameter("@ConfirmedBy",   cashierId),
+                    DBHelper.Parameter("@PaymentMethod", DBNull.Value),
+                    DBHelper.Parameter("@TaxPercent",    DBNull.Value));
+                lblListMsg.Text    = "Order settled (paid).";
+                lblListMsg.Visible = true;
+            }
+            catch (Exception ex)
+            {
+                lblListError.Text    = "Could not settle: " + ex.Message;
+                lblListError.Visible = true;
+            }
+            BindOrders();
         }
 
         protected void btnPrev_Click(object sender, EventArgs e) { if (PageNo > 1) PageNo--; BindOrders(); }

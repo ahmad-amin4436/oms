@@ -238,7 +238,7 @@ BEGIN
 
   BEGIN TRANSACTION;
 
-  DECLARE @Status NVARCHAR(20), @Method NVARCHAR(20), @Sub DECIMAL(10,2), @Disc DECIMAL(10,2), @Day INT, @DayClosed BIT;
+  DECLARE @Status NVARCHAR(20), @Method NVARCHAR(20), @Sub DECIMAL(10,2), @Disc DECIMAL(10,2), @Day INT, @DayClosed BIT, @Moved INT = NULL;
   SELECT @Status = o.Status, @Method = o.PaymentMethod, @Sub = o.SubTotal, @Disc = o.DiscountAmount,
          @Day = o.BusinessDayID, @DayClosed = CASE WHEN bd.ClosedAt IS NOT NULL THEN 1 ELSE 0 END
   FROM dbo.Orders o WITH (UPDLOCK, HOLDLOCK)
@@ -248,7 +248,20 @@ BEGIN
   IF @Status IS NULL      THROW 50001, 'Order not found.', 1;
   IF @Status = 'Cancelled' THROW 50023, 'A cancelled order cannot be confirmed.', 1;
   IF @Status = 'Confirmed' THROW 50024, 'This order is already confirmed (paid).', 1;
-  IF @DayClosed = 1       THROW 50025, 'This order belongs to a business day that is already closed.', 1;
+  -- An old unpaid order paid today: the money arrives today, so it joins the OPEN business day
+  -- (a new one is opened if none). The closed day it came from is left exactly as it was closed.
+  IF @DayClosed = 1
+  BEGIN
+    DECLARE @Open INT = (SELECT TOP 1 BusinessDayID FROM dbo.BusinessDays WITH (UPDLOCK, HOLDLOCK) WHERE OpenSlot = 1);
+    IF @Open IS NULL
+    BEGIN
+      INSERT INTO dbo.BusinessDays (BusinessDate, OpenedBy)
+      VALUES (CAST(DATEADD(HOUR, -1, SYSUTCDATETIME()) AS DATE), @ConfirmedBy);
+      SET @Open = SCOPE_IDENTITY();
+    END
+    UPDATE dbo.Orders SET BusinessDayID = @Open WHERE OrderID = @OrderID;
+    SET @Moved = @Day;
+  END
 
   IF @PaymentMethod IS NOT NULL AND @PaymentMethod <> @Method AND @TaxPercent IS NOT NULL
   BEGIN
@@ -266,7 +279,8 @@ BEGIN
       ConfirmedBy = @ConfirmedBy, UpdatedAt = SYSUTCDATETIME()
   WHERE OrderID = @OrderID;
 
-  DECLARE @Desc NVARCHAR(500) = CONCAT('Order #', @OrderID, ' paid (', ISNULL(@PaymentMethod, @Method), ') - confirmed');
+  DECLARE @Desc NVARCHAR(500) = CONCAT('Order #', @OrderID, ' paid (', ISNULL(@PaymentMethod, @Method), ') - confirmed',
+                              CASE WHEN @Moved IS NOT NULL THEN CONCAT(' - settled late, moved from business day #', @Moved) ELSE '' END);
   EXEC dbo.sp_LogActivity @ConfirmedBy, 'ConfirmOrder', @Desc, NULL;
 
   COMMIT TRANSACTION;
@@ -381,7 +395,8 @@ BEGIN
   DECLARE @Take INT = CASE WHEN @PageSize IS NULL THEN 500 ELSE @PageSize + 1 END;
   DECLARE @Skip INT = CASE WHEN @PageSize IS NULL THEN 0 ELSE (CASE WHEN @PageNumber < 1 THEN 0 ELSE @PageNumber - 1 END) * @PageSize END;
 
-  SELECT o.*, CreatedByName = u.FullName, bd.BusinessDate
+  SELECT o.*, CreatedByName = u.FullName, bd.BusinessDate,
+         DayClosed = CASE WHEN bd.ClosedAt IS NOT NULL THEN 1 ELSE 0 END
   FROM dbo.Orders o
   LEFT JOIN dbo.Users u         ON u.UserID = o.CreatedBy
   LEFT JOIN dbo.BusinessDays bd ON bd.BusinessDayID = o.BusinessDayID

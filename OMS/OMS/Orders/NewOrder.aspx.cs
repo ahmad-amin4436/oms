@@ -53,6 +53,14 @@ namespace OMS.Orders
         {
             SecurityHelper.RequireUrlAccess();
 
+            // Stop the browser pre-filling a saved login into the customer fields (see OrderList).
+            foreach (var tb in new[] { txtCustomerName, txtPhone, txtTableNo, txtAddress })
+            {
+                tb.Attributes["readonly"] = "readonly";
+                tb.Attributes["onfocus"]  = "this.removeAttribute('readonly');";
+                tb.Attributes["data-lpignore"] = "true";
+            }
+
             // Bind only on first load. On postback the Repeater control trees are
             // rebuilt from ViewState, which is what lets ItemCommand events route to
             // their handlers. Re-binding (DataBind) here would recreate the child

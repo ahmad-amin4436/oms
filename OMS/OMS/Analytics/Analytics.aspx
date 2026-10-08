@@ -2,6 +2,8 @@
    CodeBehind="Analytics.aspx.cs" Inherits="OMS.Analytics.Analytics" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
+  <%-- Partial-page updates: actions refresh this panel only, never the whole page. --%>
+  <asp:UpdatePanel ID="updAnalytics" runat="server" UpdateMode="Always"><ContentTemplate>
 
   <%-- ── Page header ── --%>
   <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
@@ -222,14 +224,13 @@
 
   </div>
 
+  </ContentTemplate></asp:UpdatePanel>
+
   <%-- ── Chart.js (bundled with the Falcon theme) ── --%>
   <script src="<%= ResolveUrl("~/vendors/chart/chart.min.js") %>"></script>
   <script>
-    (function () {
-      // Live data injected from the code-behind for the selected range.
-      var revenue  = <%= RevenueChartJson %>;   // { labels:[], data:[] }
-      var payments = <%= PaymentChartJson %>;    // { labels:[], data:[] }
-      var topItems = <%= TopItemsChartJson %>;   // { labels:[], data:[] }
+    // Called by the server after the first load and after every partial refresh with the new data.
+    function renderCharts(revenue, payments, topItems) {
 
       var moneyTick = function (v) { return 'Rs. ' + Number(v).toLocaleString(); };
       var palette = ['#2c7be5', '#27bcfd', '#00d27a', '#f5803e', '#e63757', '#a16eff', '#d8e2ef'];
@@ -283,7 +284,7 @@
           scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }
         }
       });
-    })();
+    }
   </script>
 
 </asp:Content>
