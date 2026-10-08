@@ -100,7 +100,7 @@ namespace OMS.Orders
             DataSet ds;
             try
             {
-                ds = DBHelper.ExecuteDataSet("sp_GetActiveDealsWithItems");
+                ds = DBHelper.CachedDataSet("menu", 60, "sp_GetActiveDealsWithItems");
             }
             catch
             {
@@ -181,7 +181,7 @@ namespace OMS.Orders
             lbAllCat.CssClass = NavPillCss(!SelectedCategory.HasValue);
             try
             {
-                var dt = DBHelper.ExecuteDataTable("sp_GetMenuCategories");
+                var dt = DBHelper.CachedDataTable("menu", 60, "sp_GetMenuCategories");
                 rptCategories.DataSource = dt.Rows.Count > 0 ? (object)dt : null;
             }
             catch
@@ -197,7 +197,7 @@ namespace OMS.Orders
                 ? DBHelper.Parameter("@CategoryID", categoryId.Value)
                 : DBHelper.Parameter("@CategoryID", DBNull.Value);
 
-            var dt = DBHelper.ExecuteDataTable(
+            var dt = DBHelper.CachedDataTable("menu", 60,
                 "sp_GetMenuItems",
                 catParam,
                 DBHelper.Parameter("@IsAvailable", true));
@@ -350,7 +350,7 @@ namespace OMS.Orders
 
             int dealId = Convert.ToInt32(e.CommandArgument);
 
-            var ds = DBHelper.ExecuteDataSet("sp_GetActiveDealsWithItems");
+            var ds = DBHelper.CachedDataSet("menu", 60, "sp_GetActiveDealsWithItems");
             if (ds.Tables.Count < 2) return;
 
             DataRow deal = ds.Tables[0].AsEnumerable()
@@ -517,11 +517,32 @@ namespace OMS.Orders
                         DBHelper.Parameter("@LineTotal", item.LineTotal));
 
                 Cart = new List<CartItem>();
-                // Land on the order only if this role may open Order Detail.
-                Response.Redirect(SecurityHelper.CanOpen("~/Orders/OrderDetail.aspx")
-                    ? "~/Orders/OrderDetail.aspx?id=" + orderId
-                    : "~/Orders/NewOrder.aspx?placed=1", false);
-                Context.ApplicationInstance.CompleteRequest();
+
+                // Stay on this screen, ready for the next order (no navigation, no reload): clear the form
+                // and show what was placed, with links to open or print it if this role may.
+                string orderNo = "";
+                try
+                {
+                    var created = DBHelper.ExecuteDataSet("sp_GetOrderByID", DBHelper.Parameter("@OrderID", orderId));
+                    orderNo = Convert.ToString(created.Tables[0].Rows[0]["OrderNumber"]);
+                }
+                catch { /* the number is only for the message */ }
+
+                txtCustomerName.Text = txtPhone.Text = txtAddress.Text = txtTableNo.Text = txtNotes.Text = "";
+                txtDiscountPct.Text  = "0";
+                BindCart();
+
+                string links = "";
+                if (SecurityHelper.CanOpen("~/Orders/OrderDetail.aspx"))
+                    links += " <a class=\"alert-link ms-2\" href=\"" + ResolveUrl("~/Orders/OrderDetail.aspx?id=" + orderId) + "\">View order</a>";
+                if (SecurityHelper.CanOpen("~/Reports/PrintInvoice.aspx"))
+                    links += " <a class=\"alert-link ms-2\" target=\"_blank\" href=\"" + ResolveUrl("~/Reports/PrintInvoice.aspx?id=" + orderId) + "\">Print invoice</a>";
+
+                lblPlaced.Text = "<span class=\"fas fa-check-circle me-2\"></span>Order <strong>" + HttpUtility.HtmlEncode(orderNo) +
+                                 "</strong> placed &mdash; Rs. " + total.ToString("N0") + "." + links;
+                lblPlaced.Visible = true;
+                System.Web.UI.ScriptManager.RegisterStartupScript(lblPlaced, typeof(System.Web.UI.WebControls.Label), "placedScroll",
+                    "window.scrollTo({top:0,behavior:'smooth'});", true);
             }
             catch (Exception ex)
             {

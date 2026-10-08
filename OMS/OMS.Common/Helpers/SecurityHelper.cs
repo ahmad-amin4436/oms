@@ -72,20 +72,22 @@ namespace OMS.Common.Helpers
             var role = UserRole;
             if (string.IsNullOrEmpty(role)) return false;
 
-            var canParam = DBHelper.OutputParameter("@CanAccess", SqlDbType.Bit);
-            DBHelper.ExecuteNonQuery("sp_CanRoleAccessUrl",
-                DBHelper.Parameter("@RoleName", role),
-                DBHelper.Parameter("@Url", url),
-                canParam);
+            // The decision only changes when rights are edited, which clears the "auth" cache scope.
+            return AppCache.GetOrAdd<object>("auth", "can|" + role + "|" + url, 60, () =>
+            {
+                var canParam = DBHelper.OutputParameter("@CanAccess", SqlDbType.Bit);
+                DBHelper.ExecuteNonQuery("sp_CanRoleAccessUrl",
+                    DBHelper.Parameter("@RoleName", role),
+                    DBHelper.Parameter("@Url", url),
+                    canParam);
 
-            // A page that exists in the nav and is denied -> false.
-            // A page not found in the nav at all -> @CanAccess stays 0, but we
-            // treat "unknown" as allowed (login already enforced) so non-nav
-            // utility pages are not accidentally locked. Distinguish via a probe.
-            bool granted = canParam.Value != DBNull.Value && Convert.ToBoolean(canParam.Value);
-            if (granted) return true;
-
-            return !UrlExistsInNav(url);
+                // A page that exists in the nav and is denied -> false.
+                // A page not found in the nav at all -> @CanAccess stays 0, but we
+                // treat "unknown" as allowed (login already enforced) so non-nav
+                // utility pages are not accidentally locked. Distinguish via a probe.
+                bool granted = canParam.Value != DBNull.Value && Convert.ToBoolean(canParam.Value);
+                return (object)(granted || !UrlExistsInNav(url));
+            }) is bool ok && ok;
         }
 
         /// <summary>

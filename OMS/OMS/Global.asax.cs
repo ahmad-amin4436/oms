@@ -74,6 +74,18 @@ namespace OMS
             };
         }
 
+        // Standard Server-Timing header: database time and query count for this page (per-query detail for staff only).
+        void Application_PreSendRequestHeaders(object sender, EventArgs e)
+        {
+            try
+            {
+                bool staff = Context != null && Context.User != null && (Context.User.IsInRole("Admin") || Context.User.IsInRole("Manager"));
+                string h = OMS.Common.DAL.DbStats.Header(Context, staff);
+                if (h != null) Response.Headers["Server-Timing"] = h;
+            }
+            catch { /* diagnostics must never break a response */ }
+        }
+
         void Application_Error(object sender, EventArgs e)
         {
             var ex = Server.GetLastError();

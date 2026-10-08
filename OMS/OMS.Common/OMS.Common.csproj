@@ -45,6 +45,8 @@
     <Compile Include="BLL\DashboardService.cs" />
     <Compile Include="BLL\NavMenuService.cs" />
     <Compile Include="DAL\DBHelper.cs" />
+    <Compile Include="DAL\DbStats.cs" />
+    <Compile Include="Helpers\AppCache.cs" />
     <Compile Include="Helpers\ImageHelper.cs" />
     <Compile Include="Helpers\PasswordHelper.cs" />
     <Compile Include="Helpers\SecurityHelper.cs" />

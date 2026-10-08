@@ -16,8 +16,9 @@ namespace OMS
         {
             FixScriptManagerPaths();
 
-            if (!IsPostBack)
-                RenderNavMenu();
+            // The menu is no longer stored in ViewState (it was 25+ KB uploaded on every click), so build it each
+            // request; the menu data itself is cached per role, so this is cheap.
+            RenderNavMenu();
         }
 
         // ----------------------------------------------------------------
@@ -155,7 +156,8 @@ namespace OMS
         {
             var role = HttpContext.Current.Session?["UserRole"]?.ToString() ?? "Guest";
             var service = new NavMenuService(new NavMenuRepository());
-            var sections = service.GetNavSections(role);
+            // The menu only changes when rights are edited (clears the "auth" scope): cache it per role.
+            var sections = OMS.Common.Helpers.AppCache.GetOrAdd<IList<NavMenuSection>>("auth", "nav|" + role, 60, () => service.GetNavSections(role));
 
             string verticalHtml = BuildNavHtml(sections);
             string topHtml      = BuildTopNavHtml(sections);

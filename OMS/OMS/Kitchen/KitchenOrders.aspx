@@ -124,7 +124,7 @@
 
       function setStatus(text, kind) { status.textContent = text; status.className = 'badge badge-subtle-' + kind; }
 
-      var timer = null, inFlight = false;
+      var timer = null, inFlight = false, stopped = false;
       function poll(now) {
         if (inFlight) return;
         inFlight = true;
@@ -148,10 +148,16 @@
             setStatus('Live - ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }), 'success');
           })
           .catch(function () { if (status.textContent.indexOf('Signed out') !== 0) setStatus('Reconnecting...', 'warning'); })
-          .then(function () { inFlight = false; timer = setTimeout(poll, document.hidden ? POLL_HIDDEN_MS : POLL_MS); });
+          .then(function () { inFlight = false; if (!stopped) timer = setTimeout(poll, document.hidden ? POLL_HIDDEN_MS : POLL_MS); });
       }
-      document.addEventListener('visibilitychange', function () { if (!document.hidden) poll(); });
-      setInterval(function () { if (items.length) render(); }, 30000);    // keep the "minutes waiting" fresh between refreshes
+      function onVisible() { if (!document.hidden && !stopped) poll(); }
+      document.addEventListener('visibilitychange', onVisible);
+      var ageTimer = setInterval(function () { if (items.length) render(); }, 30000);    // keep the "minutes waiting" fresh between refreshes
+      // In-app navigation calls this when the user leaves the screen: stop polling for good.
+      window.__pageCleanup = function () {
+        stopped = true; clearTimeout(timer); clearInterval(ageTimer);
+        document.removeEventListener('visibilitychange', onVisible);
+      };
       poll();
     })();
   </script>

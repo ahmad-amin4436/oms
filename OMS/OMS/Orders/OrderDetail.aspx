@@ -321,7 +321,8 @@
     function initDishPicker() {
       var box = document.getElementById('txtDishSearch');
       var menu = document.getElementById('dishMenu');
-      if (!box || !menu) return;
+      if (!box || !menu || box.__dishBound) return;      // already wired (the script can be registered more than once)
+      box.__dishBound = true;
       var hf = document.getElementById('<%= hfAddItem.ClientID %>');
       var rows = menu.children;                      // category headers + dish buttons, in menu order
 

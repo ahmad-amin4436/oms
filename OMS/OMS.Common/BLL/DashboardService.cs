@@ -1,15 +1,45 @@
 using System;
 using System.Data;
 using OMS.Common.DAL;
+using OMS.Common.Helpers;
 using OMS.Common.Models;
 
 namespace OMS.Common.BLL
 {
     public static class DashboardService
     {
+        /// <summary>All-time figures (counts by status/type, gross sales) in one aggregate query.</summary>
+        public static DataRow Totals()
+        {
+            var dt = DBHelper.CachedDataTable("orders", 15, "sp_GetDashboardTotals");
+            return dt.Rows.Count > 0 ? dt.Rows[0] : null;
+        }
+
+        /// <summary>The newest orders for the "recent" table (a page, not the whole table).</summary>
+        public static DataTable RecentOrders(int count)
+        {
+            return DBHelper.CachedDataTable("orders", 15, "sp_GetOrders",
+                DBHelper.Parameter("@PageSize", count), DBHelper.Parameter("@PageNumber", 1));
+        }
+
+        /// <summary>One year of daily DineIn / Takeaway+Delivery counts in a single query.</summary>
+        public static DataTable DailyOrdersByTypeYear(int year)
+        {
+            return DBHelper.CachedDataTable("orders", 30, "sp_GetDailyOrdersByTypeYear", DBHelper.Parameter("@Year", year));
+        }
+
+        public static int ItemsSold()
+        {
+            return AppCache.GetOrAdd<object>("orders", "itemsSold", 60, () =>
+            {
+                object v = DBHelper.ExecuteScalar("sp_GetItemsSoldCount");
+                return (object)(v == null || v == DBNull.Value ? 0 : Convert.ToInt32(v));
+            }) is int n ? n : 0;
+        }
+
         public static DashboardSummary GetSummary(DateTime localDate)
         {
-            var dataSet = DBHelper.ExecuteDataSet("sp_GetDashboardSummary", DBHelper.Parameter("@Date", localDate.Date));
+            var dataSet = DBHelper.CachedDataSet("orders", 15, "sp_GetDashboardSummary", DBHelper.Parameter("@Date", localDate.Date));
             var summary = new DashboardSummary();
 
             if (dataSet.Tables.Count > 0 && dataSet.Tables[0].Rows.Count > 0)
@@ -61,7 +91,7 @@ namespace OMS.Common.BLL
 
         public static DataTable TwoMonthDailySales(DateTime today)
         {
-            return DBHelper.ExecuteDataTable("sp_GetTwoMonthDailySales",
+            return DBHelper.CachedDataTable("orders", 30, "sp_GetTwoMonthDailySales",
                 DBHelper.Parameter("@Today", today.Date));
         }
 
@@ -73,7 +103,7 @@ namespace OMS.Common.BLL
 
         public static DataRow RevenueByOrderType(DateTime today)
         {
-            DataTable dt = DBHelper.ExecuteDataTable("sp_GetRevenueByOrderType",
+            DataTable dt = DBHelper.CachedDataTable("orders", 30, "sp_GetRevenueByOrderType",
                 DBHelper.Parameter("@Today", today.Date));
             return dt.Rows.Count > 0 ? dt.Rows[0] : null;
         }

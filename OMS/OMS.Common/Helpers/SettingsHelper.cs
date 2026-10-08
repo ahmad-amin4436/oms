@@ -15,7 +15,7 @@ namespace OMS.Common.Helpers
         {
             get
             {
-                var value = DBHelper.ExecuteScalar("sp_GetSetting", DBHelper.Parameter("@SettingKey", TaxKey));
+                var value = Read(TaxKey);
                 decimal pct;
                 if (value != null && decimal.TryParse(Convert.ToString(value), NumberStyles.Number,
                         CultureInfo.InvariantCulture, out pct) && pct >= 0m && pct <= 100m)
@@ -35,6 +35,14 @@ namespace OMS.Common.Helpers
             new[] { "BankTransfer", "Bank Transfer" }
         };
 
+        // Settings are read on every order screen; cache them (a save clears the cache at once, see AppCache).
+        private static object Read(string key)
+        {
+            string v = AppCache.GetOrAdd<string>("settings", key, 60,
+                () => Convert.ToString(DBHelper.ExecuteScalar("sp_GetSetting", DBHelper.Parameter("@SettingKey", key))) ?? "");
+            return string.IsNullOrEmpty(v) ? null : v;
+        }
+
         private static string KeyFor(string method)
         {
             return string.IsNullOrEmpty(method) || method == "Cash" ? TaxKey : TaxKey + "." + method;
@@ -43,7 +51,7 @@ namespace OMS.Common.Helpers
         /// <summary>Tax rate in percent for a payment method.</summary>
         public static decimal TaxPercentFor(string method)
         {
-            var value = DBHelper.ExecuteScalar("sp_GetSetting", DBHelper.Parameter("@SettingKey", KeyFor(method)));
+            var value = Read(KeyFor(method));
             decimal pct;
             if (value != null && decimal.TryParse(Convert.ToString(value), NumberStyles.Number,
                     CultureInfo.InvariantCulture, out pct) && pct >= 0m && pct <= 100m)

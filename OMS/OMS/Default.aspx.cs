@@ -34,8 +34,13 @@ namespace OMS
                 BindDashboard();
         }
 
+        // All-time totals, read once per page load (one aggregate query) and shared by the cards below.
+        private DataRow _totals;
+        private int T(string column) { return _totals == null ? 0 : Convert.ToInt32(_totals[column]); }
+
         private void BindDashboard()
         {
+            _totals = DashboardService.Totals();
             BindGreeting();
             BindHeadlineAndStats();
             BindShareCards();
@@ -59,8 +64,7 @@ namespace OMS
 
         private void BindOrderBreakdown()
         {
-            DataTable orders = DBHelper.ExecuteDataTable("sp_GetOrders");
-            int total = orders.Rows.Count;
+            int total = T("TotalOrders");
 
             var view = new DataTable();
             view.Columns.Add("Status", typeof(string));
@@ -70,7 +74,7 @@ namespace OMS
 
             foreach (var s in StatusFlow)
             {
-                int count = orders.AsEnumerable().Count(r => Convert.ToString(r["Status"]) == s.Status);
+                int count = T(s.Status + "Orders");
                 int pct   = total == 0 ? 0 : (int)Math.Round(count * 100m / total);
                 view.Rows.Add(s.Status, count, pct, s.BarClass);
             }
@@ -114,18 +118,17 @@ namespace OMS
 
         private void BindShareCards()
         {
-            DataTable orders = DBHelper.ExecuteDataTable("sp_GetOrders");
-            int total = orders.Rows.Count;
+            int total = T("TotalOrders");
 
             // Order Completion = Confirmed (paid) / total
-            int delivered = orders.AsEnumerable().Count(r => Convert.ToString(r["Status"]) == "Confirmed");
+            int delivered = T("ConfirmedOrders");
             int completionPct = total == 0 ? 0 : (int)Math.Round(delivered * 100m / total);
             litCompletionPct.Text = completionPct + "%";
 
             // Order Types split
-            int dineIn   = orders.AsEnumerable().Count(r => Convert.ToString(r["OrderType"]) == "DineIn");
-            int takeaway = orders.AsEnumerable().Count(r => Convert.ToString(r["OrderType"]) == "Takeaway");
-            int delivery = orders.AsEnumerable().Count(r => Convert.ToString(r["OrderType"]) == "Delivery");
+            int dineIn   = T("DineInOrders");
+            int takeaway = T("TakeawayOrders");
+            int delivery = T("DeliveryOrders");
 
             litDineInPct.Text   = Pct(dineIn, total);
             litTakeawayPct.Text = Pct(takeaway, total);
@@ -156,19 +159,14 @@ namespace OMS
             litTodayVisits.Text = summary.TodayOrders.ToString("N0");
             litTodaySales.Text  = "Rs. " + summary.TodayRevenue.ToString("N0");
 
-            // Overall, all-time figures from the Orders table
-            DataTable allOrders = DBHelper.ExecuteDataTable("sp_GetOrders");
-
-            int totalOrders   = allOrders.Rows.Count;
-            int itemsSold     = TotalItemsSold();
-            // Sales = paid (Confirmed) orders only; Pending and Cancelled are not sales.
-            decimal grossSale = allOrders.AsEnumerable()
-                .Where(r => Convert.ToString(r["Status"]) == "Confirmed")
-                .Sum(r => Convert.ToDecimal(r["TotalAmount"]));
-            int cancelled     = allOrders.AsEnumerable().Count(r => Convert.ToString(r["Status"]) == "Cancelled");
-            int processing    = allOrders.AsEnumerable().Count(r => Convert.ToString(r["Status"]) == "Pending");   // unpaid
-            int confirmedCount = allOrders.AsEnumerable().Count(r => Convert.ToString(r["Status"]) == "Confirmed");
-            decimal avgOrder  = confirmedCount == 0 ? 0 : Math.Round(grossSale / confirmedCount, 2);
+            // Overall, all-time figures (one aggregate query, see BindDashboard)
+            int totalOrders    = T("TotalOrders");
+            int itemsSold      = DashboardService.ItemsSold();
+            decimal grossSale  = _totals == null ? 0m : Convert.ToDecimal(_totals["GrossSales"]);   // paid (Confirmed) orders only
+            int cancelled      = T("CancelledOrders");
+            int processing     = T("PendingOrders");                                               // unpaid
+            int confirmedCount = T("ConfirmedOrders");
+            decimal avgOrder   = confirmedCount == 0 ? 0 : Math.Round(grossSale / confirmedCount, 2);
 
             // "Weekly sales" + "Total order" mini-cards
             decimal weekSales = WeekRevenue();
@@ -194,12 +192,6 @@ namespace OMS
             }
         }
 
-        // Sum of quantities across all order items (all-time).
-        private static int TotalItemsSold()
-        {
-            object scalar = DBHelper.ExecuteScalar("sp_GetItemsSoldCount");
-            return scalar == null || scalar == DBNull.Value ? 0 : Convert.ToInt32(scalar);
-        }
 
         // Paid/gross revenue for the last 7 local days.
         private static decimal WeekRevenue()
@@ -212,8 +204,7 @@ namespace OMS
 
         private void BindRecentOrders()
         {
-            DataTable orders = DBHelper.ExecuteDataTable("sp_GetOrders");
-            // Most recent first; show the latest 14 (sp returns ordered by CreatedAt DESC).
+            DataTable orders = DashboardService.RecentOrders(14);   // newest first
             rptRecent.DataSource = orders.Rows.Count > 0 ? orders : null;
             rptRecent.DataBind();
         }
@@ -234,30 +225,37 @@ namespace OMS
 
         private void BindDailyOrdersChart()
         {
-            var inv = System.Globalization.CultureInfo.InvariantCulture;
-            var dineInSb  = new System.Text.StringBuilder();
-            var takedSb   = new System.Text.StringBuilder();
-            int thisMonthTotal = 0;
+            // One query for the whole year (rows only for days that had orders); the arrays below are
+            // laid out month by month, one value per day, zero where nothing was ordered.
+            int year = LocalToday.Year;
+            DataTable dt = DashboardService.DailyOrdersByTypeYear(year);
 
+            var dineIn = new int[13][];
+            var taked  = new int[13][];
             for (int m = 1; m <= 12; m++)
             {
-                DataTable dt = DashboardService.DailyOrdersByType(new DateTime(LocalToday.Year, m, 1));
+                int days = DateTime.DaysInMonth(year, m);
+                dineIn[m] = new int[days];
+                taked[m]  = new int[days];
+            }
+            int thisMonthTotal = 0;
+            foreach (DataRow r in dt.Rows)
+            {
+                int m = Convert.ToInt32(r["MonthNo"]), day = Convert.ToInt32(r["DayNo"]);
+                if (m < 1 || m > 12 || day < 1 || day > dineIn[m].Length) continue;
+                int di = Convert.ToInt32(r["DineIn"]), td = Convert.ToInt32(r["TakeawayDelivery"]);
+                dineIn[m][day - 1] = di;
+                taked[m][day - 1]  = td;
+                if (m == LocalToday.Month) thisMonthTotal += di + td;
+            }
 
-                var diArr = new System.Text.StringBuilder();
-                var tdArr = new System.Text.StringBuilder();
-                foreach (DataRow r in dt.Rows)
-                {
-                    if (diArr.Length > 0) { diArr.Append(','); tdArr.Append(','); }
-                    int di = Convert.ToInt32(r["DineIn"]);
-                    int td = Convert.ToInt32(r["TakeawayDelivery"]);
-                    diArr.Append(di);
-                    tdArr.Append(td);
-                    if (m == LocalToday.Month) thisMonthTotal += di + td;
-                }
-
-                if (dineInSb.Length > 0) { dineInSb.Append(','); takedSb.Append(','); }
-                dineInSb.Append('[').Append(diArr).Append(']');
-                takedSb.Append('[').Append(tdArr).Append(']');
+            var dineInSb = new System.Text.StringBuilder();
+            var takedSb  = new System.Text.StringBuilder();
+            for (int m = 1; m <= 12; m++)
+            {
+                if (m > 1) { dineInSb.Append(','); takedSb.Append(','); }
+                dineInSb.Append('[').Append(string.Join(",", dineIn[m])).Append(']');
+                takedSb.Append('[').Append(string.Join(",", taked[m])).Append(']');
             }
 
             DailyOrdersJson = "{\"dineIn\":[" + dineInSb + "],\"takeawayDelivery\":[" + takedSb + "]}";

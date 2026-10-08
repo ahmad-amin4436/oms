@@ -138,7 +138,7 @@ namespace OMS.Orders
 
             if (string.IsNullOrEmpty(litDishList.Text))
             {
-                var items = DBHelper.ExecuteDataTable("sp_GetMenuItems",
+                var items = DBHelper.CachedDataTable("menu", 60, "sp_GetMenuItems",
                     DBHelper.Parameter("@CategoryID", DBNull.Value),
                     DBHelper.Parameter("@IsAvailable", true));
                 // Whole menu, grouped by category (sp_GetMenuItems already returns it in menu order).
