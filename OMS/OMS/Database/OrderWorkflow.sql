@@ -1,4 +1,4 @@
-/*
+﻿/*
   OMS - Order workflow: two statuses, payment confirmation, business-day close.
   Run AFTER OrderEnhancements.sql (and AnalyticsFix.sql / DashboardData.sql). Safe to re-run.
   This script owns these procedures from now on - it redefines the versions in earlier scripts:
@@ -1032,7 +1032,7 @@ BEGIN
 END
 GO
 
-EXEC sp_updatestats;   -- fresh statistics so the optimiser sees the new indexes' data distribution
+UPDATE STATISTICS dbo.Orders; UPDATE STATISTICS dbo.OrderItems;   -- fresh statistics so the optimiser sees the new indexes' data distribution
 GO
 
 PRINT 'Cashier column, order totals, analytics time range, kitchen and performance applied.';
