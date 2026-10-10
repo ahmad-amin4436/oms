@@ -1,4 +1,4 @@
-<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="OMS.SiteMaster" %>
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="OMS.SiteMaster" %>
 <!DOCTYPE html>
 <html data-bs-theme="light" lang="en-US" dir="ltr">
 <head runat="server">
@@ -612,7 +612,8 @@
             });
           })();
         </script>
-        <script src="/assets/js/softnav.js?v=2"></script>
+        <script src="/assets/js/tableexport.js?v=1"></script>
+        <script src="/assets/js/softnav.js?v=3"></script>
         <%-- Startup scripts registered by a screen are rendered after this marker; softnav re-runs them. --%>
         <span id="softTail"></span>
       </form>

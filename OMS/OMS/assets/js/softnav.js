@@ -216,6 +216,7 @@
         [].forEach.call(root.querySelectorAll('[data-bs-toggle="tooltip"]'), function (el) { try { new bootstrap.Tooltip(el); } catch (e) {} });
       }
       window.scrollTo(0, 0);
+      if (window.OmsExport) { try { OmsExport.scan(); } catch (e) {} }
     });
   }
 })();
