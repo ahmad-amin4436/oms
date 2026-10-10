@@ -138,6 +138,7 @@
     <Content Include="Admin\Users.aspx" />
     <Content Include="Admin\Roles.aspx" />
     <Content Include="Admin\Settings.aspx" />
+    <Content Include="Admin\Departments.aspx" />
     <Content Include="Database\OrderEnhancements.sql" />
     <Content Include="Admin.Master" />
     <Content Include="Analytics\Analytics.aspx" />
@@ -818,6 +819,13 @@
     </Compile>
     <Compile Include="Admin\Roles.aspx.designer.cs">
       <DependentUpon>Roles.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Admin\Departments.aspx.cs">
+      <DependentUpon>Departments.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Admin\Departments.aspx.designer.cs">
+      <DependentUpon>Departments.aspx</DependentUpon>
     </Compile>
     <Compile Include="Admin\Settings.aspx.cs">
       <DependentUpon>Settings.aspx</DependentUpon>

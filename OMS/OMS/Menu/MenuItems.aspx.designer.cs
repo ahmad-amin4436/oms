@@ -9,6 +9,8 @@ namespace OMS.Menu
         protected global::System.Web.UI.WebControls.Panel        pnlCategories;
         protected global::System.Web.UI.WebControls.Panel        pnlCatEditor;
         protected global::System.Web.UI.WebControls.HiddenField  hfCatID;
+        protected global::System.Web.UI.WebControls.DropDownList ddlCatDepartment;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvCatDepartment;
         protected global::System.Web.UI.WebControls.TextBox      txtCatName;
         protected global::System.Web.UI.WebControls.TextBox      txtCatOrder;
         protected global::System.Web.UI.WebControls.CheckBox     chkCatActive;

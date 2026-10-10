@@ -45,6 +45,7 @@ namespace OMS.Common.Helpers
                 case "sp_SaveMenuItem": case "sp_DeleteMenuItem": case "sp_ToggleMenuItemAvailability":
                 case "sp_SaveCategory": case "sp_DeleteCategory": case "sp_SaveSizePricing": case "sp_SaveTopping":
                 case "sp_SaveDeal": case "sp_DeleteDeal": case "sp_ToggleDealStatus":
+                case "sp_SaveDepartment": case "sp_DeleteDepartment":
                     return "menu";
                 case "sp_SaveRole": case "sp_DeleteRole": case "sp_SetRoleNavGroups": case "sp_SetRoleNavItems":
                 case "sp_SaveUser": case "sp_DeleteUser": case "sp_ToggleUserStatus":

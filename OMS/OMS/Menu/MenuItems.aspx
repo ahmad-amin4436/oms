@@ -40,14 +40,21 @@
           <asp:Panel ID="pnlCatEditor" runat="server" Visible="false" CssClass="border rounded p-3 mb-3 bg-light">
             <asp:HiddenField ID="hfCatID" runat="server" Value="0" />
             <div class="row g-2 align-items-end">
-              <div class="col-md-5">
+              <div class="col-md-3">
+                <label class="form-label fs--1 mb-1">Department<span class="text-danger ms-1">*</span></label>
+                <asp:DropDownList ID="ddlCatDepartment" runat="server" CssClass="form-select form-select-sm" />
+                <asp:RequiredFieldValidator ID="rfvCatDepartment" runat="server" ControlToValidate="ddlCatDepartment"
+                  ValidationGroup="CatEditor" Display="Dynamic" InitialValue=""
+                  CssClass="text-danger fs--2" Text="Select a department." />
+              </div>
+              <div class="col-md-3">
                 <label class="form-label fs--1 mb-1">Category Name<span class="text-danger ms-1">*</span></label>
                 <asp:TextBox ID="txtCatName" runat="server" CssClass="form-control form-control-sm" MaxLength="80" />
                 <asp:RequiredFieldValidator runat="server" ControlToValidate="txtCatName"
                   ValidationGroup="CatEditor" Display="Dynamic"
                   CssClass="text-danger fs--2" Text="Name is required." />
               </div>
-              <div class="col-md-3">
+              <div class="col-md-2">
                 <label class="form-label fs--1 mb-1">Display Order</label>
                 <asp:TextBox ID="txtCatOrder" runat="server" CssClass="form-control form-control-sm"
                   TextMode="Number" Text="0" />
@@ -86,8 +93,10 @@
               <EmptyDataRowStyle CssClass="text-center text-600 py-4 fs--1" />
               <HeaderStyle CssClass="bg-light border-bottom" />
               <Columns>
+                <asp:BoundField DataField="DepartmentName" HeaderText="Department" NullDisplayText="Unassigned"
+                  HeaderStyle-CssClass="ps-3 fw-medium" ItemStyle-CssClass="ps-3 text-600" />
                 <asp:BoundField DataField="CategoryName" HeaderText="Category"
-                  HeaderStyle-CssClass="ps-3 fw-medium" ItemStyle-CssClass="ps-3 fw-semibold" />
+                  HeaderStyle-CssClass="fw-medium" ItemStyle-CssClass="fw-semibold" />
                 <asp:BoundField DataField="DisplayOrder" HeaderText="Order"
                   HeaderStyle-CssClass="text-center fw-medium" ItemStyle-CssClass="text-center text-600" />
                 <asp:BoundField DataField="ItemCount" HeaderText="Items"

@@ -274,9 +274,31 @@ namespace OMS.Menu
                 HideCatEditor();
         }
 
+        // Categories are created under a department. Inactive departments are offered only to the
+        // category that already sits in one.
+        private void BindCatDepartments(object selectedId)
+        {
+            string sel = selectedId == null || selectedId == DBNull.Value ? "" : Convert.ToString(selectedId);
+            ddlCatDepartment.Items.Clear();
+            ddlCatDepartment.Items.Add(new ListItem("- Select department -", ""));
+            foreach (DataRow r in DBHelper.ExecuteDataTable("sp_GetDepartments", DBHelper.Parameter("@ActiveOnly", false)).Rows)
+            {
+                bool active = Convert.ToBoolean(r["IsActive"]);
+                string id = Convert.ToString(r["DepartmentID"]);
+                if (!active && id != sel) continue;
+                ddlCatDepartment.Items.Add(new ListItem(Convert.ToString(r["DepartmentName"]) + (active ? "" : " (inactive)"), id));
+            }
+            var item = ddlCatDepartment.Items.FindByValue(sel);
+            if (item != null) { ddlCatDepartment.ClearSelection(); item.Selected = true; }
+            // No departments exist yet: tell the Admin where to create one instead of silently allowing orphans.
+            if (ddlCatDepartment.Items.Count == 1)
+                ShowErr("No departments exist yet. An Admin must create a department (Admin Panel > Departments) before categories can be added.");
+        }
+
         protected void btnAddCat_Click(object sender, EventArgs e)
         {
             KeepCategoriesOpen();
+            BindCatDepartments(null);
             hfCatID.Value      = "0";
             txtCatName.Text    = "";
             txtCatOrder.Text   = "0";
@@ -321,6 +343,7 @@ namespace OMS.Menu
                 return;
             }
 
+            BindCatDepartments(dt.Columns.Contains("DepartmentID") ? row["DepartmentID"] : null);
             hfCatID.Value        = categoryId.ToString();
             txtCatName.Text      = Convert.ToString(row["CategoryName"]);
             txtCatOrder.Text     = Convert.ToString(row["DisplayOrder"]);
@@ -340,6 +363,15 @@ namespace OMS.Menu
             int order = 0;
             int.TryParse(txtCatOrder.Text.Trim(), out order);
 
+            int deptId;
+            if (!int.TryParse(ddlCatDepartment.SelectedValue, out deptId))
+            {
+                ShowErr("Please select the department this category belongs to.");
+                pnlCatEditor.Visible = true;
+                BindCategoriesGrid();
+                return;
+            }
+
             try
             {
                 var idParam = DBHelper.OutputParameter("@CategoryID", SqlDbType.Int);
@@ -349,7 +381,8 @@ namespace OMS.Menu
                     idParam,
                     DBHelper.Parameter("@Name",         txtCatName.Text.Trim()),
                     DBHelper.Parameter("@DisplayOrder", order),
-                    DBHelper.Parameter("@IsActive",     chkCatActive.Checked));
+                    DBHelper.Parameter("@IsActive",     chkCatActive.Checked),
+                    DBHelper.Parameter("@DepartmentID", deptId));
 
                 ShowMsg(catId == 0 ? "New category added." : "Category updated.");
                 HideCatEditor();

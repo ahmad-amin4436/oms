@@ -6,26 +6,22 @@
 
 namespace OMS.Admin
 {
-    public partial class Users
+    public partial class Departments
     {
-        protected global::System.Web.UI.UpdatePanel updUsers;
+        protected global::System.Web.UI.UpdatePanel updDepartments;
         protected global::System.Web.UI.WebControls.Label lblMsg;
         protected global::System.Web.UI.WebControls.Label lblErr;
         protected global::System.Web.UI.WebControls.Panel pnlEditor;
         protected global::System.Web.UI.WebControls.Literal litEditorTitle;
         protected global::System.Web.UI.WebControls.LinkButton lbCloseEditor;
-        protected global::System.Web.UI.WebControls.HiddenField hfUserID;
-        protected global::System.Web.UI.WebControls.TextBox txtFullName;
-        protected global::System.Web.UI.WebControls.TextBox txtEmail;
-        protected global::System.Web.UI.WebControls.Literal litPwdHint;
-        protected global::System.Web.UI.WebControls.TextBox txtPassword;
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvPassword;
-        protected global::System.Web.UI.WebControls.DropDownList ddlRole;
-        protected global::System.Web.UI.WebControls.DropDownList ddlDepartment;
+        protected global::System.Web.UI.WebControls.HiddenField hfDepartmentID;
+        protected global::System.Web.UI.WebControls.TextBox txtName;
+        protected global::System.Web.UI.WebControls.TextBox txtDescription;
+        protected global::System.Web.UI.WebControls.TextBox txtOrder;
         protected global::System.Web.UI.WebControls.CheckBox chkActive;
         protected global::System.Web.UI.WebControls.Button btnSave;
         protected global::System.Web.UI.WebControls.Button btnCancel;
         protected global::System.Web.UI.WebControls.Button btnAddNew;
-        protected global::System.Web.UI.WebControls.GridView gvUsers;
+        protected global::System.Web.UI.WebControls.GridView gvDepartments;
     }
 }

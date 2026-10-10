@@ -105,7 +105,9 @@ namespace OMS.Common.DAL
 
         public static SqlParameter OutputParameter(string name, SqlDbType type)
         {
-            return new SqlParameter(name, type) { Direction = ParameterDirection.Output };
+            // InputOutput: the save procedures need the caller's current ID (0 = new) as well as returning the saved one.
+            // A plain Output parameter is sent to the server as NULL, which made every "edit" look like an insert.
+            return new SqlParameter(name, type) { Direction = ParameterDirection.InputOutput, Value = DBNull.Value };
         }
 
         private static SqlCommand CreateCommand(SqlConnection connection, string storedProcedure, SqlParameter[] parameters)

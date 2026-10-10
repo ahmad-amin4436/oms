@@ -34,6 +34,24 @@ namespace OMS.Admin
             ddlRole.Items.Insert(0, new ListItem("- Select role -", ""));
         }
 
+        // Optional: staff do not have to belong to a department.
+        private void BindDepartmentDropdown(object selectedId = null)
+        {
+            var dt = DBHelper.ExecuteDataTable("sp_GetDepartments", DBHelper.Parameter("@ActiveOnly", false));
+            ddlDepartment.Items.Clear();
+            ddlDepartment.Items.Add(new ListItem("- None -", ""));
+            string sel = selectedId == null || selectedId == DBNull.Value ? "" : Convert.ToString(selectedId);
+            foreach (DataRow r in dt.Rows)
+            {
+                bool active = Convert.ToBoolean(r["IsActive"]);
+                string id = Convert.ToString(r["DepartmentID"]);
+                if (!active && id != sel) continue;          // inactive ones only show when already assigned
+                ddlDepartment.Items.Add(new ListItem(Convert.ToString(r["DepartmentName"]) + (active ? "" : " (inactive)"), id));
+            }
+            var item = ddlDepartment.Items.FindByValue(sel);
+            if (item != null) { ddlDepartment.ClearSelection(); item.Selected = true; }
+        }
+
         // ── Grid row actions ─────────────────────────────────────────
 
         protected void gvUsers_RowCommand(object sender, GridViewCommandEventArgs e)
@@ -92,6 +110,7 @@ namespace OMS.Admin
         protected void btnAddNew_Click(object sender, EventArgs e)
         {
             BindRoleDropdown();
+            BindDepartmentDropdown();
             hfUserID.Value      = "0";
             litEditorTitle.Text = "Add New User";
             litPwdHint.Text     = "";
@@ -121,6 +140,7 @@ namespace OMS.Admin
 
             BindRoleDropdown();
             var row = dt.Rows[0];
+            BindDepartmentDropdown(dt.Columns.Contains("DepartmentID") ? row["DepartmentID"] : null);
 
             hfUserID.Value      = userId.ToString();
             litEditorTitle.Text = "Edit User";
@@ -154,6 +174,10 @@ namespace OMS.Admin
                 return;
             }
 
+            int? deptId = null;
+            int d;
+            if (int.TryParse(ddlDepartment.SelectedValue, out d)) deptId = d;
+
             string password = txtPassword.Text;
             // New user requires a password; existing user keeps current if left blank.
             if (userId == 0 && string.IsNullOrWhiteSpace(password))
@@ -178,7 +202,8 @@ namespace OMS.Admin
                     DBHelper.Parameter("@Email",        txtEmail.Text.Trim()),
                     DBHelper.Parameter("@PasswordHash", passwordHash),
                     DBHelper.Parameter("@RoleID",       roleId),
-                    DBHelper.Parameter("@IsActive",     chkActive.Checked));
+                    DBHelper.Parameter("@IsActive",     chkActive.Checked),
+                    DBHelper.Parameter("@DepartmentID", deptId.HasValue ? (object)deptId.Value : DBNull.Value));
 
                 ShowMsg(userId == 0 ? "New user created." : "User updated.");
                 HideEditor();

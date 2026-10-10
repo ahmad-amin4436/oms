@@ -79,6 +79,11 @@
                 CssClass="text-danger fs--2" Text="Select a role." />
             </div>
 
+            <div class="col-md-6">
+              <label class="form-label fs--1 mb-1">Department</label>
+              <asp:DropDownList ID="ddlDepartment" runat="server" CssClass="form-select form-select-sm" />
+            </div>
+
             <div class="col-12">
               <div class="form-check mb-0">
                 <asp:CheckBox ID="chkActive" runat="server" CssClass="form-check-input" Checked="true" />
@@ -126,6 +131,8 @@
                 ItemStyle-CssClass="text-600" />
               <asp:BoundField DataField="RoleName" HeaderText="Role"
                 HeaderStyle-CssClass="fw-medium" />
+              <asp:BoundField DataField="DepartmentName" HeaderText="Department" NullDisplayText="-"
+                HeaderStyle-CssClass="fw-medium" ItemStyle-CssClass="text-600" />
               <asp:TemplateField HeaderText="Status"
                 HeaderStyle-CssClass="text-center fw-medium"
                 ItemStyle-CssClass="text-center">

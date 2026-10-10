@@ -25,7 +25,8 @@
     </div>
   </div>
 
-  <%-- Category filter (built from the dishes currently on the screen) --%>
+  <%-- Department filter, then that department's categories (both built from the dishes on the screen) --%>
+  <div id="ktDepts" class="d-flex flex-wrap gap-2 mb-2"></div>
   <div id="ktCats" class="d-flex flex-wrap gap-2 mb-3"></div>
 
   <div id="ktGrid" class="row g-3"></div>
@@ -39,6 +40,9 @@
       var POLL_MS = 3000, POLL_HIDDEN_MS = 10000, WARN_MIN = 10, LATE_MIN = 20;
 
       var items = [], known = {}, justDone = {}, firstLoad = true, cat = 'all', fetchedAt = Date.now();
+      var dept = 'all', deptNames = {};                    // a kitchen display can stay on its own department
+      try { var sd = localStorage.getItem('ktDept'); if (sd) dept = sd; } catch (e) {}
+      var depts = document.getElementById('ktDepts');
       var grid = document.getElementById('ktGrid'), cats = document.getElementById('ktCats');
       var empty = document.getElementById('ktEmpty'), status = document.getElementById('ktStatus');
       var soundBox = document.getElementById('ktSound');
@@ -60,23 +64,39 @@
         } catch (e) {}
       }
 
+      function inDept(it) { return dept === 'all' || String(it.deptId) === String(dept); }
+
+      function renderDepts() {
+        var counts = {};
+        items.forEach(function (it) { deptNames[it.deptId] = it.dept; counts[it.deptId] = (counts[it.deptId] || 0) + 1; });
+        var ids = Object.keys(deptNames);
+        if (ids.length < 2 && dept === 'all') { depts.innerHTML = ''; return; }     // one department only: nothing to filter
+        if (dept !== 'all' && ids.length && !(dept in deptNames)) dept = 'all';      // that department no longer exists
+        ids.sort(function (a, b) { return deptNames[a].localeCompare(deptNames[b]); });
+        var html = chip('data-dept', 'all', 'All departments', items.length, dept);
+        ids.forEach(function (id) { html += chip('data-dept', id, deptNames[id], counts[id] || 0, dept); });
+        depts.innerHTML = html;
+      }
+
       function renderCats() {
-        var counts = {}, order = [];
-        items.forEach(function (it) { if (!(it.catId in counts)) { counts[it.catId] = { name: it.cat, n: 0 }; order.push(it.catId); } counts[it.catId].n++; });
+        var counts = {}, order = [], pool = items.filter(inDept);
+        pool.forEach(function (it) { if (!(it.catId in counts)) { counts[it.catId] = { name: it.cat, n: 0 }; order.push(it.catId); } counts[it.catId].n++; });
         if (cat !== 'all' && !(cat in counts)) cat = 'all';           // the chosen category has nothing left: show everything
-        var html = chip('all', 'All', items.length);
-        order.forEach(function (id) { html += chip(String(id), counts[id].name, counts[id].n); });
+        var html = chip('data-cat', 'all', 'All', pool.length, cat);
+        order.forEach(function (id) { html += chip('data-cat', String(id), counts[id].name, counts[id].n, cat); });
         cats.innerHTML = html;
       }
-      function chip(id, name, n) {
-        var on = String(cat) === id;
-        return '<button type="button" class="btn btn-sm ' + (on ? 'btn-primary' : 'btn-falcon-default') + '" data-cat="' + id + '">' +
+      function chip(attr, id, name, n, current) {
+        var on = String(current) === id;
+        return '<button type="button" class="btn btn-sm ' + (on ? 'btn-primary' : 'btn-falcon-default') + '" ' + attr + '="' + esc(id) + '">' +
                esc(name) + ' <span class="badge ' + (on ? 'bg-light text-primary' : 'badge-subtle-secondary') + ' ms-1">' + n + '</span></button>';
       }
 
       function render(newIds) {
+        renderDepts();
         renderCats();
-        var shown = items.filter(function (it) { return cat === 'all' || String(it.catId) === String(cat); });
+        var pool = items.filter(inDept);
+        var shown = pool.filter(function (it) { return cat === 'all' || String(it.catId) === String(cat); });
         grid.innerHTML = shown.map(function (it) {
           var m = ageMin(it), cls = m >= LATE_MIN ? 'kt-late' : m >= WARN_MIN ? 'kt-warn' : '';
           var where = it.type === 'DineIn' && it.table ? 'Table ' + esc(it.table) : esc(it.type === 'DineIn' ? 'Dine in' : it.type);
@@ -90,11 +110,11 @@
                 '<div><div class="kt-name">' + esc(it.name) + '</div>' +
                 (it.size ? '<div class="fs--1 text-600">' + esc(it.size) + '</div>' : '') + '</div></div>' +
               (it.note ? '<div class="alert alert-warning py-1 px-2 fs--1 mb-2">' + esc(it.note) + '</div>' : '') +
-              '<div class="fs--2 text-600 mb-2">' + esc(it.cat) + '</div>' +
+              '<div class="fs--2 text-600 mb-2">' + esc(it.dept) + ' &rsaquo; ' + esc(it.cat) + '</div>' +
               '<button type="button" class="btn btn-success mt-auto" data-done="' + it.id + '">Done</button>' +
             '</div></div></div>';
         }).join('');
-        empty.classList.toggle('d-none', items.length !== 0);
+        empty.classList.toggle('d-none', shown.length !== 0);
       }
 
       // Done: remove the dish from the screen at once, tell the server in the background.
@@ -114,6 +134,13 @@
           body: 'done=' + id
         }).then(function (r) { if (!r.ok) throw new Error(r.status); poll(true); })
           .catch(function () { delete justDone[id]; setStatus('Could not save "Done" - checking again...', 'danger'); poll(true); });   // the next refresh re-shows it if it was not saved
+      });
+      depts.addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-dept]');
+        if (!b) return;
+        dept = b.getAttribute('data-dept'); cat = 'all';
+        try { localStorage.setItem('ktDept', dept); } catch (err) {}
+        render();
       });
       cats.addEventListener('click', function (e) {
         var b = e.target.closest('button[data-cat]');
@@ -139,6 +166,7 @@
             var listed = {};
             (d.items || []).forEach(function (it) { listed[it.id] = true; });
             Object.keys(justDone).forEach(function (k) { if (!listed[k]) delete justDone[k]; });   // the server has caught up
+            (d.depts || []).forEach(function (x) { deptNames[x.id] = x.name; });
             items = (d.items || []).filter(function (it) { return !justDone[it.id]; }); fetchedAt = Date.now();
             var fresh = {}, any = false;
             items.forEach(function (it) { if (!known[it.id]) { known[it.id] = true; if (!firstLoad) { fresh[it.id] = true; any = true; } } });
@@ -152,7 +180,8 @@
       }
       function onVisible() { if (!document.hidden && !stopped) poll(); }
       document.addEventListener('visibilitychange', onVisible);
-      var ageTimer = setInterval(function () { if (items.length) render(); }, 30000);    // keep the "minutes waiting" fresh between refreshes
+      var ageTimer = setInterval(function () { if (items.length) render(); }, 30000);
+      renderDepts();                                                                       // show the remembered department at once    // keep the "minutes waiting" fresh between refreshes
       // In-app navigation calls this when the user leaves the screen: stop polling for good.
       window.__pageCleanup = function () {
         stopped = true; clearTimeout(timer); clearInterval(ageTimer);

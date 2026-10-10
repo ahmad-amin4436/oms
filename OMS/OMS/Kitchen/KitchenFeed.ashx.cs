@@ -49,6 +49,7 @@ namespace OMS.Kitchen
 
             var dt = DBHelper.ExecuteDataTable("sp_GetKitchenItems");
             var items = new List<Dictionary<string, object>>(dt.Rows.Count);
+            bool hasDept = dt.Columns.Contains("DepartmentID");     // absent until Departments.sql has been applied
             foreach (DataRow r in dt.Rows)
             {
                 items.Add(new Dictionary<string, object>
@@ -63,10 +64,18 @@ namespace OMS.Kitchen
                     { "note",     Convert.ToString(r["SpecialInstructions"]) },
                     { "catId",    Convert.ToInt32(r["CategoryID"]) },
                     { "cat",      Convert.ToString(r["CategoryName"]) },
+                    { "deptId",   hasDept ? Convert.ToInt32(r["DepartmentID"]) : 0 },
+                    { "dept",     hasDept ? Convert.ToString(r["DepartmentName"]) : "Unassigned" },
                     { "ageSec",   Math.Max(0, Convert.ToInt32(r["AgeSeconds"])) }   // measured by the server, not the browser clock
                 });
             }
-            context.Response.Write(new JavaScriptSerializer().Serialize(new Dictionary<string, object> { { "items", items } }));
+            // Every active department, so a kitchen display set to one department keeps its tab even when it is quiet.
+            var depts = new List<Dictionary<string, object>>();
+            if (hasDept)
+                foreach (DataRow r in DBHelper.CachedDataTable("menu", 60, "sp_GetDepartments",
+                                          DBHelper.Parameter("@ActiveOnly", true)).Rows)
+                    depts.Add(new Dictionary<string, object> { { "id", Convert.ToInt32(r["DepartmentID"]) }, { "name", Convert.ToString(r["DepartmentName"]) } });
+            context.Response.Write(new JavaScriptSerializer().Serialize(new Dictionary<string, object> { { "items", items }, { "depts", depts } }));
         }
 
         private static void Fail(HttpContext context, int code)
