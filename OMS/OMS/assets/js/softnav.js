@@ -31,6 +31,18 @@
   var busy = false;
   var lastKey = location.pathname + location.search;
 
+  // The menu, logo and bell are rendered once, with links relative to the page they were first served from
+  // ("Default.aspx", "../Orders/OrderList.aspx"). After the address changes to another folder those would point
+  // at the wrong place (e.g. /Orders/Default.aspx), so turn them into root-relative paths while they still match.
+  function absolutize(scope) {
+    [].forEach.call(scope.querySelectorAll('a[href]'), function (a) {
+      var h = a.getAttribute('href');
+      if (!h || h.charAt(0) === '#' || /^([a-z][a-z0-9+.\-]*:|\/)/i.test(h)) return;
+      try { var u = new URL(a.href, location.href); a.setAttribute('href', u.pathname + u.search + u.hash); } catch (e) {}
+    });
+  }
+  absolutize(document);
+
   function bar() { return document.getElementById('ajaxBar'); }
   function progress(on) {
     var b = bar(); if (!b) return;
@@ -151,7 +163,7 @@
     // The notification bell is rendered per request: take the fresh copy.
     var mine = [].filter.call(document.querySelectorAll('li.nav-item.dropdown'), function (li) { return li.querySelector('#navbarDropdownNotification'); });
     var theirs = [].filter.call(doc.querySelectorAll('li.nav-item.dropdown'), function (li) { return li.querySelector('#navbarDropdownNotification'); });
-    mine.forEach(function (li, i) { if (theirs[i]) li.innerHTML = theirs[i].innerHTML; });
+    mine.forEach(function (li, i) { if (theirs[i]) { li.innerHTML = theirs[i].innerHTML; absolutize(li); } });
 
     // Menu highlight follows the current screen.
     var path = location.pathname.toLowerCase();

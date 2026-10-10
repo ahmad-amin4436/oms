@@ -612,7 +612,7 @@
             });
           })();
         </script>
-        <script src="/assets/js/softnav.js?v=1"></script>
+        <script src="/assets/js/softnav.js?v=2"></script>
         <%-- Startup scripts registered by a screen are rendered after this marker; softnav re-runs them. --%>
         <span id="softTail"></span>
       </form>
