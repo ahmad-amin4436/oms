@@ -202,6 +202,24 @@ namespace OMS {
         protected global::System.Web.UI.WebControls.Literal litSalesLastMonth;
         
         /// <summary>
+        /// btnSalesExcel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnSalesExcel;
+        
+        /// <summary>
+        /// btnSalesPDF control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnSalesPDF;
+        
+        /// <summary>
         /// rptBreakdown control.
         /// </summary>
         /// <remarks>
@@ -209,6 +227,51 @@ namespace OMS {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Repeater rptBreakdown;
+        
+        /// <summary>
+        /// btnTopProductsExcel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnTopProductsExcel;
+        
+        /// <summary>
+        /// btnTopProductsPDF control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnTopProductsPDF;
+        
+        /// <summary>
+        /// btnRecentExcel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnRecentExcel;
+        
+        /// <summary>
+        /// btnRecentPDF control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnRecentPDF;
+        
+        /// <summary>
+        /// litRecentRowCount control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litRecentRowCount;
         
         /// <summary>
         /// rptRecent control.
@@ -227,7 +290,7 @@ namespace OMS {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Literal litDailyOrdersTotal;
-
+        
         /// <summary>
         /// litRadarThisMonth control.
         /// </summary>
@@ -236,7 +299,7 @@ namespace OMS {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Literal litRadarThisMonth;
-
+        
         /// <summary>
         /// litRadarLastMonth control.
         /// </summary>
@@ -263,5 +326,23 @@ namespace OMS {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Repeater rptBest;
+        
+        /// <summary>
+        /// ddlBestRange control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlBestRange;
+        
+        /// <summary>
+        /// btnBestViewAll control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnBestViewAll;
     }
 }

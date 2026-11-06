@@ -11,7 +11,7 @@ namespace OMS.Admin
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            SecurityHelper.RequireRoles("Admin");
+            SecurityHelper.RequirePermission("Administration.Departments.View");
             if (!IsPostBack)
                 BindGrid();
         }
@@ -29,7 +29,7 @@ namespace OMS.Admin
 
         protected void gvDepartments_RowCommand(object sender, GridViewCommandEventArgs e)
         {
-            SecurityHelper.RequireRoles("Admin");
+            SecurityHelper.RequirePermission(e.CommandName == "DeleteDept" ? "Administration.Departments.Delete" : "Administration.Departments.Edit");
             int id;
             if (!int.TryParse(Convert.ToString(e.CommandArgument), out id)) return;
 
@@ -95,7 +95,7 @@ namespace OMS.Admin
 
         protected void btnAddNew_Click(object sender, EventArgs e)
         {
-            SecurityHelper.RequireRoles("Admin");
+            SecurityHelper.RequirePermission("Administration.Departments.Add");
             hfDepartmentID.Value = "0";
             litEditorTitle.Text  = "Add Department";
             txtName.Text = ""; txtDescription.Text = ""; txtOrder.Text = "0";
@@ -106,7 +106,8 @@ namespace OMS.Admin
 
         protected void btnSave_Click(object sender, EventArgs e)
         {
-            SecurityHelper.RequireRoles("Admin");
+            SecurityHelper.RequirePermission(string.IsNullOrEmpty(hfDepartmentID.Value) || hfDepartmentID.Value == "0"
+                ? "Administration.Departments.Add" : "Administration.Departments.Edit");
             if (!Page.IsValid) { pnlEditor.Visible = true; BindGrid(); return; }
 
             int id = 0; int.TryParse(hfDepartmentID.Value, out id);

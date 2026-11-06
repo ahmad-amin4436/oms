@@ -207,19 +207,46 @@
                       <h6 class="mb-0">Total Sales</h6>
                     </div>
                     <div class="col-auto d-flex">
-                      <div class="form-check mb-0 d-flex"><input class="form-check-input form-check-input-primary" id="ecommerceLastMonth" type="checkbox" checked="checked" /><label class="form-check-label ps-2 fs--2 text-600 mb-0" for="ecommerceLastMonth">This Month<span class="text-dark d-none d-md-inline">: <asp:Literal ID="litSalesThisMonth" runat="server" Text="Rs. 0" /></span></label></div>
-                      <div class="form-check mb-0 d-flex ps-0 ps-md-3"><input class="form-check-input ms-2 form-check-input-warning opacity-75" id="ecommercePrevYear" type="checkbox" checked="checked" /><label class="form-check-label ps-2 fs--2 text-600 mb-0" for="ecommercePrevYear">Last Month<span class="text-dark d-none d-md-inline">: <asp:Literal ID="litSalesLastMonth" runat="server" Text="Rs. 0" /></span></label></div>
+                      <div class="form-check mb-0 d-flex">
+                        <input class="form-check-input form-check-input-primary" type="checkbox" id="ecommerceLastMonth" checked="checked" />
+                        <label class="form-check-label ps-2 fs--2 text-600 mb-0" for="ecommerceLastMonth">This Month<span class="text-dark d-none d-md-inline">: <asp:Literal ID="litSalesThisMonth" runat="server" Text="Rs. 0" /></span></label>
+                      </div>
+                      <div class="form-check mb-0 d-flex ps-0 ps-md-3">
+                        <input class="form-check-input ms-2 form-check-input-warning opacity-75" type="checkbox" id="ecommercePrevYear" checked="checked" />
+                        <label class="form-check-label ps-2 fs--2 text-600 mb-0" for="ecommercePrevYear">Last Month<span class="text-dark d-none d-md-inline">: <asp:Literal ID="litSalesLastMonth" runat="server" Text="Rs. 0" /></span></label>
+                      </div>
                     </div>
                     <div class="col-auto">
-                      <div class="dropdown font-sans-serif btn-reveal-trigger"><button class="btn btn-link text-600 btn-sm dropdown-toggle dropdown-caret-none btn-reveal" type="button" id="dropdown-total-sales-ecomm" data-bs-toggle="dropdown" data-boundary="viewport" aria-haspopup="true" aria-expanded="false"><span class="fas fa-ellipsis-h fs--2"></span></button>
-                        <div class="dropdown-menu dropdown-menu-end border py-2" aria-labelledby="dropdown-total-sales-ecomm"><a class="dropdown-item" href="#!">View</a><a class="dropdown-item" href="#!">Export</a>
-                          <div class="dropdown-divider"></div><a class="dropdown-item text-danger" href="#!">Remove</a>
+                      <div class="dropdown font-sans-serif btn-reveal-trigger">
+                        <button class="btn btn-link text-600 btn-sm dropdown-toggle dropdown-caret-none btn-reveal"
+                                type="button"
+                                id="dropdown-total-sales-ecomm"
+                                data-bs-toggle="dropdown"
+                                data-boundary="viewport"
+                                aria-haspopup="true"
+                                aria-expanded="false">
+                          <span class="fas fa-ellipsis-h fs--2"></span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end border py-2"
+                             aria-labelledby="dropdown-total-sales-ecomm">
+                          <a class="dropdown-item" href="<%= ResolveUrl("~/Analytics/Analytics.aspx") %>">View Details</a>
+                          <div class="dropdown-divider"></div>
+                          <div class="dropdown-submenu">
+                            <a class="dropdown-item dropdown-toggle" href="javascript:void(0);">Export</a>
+                            <div class="dropdown-menu">
+                              <asp:LinkButton ID="btnSalesExcel" runat="server" CssClass="dropdown-item" OnClick="btnSalesExcel_Click" CausesValidation="false">Export as Excel</asp:LinkButton>
+                              <asp:LinkButton ID="btnSalesPDF" runat="server" CssClass="dropdown-item" OnClick="btnSalesPDF_Click" CausesValidation="false">Export as PDF</asp:LinkButton>
+                            </div>
+                          </div>
+                          <div class="dropdown-divider"></div>
+                          <a class="dropdown-item text-danger" href="javascript:void(0);" onclick="removeDashboardCard('totalSalesCard')">Remove Card</a>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div class="card-body pe-xxl-0">
+                <div class="card-body pe-xxl-0" id="totalSalesCard">
+
                   <!-- Find the JS file for the following chart at: src/js/charts/echarts/total-sales-ecommerce.js-->
                   <!-- If you are not using gulp based workflow, you can find the transpiled code at: public/assets/js/theme.js-->
                   <div class="echart-line-total-sales-ecommerce" data-echart-responsive="true" data-options='{"optionOne":"ecommerceLastMonth","optionTwo":"ecommercePrevYear"}'></div>
@@ -260,16 +287,28 @@
               </div>
             </div>
             <div class="col-xxl-4 col-md-6 col-lg-7 order-xxl-1">
-              <div class="card h-100">
+              <div class="card h-100" id="topProductsCard">
                 <div class="card-header bg-light py-2 d-flex flex-between-center">
                   <h6 class="mb-0">Top Products</h6>
-                  <div class="d-flex"><a class="btn btn-link btn-sm me-2" href="#!">View Details</a>
-                    <div class="dropdown font-sans-serif btn-reveal-trigger"><button class="btn btn-link text-600 btn-sm dropdown-toggle dropdown-caret-none btn-reveal" type="button" id="dropdown-top-products" data-bs-toggle="dropdown" data-boundary="viewport" aria-haspopup="true" aria-expanded="false"><span class="fas fa-ellipsis-h fs--2"></span></button>
-                      <div class="dropdown-menu dropdown-menu-end border py-2" aria-labelledby="dropdown-top-products"><a class="dropdown-item" href="#!">View</a><a class="dropdown-item" href="#!">Export</a>
-                        <div class="dropdown-divider"></div><a class="dropdown-item text-danger" href="#!">Remove</a>
-                      </div>
-                    </div>
-                  </div>
+                  <div class="d-flex"><a class="btn btn-link btn-sm me-2" href="<%= ResolveUrl("~/Analytics/Analytics.aspx") %>">View Details</a>
+    <div class="dropdown font-sans-serif btn-reveal-trigger">
+        <button class="btn btn-link text-600 btn-sm dropdown-toggle dropdown-caret-none btn-reveal" type="button" id="dropdown-top-products" data-bs-toggle="dropdown" data-boundary="viewport" aria-haspopup="true" aria-expanded="false">
+            <span class="fas fa-ellipsis-h fs--2"></span>
+        </button>
+        <div class="dropdown-menu dropdown-menu-end border py-2" aria-labelledby="dropdown-top-products">
+            <a class="dropdown-item" href="<%= ResolveUrl("~/Analytics/Analytics.aspx") %>">View</a>
+            <div class="dropdown-submenu">
+                <a class="dropdown-item dropdown-toggle" href="javascript:void(0);">Export</a>
+                <div class="dropdown-menu">
+                    <asp:LinkButton ID="btnTopProductsExcel" runat="server" CssClass="dropdown-item" OnClick="btnTopProductsExcel_Click" CausesValidation="false">Export as Excel</asp:LinkButton>
+                    <asp:LinkButton ID="btnTopProductsPDF" runat="server" CssClass="dropdown-item" OnClick="btnTopProductsPDF_Click" CausesValidation="false">Export as PDF</asp:LinkButton>
+                </div>
+            </div>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item text-danger" href="javascript:void(0);" onclick="removeDashboardCard('topProductsCard')">Remove</a>
+        </div>
+    </div>
+</div>
                 </div>
                 <div class="card-body d-flex h-100 flex-column justify-content-end">
                   <!-- Find the JS file for the following chart at: src/js/charts/echarts/top-products.js-->
@@ -294,7 +333,23 @@
                             <option value="Archive">Archive</option>
                           </select><button class="btn btn-falcon-default btn-sm ms-2" type="button">Apply</button></div>
                       </div>
-                      <div id="table-purchases-replace-element"><button class="btn btn-falcon-default btn-sm" type="button"><span class="fas fa-plus" data-fa-transform="shrink-3 down-2"></span><span class="d-none d-sm-inline-block ms-1">New</span></button><button class="btn btn-falcon-default btn-sm mx-2" type="button"><span class="fas fa-filter" data-fa-transform="shrink-3 down-2"></span><span class="d-none d-sm-inline-block ms-1">Filter</span></button><button class="btn btn-falcon-default btn-sm" type="button"><span class="fas fa-external-link-alt" data-fa-transform="shrink-3 down-2"></span><span class="d-none d-sm-inline-block ms-1">Export</span></button></div>
+                      <div id="table-purchases-replace-element"><a class="btn btn-falcon-default btn-sm" href="Orders/OrderList.aspx"><span class="fas fa-plus" data-fa-transform="shrink-3 down-2"></span><span class="d-none d-sm-inline-block ms-1">New</span></a><a class="btn btn-falcon-default btn-sm mx-2" href="Orders/OrderList.aspx"><span class="fas fa-filter" data-fa-transform="shrink-3 down-2"></span><span class="d-none d-sm-inline-block ms-1">Filter</span></a><div class="dropdown d-inline-block font-sans-serif text-start">
+                          <button class="btn btn-falcon-default btn-sm dropdown-toggle dropdown-caret-none" type="button" id="dropdown-recent-export" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-haspopup="true" aria-expanded="false"><span class="fas fa-external-link-alt" data-fa-transform="shrink-3 down-2"></span><span class="d-none d-sm-inline-block ms-1">Export</span></button>
+                          <div class="dropdown-menu dropdown-menu-end border p-3" aria-labelledby="dropdown-recent-export" style="min-width:260px">
+                            <div class="fs--1 text-600 mb-2">Columns to export</div>
+                            <div class="form-check mb-1"><input class="form-check-input" type="checkbox" name="expCols" id="expCol_customer" value="customer" checked="checked" /><label class="form-check-label fs--1 text-700 mb-0" for="expCol_customer">Customer</label></div>
+                            <div class="form-check mb-1"><input class="form-check-input" type="checkbox" name="expCols" id="expCol_phone" value="phone" checked="checked" /><label class="form-check-label fs--1 text-700 mb-0" for="expCol_phone">Phone</label></div>
+                            <div class="form-check mb-1"><input class="form-check-input" type="checkbox" name="expCols" id="expCol_order" value="order" checked="checked" /><label class="form-check-label fs--1 text-700 mb-0" for="expCol_order">Order #</label></div>
+                            <div class="form-check mb-1"><input class="form-check-input" type="checkbox" name="expCols" id="expCol_status" value="status" checked="checked" /><label class="form-check-label fs--1 text-700 mb-0" for="expCol_status">Status</label></div>
+                            <div class="form-check mb-1"><input class="form-check-input" type="checkbox" name="expCols" id="expCol_amount" value="amount" checked="checked" /><label class="form-check-label fs--1 text-700 mb-0" for="expCol_amount">Amount</label></div>
+                            <div class="fs--2 mt-2 mb-2"><a href="javascript:void(0);" onclick="omsExpCols(true)">All</a> &middot; <a href="javascript:void(0);" onclick="omsExpCols(false)">None</a></div>
+                            <div class="d-flex gap-2">
+                              <asp:LinkButton ID="btnRecentExcel" runat="server" CssClass="btn btn-sm flex-fill text-white" style="background-color:#0b5d1e;" OnClick="btnRecentExcel_Click" OnClientClick="return omsExpCheck();" CausesValidation="false"><span class="fas fa-file-excel me-1"></span>Excel</asp:LinkButton>
+                              <asp:LinkButton ID="btnRecentPDF" runat="server" CssClass="btn btn-sm flex-fill text-white" style="background-color:#e63757;" OnClick="btnRecentPDF_Click" OnClientClick="return omsExpCheck();" CausesValidation="false"><span class="fas fa-file-pdf me-1"></span>PDF</asp:LinkButton>
+                            </div>
+                            <div class="fs--2 text-600 mt-2"><asp:Literal ID="litRecentRowCount" runat="server" Text="0 rows shown in this table." /></div>
+                          </div>
+                        </div></div>
                     </div>
                   </div>
                 </div>
@@ -398,7 +453,7 @@
               <div class="card h-100">
                 <div class="card-header bg-light py-2">
                   <div class="d-flex flex-between-center">
-                    <h6 class="mb-0">Sales by POS location </h6><a class="btn btn-link btn-sm px-0" href="#!">View Details<span class="fas fa-chevron-right ms-1 fs--2"></span></a>
+                    <h6 class="mb-0">Sales by POS location </h6><a class="btn btn-link btn-sm px-0" href="<%= ResolveUrl("~/Analytics/Analytics.aspx") %>">View Details<span class="fas fa-chevron-right ms-1 fs--2"></span></a>
                   </div>
                 </div>
                 <div class="card-body px-0 pt-4 pb-0">
@@ -467,17 +522,44 @@
                 </div>
                 <div class="card-footer bg-light py-2">
                   <div class="row flex-between-center">
-                    <div class="col-auto"><select class="form-select form-select-sm">
-                        <option>Last 7 days</option>
-                        <option>Last Month</option>
-                        <option>Last Year</option>
-                      </select></div>
-                    <div class="col-auto"><a class="btn btn-sm btn-falcon-default" href="#!">View All</a></div>
+                    <div class="col-auto"><asp:DropDownList ID="ddlBestRange" runat="server" CssClass="form-select form-select-sm" AutoPostBack="true" OnSelectedIndexChanged="ddlBestRange_SelectedIndexChanged">
+                        <asp:ListItem Value="7">Last 7 days</asp:ListItem>
+                        <asp:ListItem Value="30" Selected="True">Last Month</asp:ListItem>
+                        <asp:ListItem Value="365">Last Year</asp:ListItem>
+                      </asp:DropDownList></div>
+                    <div class="col-auto"><asp:LinkButton ID="btnBestViewAll" runat="server" CssClass="btn btn-sm btn-falcon-default" OnClick="btnBestViewAll_Click" CausesValidation="false">View All</asp:LinkButton></div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+
+  <%-- Export sub-menu (Bootstrap 5 has no nested dropdowns, so this small CSS/JS adds it). --%>
+  <style>
+    .dropdown-submenu { position: relative; }
+    .dropdown-submenu > .dropdown-menu { top: 0; right: 100%; left: auto; margin-top: -0.5rem; margin-right: .1rem; }
+    .dropdown-submenu:hover > .dropdown-menu,
+    .dropdown-submenu.open > .dropdown-menu { display: block; }
+  </style>
+  <script>
+    function omsExpCols(on) {
+      document.querySelectorAll('input[name="expCols"]').forEach(function (c) { c.checked = on; });
+    }
+    function omsExpCheck() {
+      var any = document.querySelectorAll('input[name="expCols"]:checked').length > 0;
+      if (!any) alert('Select at least one column to export.');
+      return any;
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('.dropdown-submenu > .dropdown-toggle').forEach(function (t) {
+        t.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          t.parentElement.classList.toggle('open');
+        });
+      });
+    });
+  </script>
 
   <%-- Feed the demo ECharts with real OMS data, after the Falcon theme has
        initialised each chart instance. We only override data/labels/tooltip —
@@ -639,6 +721,20 @@
       window.addEventListener('load', function () {
         applyTotalSales(); applyTopProducts(); applyDailyOrders(); applyRadar();
       });
-    })();
+      })();
+      //Remove
+      function removeDashboardCard(cardId) {
+    if (!confirm("Are you sure you want to remove this dashboard card?")) {
+        return;
+    }
+
+    var el = document.getElementById(cardId);
+
+    if (el) {
+        // remove the whole card (header + body), not just the inner body
+        var card = el.closest('.card') || el;
+        card.remove();
+    }
+}
   </script>
 </asp:Content>

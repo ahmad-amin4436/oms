@@ -19,7 +19,7 @@ namespace OMS.Orders
                 tb.Attributes["onfocus"]  = "this.removeAttribute('readonly');";
                 tb.Attributes["data-lpignore"] = "true";
             }
-            lnkDayClose.Visible = SecurityHelper.IsInRole("Cashier", "Admin")
+            lnkDayClose.Visible = SecurityHelper.CanPerform("Orders.CloseBusinessDay")
                                   && SecurityHelper.CanOpen("~/Orders/DayClose.aspx");
             if (!IsPostBack)
             {
@@ -56,7 +56,7 @@ namespace OMS.Orders
         // settled: the payment is counted in the current business day (the closed day is not changed).
         protected bool ShowSettle(object status)
         {
-            return SecurityHelper.IsInRole("Cashier", "Admin")
+            return SecurityHelper.CanPerform("Orders.Settle")
                    && Convert.ToString(status) == "Pending";
         }
 
@@ -74,12 +74,7 @@ namespace OMS.Orders
             if (e.CommandName != "Settle") return;
 
             // Server-side authorization: the button being visible proves nothing.
-            if (!SecurityHelper.IsInRole("Cashier", "Admin"))
-            {
-                Response.Redirect("~/AccessDenied.aspx", false);
-                Context.ApplicationInstance.CompleteRequest();
-                return;
-            }
+            SecurityHelper.RequirePermission("Orders.Settle");
 
             int orderId, cashierId = SecurityHelper.UserID;
             if (cashierId == 0 || !int.TryParse(Convert.ToString(e.CommandArgument), out orderId)) return;
@@ -92,6 +87,8 @@ namespace OMS.Orders
                     DBHelper.Parameter("@ConfirmedBy",   cashierId),
                     DBHelper.Parameter("@PaymentMethod", DBNull.Value),
                     DBHelper.Parameter("@TaxPercent",    DBNull.Value));
+                SecurityHelper.LogActivity("Orders", "SettleOrder", "Order settled from order list.", orderId, "Order", orderId,
+                    "PaymentStatus", "Pending", "Paid");
                 lblListMsg.Text    = "Order settled (paid).";
                 lblListMsg.Visible = true;
             }

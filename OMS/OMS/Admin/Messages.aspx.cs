@@ -15,7 +15,7 @@ namespace OMS.Admin
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            SecurityHelper.RequireRoles("Admin", "Manager");
+            SecurityHelper.RequirePermission("Administration.Messages.View");
             if (!IsPostBack)
                 BindMessages();
         }
@@ -88,6 +88,7 @@ namespace OMS.Admin
 
         protected void btnReply_Click(object sender, EventArgs e)
         {
+            SecurityHelper.RequirePermission("Administration.Messages.Reply");
             int msgId = Convert.ToInt32(hdnMessageID.Value);
             if (msgId == 0 || string.IsNullOrWhiteSpace(txtReply.Text)) return;
 
@@ -95,6 +96,8 @@ namespace OMS.Admin
                 DBHelper.Parameter("@MessageID", msgId),
                 DBHelper.Parameter("@ReplyBody",  txtReply.Text.Trim()),
                 DBHelper.Parameter("@RepliedBy",  SecurityHelper.UserID));
+
+            SecurityHelper.LogActivity("Administration", "ReplyMessage", "Message reply recorded.", null, "Message", msgId);
 
             lblMsg.Text    = "Reply recorded and message marked as read.";
             lblMsg.Visible = true;

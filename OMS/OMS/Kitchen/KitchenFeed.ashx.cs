@@ -39,10 +39,12 @@ namespace OMS.Kitchen
                 if (!int.TryParse(context.Request.Form["done"], out id) || id <= 0) { Fail(context, 400); return; }
                 int userId = SecurityHelper.UserID;
                 if (userId == 0) { Fail(context, 401); return; }
+                if (!SecurityHelper.CanPerform("Kitchen.MarkDone")) { Fail(context, 403); return; }
 
                 DBHelper.ExecuteNonQuery("sp_MarkItemDone",
                     DBHelper.Parameter("@OrderItemID", id),
                     DBHelper.Parameter("@DoneBy", userId));
+                SecurityHelper.LogActivity("Kitchen", "MarkItemDone", "Kitchen item marked done.", null, "OrderItem", id);
                 context.Response.Write("{\"ok\":true}");
                 return;
             }

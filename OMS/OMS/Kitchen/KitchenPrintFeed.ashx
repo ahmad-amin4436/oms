@@ -1,0 +1,1 @@
+﻿<%@ WebHandler Language="C#" CodeBehind="KitchenPrintFeed.ashx.cs" Class="OMS.Kitchen.KitchenPrintFeed" %>

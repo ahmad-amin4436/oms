@@ -162,6 +162,24 @@
                   </asp:Repeater>
                 </div>
 
+                <h6 class="mt-3 mb-2">Operation Permissions</h6>
+                <p class="fs--2 text-600 mb-2">These permissions control backend actions. Hiding a button is not used as authorization.</p>
+                <div class="border rounded p-2 mb-3" style="max-height:420px; overflow-y:auto;">
+                  <asp:Repeater ID="rptPermissions" runat="server">
+                    <ItemTemplate>
+                      <div class="d-flex align-items-center justify-content-between border-bottom py-1">
+                        <div>
+                          <span class="fw-semibold fs--1"><%# Server.HtmlEncode(Convert.ToString(Eval("ModuleName"))) %></span>
+                          <span class="ms-2 fs--1"><%# Server.HtmlEncode(Convert.ToString(Eval("ActionName"))) %></span>
+                          <input type="hidden" runat="server" id="hfPermissionId" value='<%# Eval("PermissionID") %>' />
+                        </div>
+                        <asp:CheckBox runat="server" ID="chkPermission" CssClass="form-check-input"
+                          Checked='<%# (bool)Eval("Granted") %>' />
+                      </div>
+                    </ItemTemplate>
+                  </asp:Repeater>
+                </div>
+
                 <asp:Button ID="btnSaveRights" runat="server" CssClass="btn btn-sm btn-primary"
                   CausesValidation="false" Text="Save Rights" OnClick="btnSaveRights_Click" />
               </asp:Panel>

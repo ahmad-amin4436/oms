@@ -449,6 +449,7 @@ namespace OMS.Orders
 
         protected void btnPlaceOrder_Click(object sender, EventArgs e)
         {
+            SecurityHelper.RequirePermission("Orders.Add");
             // Server-side guard — the client-side OnClientClick is only a convenience.
             Page.Validate("PlaceOrder");
             if (!Page.IsValid)
@@ -508,13 +509,38 @@ namespace OMS.Orders
 
                 int orderId = Convert.ToInt32(outId.Value);
 
+                SecurityHelper.LogActivity("Orders", "CreateOrder", "Order created.", orderId, "Order", orderId,
+                    "Status", null, "Pending");
+
                 foreach (var item in cart)
+                {
                     DBHelper.ExecuteNonQuery("sp_InsertOrderItem",
-                        DBHelper.Parameter("@OrderID",   orderId),
-                        DBHelper.Parameter("@ItemID",    item.ItemID),
-                        DBHelper.Parameter("@Quantity",  item.Qty),
+                        DBHelper.Parameter("@OrderID", orderId),
+                        DBHelper.Parameter("@ItemID", item.ItemID),
+                        DBHelper.Parameter("@Quantity", item.Qty),
                         DBHelper.Parameter("@UnitPrice", item.UnitPrice),
                         DBHelper.Parameter("@LineTotal", item.LineTotal));
+                }
+                //...
+
+                // Create department-wise kitchen print jobs.
+                string printQueueWarning = "";
+
+                try
+                {
+                    DBHelper.ExecuteNonQuery(
+                        "sp_QueueKitchenPrintJobs",
+                        DBHelper.Parameter("@OrderID", orderId)
+                    );
+                }
+                catch (Exception ex)
+                {
+                    printQueueWarning = "Kitchen print jobs could not be queued.";
+                    System.Diagnostics.Debug.WriteLine(
+                        "Kitchen print queue error: " + ex.Message
+                    );
+                }
+                //...
 
                 Cart = new List<CartItem>();
 
@@ -537,9 +563,19 @@ namespace OMS.Orders
                     links += " <a class=\"alert-link ms-2\" href=\"" + ResolveUrl("~/Orders/OrderDetail.aspx?id=" + orderId) + "\">View order</a>";
                 if (SecurityHelper.CanOpen("~/Reports/PrintInvoice.aspx"))
                     links += " <a class=\"alert-link ms-2\" target=\"_blank\" href=\"" + ResolveUrl("~/Reports/PrintInvoice.aspx?id=" + orderId) + "\">Print invoice</a>";
+//...
+                lblPlaced.Text = "<span class=\"fas fa-check-circle me-2\"></span>Order <strong>" +
+                 HttpUtility.HtmlEncode(orderNo) +
+                 "</strong> placed &mdash; Rs. " + total.ToString("N0") +
+                 "." + links;
 
-                lblPlaced.Text = "<span class=\"fas fa-check-circle me-2\"></span>Order <strong>" + HttpUtility.HtmlEncode(orderNo) +
-                                 "</strong> placed &mdash; Rs. " + total.ToString("N0") + "." + links;
+                if (!string.IsNullOrEmpty(printQueueWarning))
+                {
+                    lblPlaced.Text += "<br/><span class=\"text-danger\">" +
+                                      HttpUtility.HtmlEncode(printQueueWarning) +
+                                      "</span>";
+                }
+            //...
                 lblPlaced.Visible = true;
                 System.Web.UI.ScriptManager.RegisterStartupScript(lblPlaced, typeof(System.Web.UI.WebControls.Label), "placedScroll",
                     "window.scrollTo({top:0,behavior:'smooth'});", true);

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.0\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.0\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -44,6 +44,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.0\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System" />
@@ -100,9 +103,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform">
-      <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.0\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
-    </Reference>
     <!-- Microsoft Enterprise Library Data Access Application Block -->
     <Reference Include="Microsoft.Practices.EnterpriseLibrary.Common">
       <HintPath>..\packages\EnterpriseLibrary.Common.6.0.1304.0\lib\NET45\Microsoft.Practices.EnterpriseLibrary.Common.dll</HintPath>
@@ -139,7 +139,11 @@
     <Content Include="Admin\Roles.aspx" />
     <Content Include="Admin\Settings.aspx" />
     <Content Include="Admin\Departments.aspx" />
+    <Content Include="Admin\PrinterConfiguration.aspx" />
+    <Content Include="Admin\AuditLogs.aspx" />
     <Content Include="Database\OrderEnhancements.sql" />
+    <Content Include="Database\PrinterConfiguration.sql" />
+    <Content Include="Database\PermissionsAndAudit.sql" />
     <Content Include="Admin.Master" />
     <Content Include="Analytics\Analytics.aspx" />
     <Content Include="AccessDenied.aspx" />
@@ -518,14 +522,15 @@
     <Content Include="favicon.png" />
     <Content Include="Login.aspx" />
     <Content Include="Logout.aspx" />
-    <Content Include="fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="App_Code\fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
-    <Content Include="fonts\glyphicons-halflings-regular.woff2" />
-    <Content Include="fonts\glyphicons-halflings-regular.woff" />
-    <Content Include="fonts\glyphicons-halflings-regular.ttf" />
-    <Content Include="fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="App_Code\fonts\glyphicons-halflings-regular.woff2" />
+    <Content Include="App_Code\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="App_Code\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="App_Code\fonts\glyphicons-halflings-regular.eot" />
     <Content Include="assets\img\favicons\manifest.json" />
     <Content Include="assets\img\icons\star_on.svg.readme" />
+    <Content Include="Kitchen\KitchenPrintFeed.ashx" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Scripts\jquery-3.3.1.intellisense.js" />
     <Content Include="Menu\MenuItems.aspx" />
@@ -767,7 +772,9 @@
     <Content Include="vendors\tinymce\tinymce.min.js" />
     <Content Include="vendors\typed.js\typed.js" />
     <Content Include="vendors\validator\validator.min.js" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Bundle.config" />
   </ItemGroup>
   <ItemGroup>
@@ -834,6 +841,20 @@
     <Compile Include="Admin\Settings.aspx.designer.cs">
       <DependentUpon>Settings.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Admin\PrinterConfiguration.aspx.cs">
+      <DependentUpon>PrinterConfiguration.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Admin\PrinterConfiguration.aspx.designer.cs">
+      <DependentUpon>PrinterConfiguration.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Admin\AuditLogs.aspx.cs">
+      <DependentUpon>AuditLogs.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Admin\AuditLogs.aspx.designer.cs">
+      <DependentUpon>AuditLogs.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Analytics\Analytics.aspx.cs">
       <DependentUpon>Analytics.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -874,6 +895,9 @@
     </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Kitchen\KitchenPrintFeed.ashx.cs">
+      <DependentUpon>KitchenPrintFeed.ashx</DependentUpon>
     </Compile>
     <Compile Include="Login.aspx.cs">
       <DependentUpon>Login.aspx</DependentUpon>

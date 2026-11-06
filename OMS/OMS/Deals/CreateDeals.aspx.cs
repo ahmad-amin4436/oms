@@ -195,6 +195,9 @@ namespace OMS.Deals
 
         protected void btnSave_Click(object sender, EventArgs e)
         {
+            int requestedDealId;
+            int.TryParse(hfDealID.Value, out requestedDealId);
+            SecurityHelper.RequirePermission(requestedDealId == 0 ? "Deals.Add" : "Deals.Edit");
             if (!Page.IsValid) return;
 
             int dealId = 0;
@@ -266,6 +269,8 @@ namespace OMS.Deals
                                                             : DBNull.Value));
 
                 ShowMsg(dealId == 0 ? "Deal created." : "Deal updated.");
+                SecurityHelper.LogActivity("Deals", dealId == 0 ? "AddDeal" : "EditDeal",
+                    dealId == 0 ? "Deal created." : "Deal updated.", null, "Deal", Convert.ToInt32(idParam.Value));
                 hfDealID.Value = Convert.ToString(idParam.Value);
                 litTitle.Text  = "Edit Deal";
 

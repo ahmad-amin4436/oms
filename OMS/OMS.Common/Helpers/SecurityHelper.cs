@@ -3,6 +3,7 @@ using System.Data;
 using System.Web;
 using System.Web.Security;
 using OMS.Common.DAL;
+using System.Data.SqlClient;
 
 namespace OMS.Common.Helpers
 {
@@ -11,6 +12,52 @@ namespace OMS.Common.Helpers
         public static int UserID
         {
             get { return Convert.ToInt32(HttpContext.Current.Session["UserID"] ?? 0); }
+        }
+
+        public static bool CanPerform(string actionKey)
+        {
+            RequireLogin();
+            if (string.IsNullOrEmpty(actionKey) || string.IsNullOrEmpty(UserRole)) return false;
+
+            var canParam = DBHelper.OutputParameter("@CanPerform", SqlDbType.Bit);
+            DBHelper.ExecuteNonQuery("sp_CanRolePerform",
+                DBHelper.Parameter("@RoleName", UserRole),
+                DBHelper.Parameter("@ActionKey", actionKey),
+                canParam);
+
+            return canParam.Value != DBNull.Value && Convert.ToBoolean(canParam.Value);
+        }
+
+        public static void RequirePermission(string actionKey)
+        {
+            if (!CanPerform(actionKey))
+            {
+                HttpContext.Current.Response.Redirect("~/AccessDenied.aspx", true);
+            }
+        }
+
+        public static void LogActivity(string module, string action, string description = null,
+            int? orderId = null, string entityType = null, int? entityId = null,
+            string fieldName = null, string previousValue = null, string newValue = null)
+        {
+            DBHelper.ExecuteNonQuery("sp_LogActivity",
+                DBHelper.Parameter("@UserID", UserID == 0 ? (object)DBNull.Value : UserID),
+                DBHelper.Parameter("@Action", action),
+                DBHelper.Parameter("@Description", description),
+                DBHelper.Parameter("@IPAddress", GetIPAddress()),
+                DBHelper.Parameter("@Module", module),
+                DBHelper.Parameter("@OrderID", orderId.HasValue ? (object)orderId.Value : DBNull.Value),
+                DBHelper.Parameter("@EntityType", entityType),
+                DBHelper.Parameter("@EntityID", entityId.HasValue ? (object)entityId.Value : DBNull.Value),
+                DBHelper.Parameter("@FieldName", fieldName),
+                DBHelper.Parameter("@PreviousValue", previousValue),
+                DBHelper.Parameter("@NewValue", newValue));
+        }
+
+        private static string GetIPAddress()
+        {
+            var request = HttpContext.Current == null ? null : HttpContext.Current.Request;
+            return request == null ? null : request.UserHostAddress;
         }
 
         public static string UserName

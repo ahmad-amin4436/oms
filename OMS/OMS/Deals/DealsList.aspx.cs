@@ -50,16 +50,20 @@ namespace OMS.Deals
 
             if (e.CommandName == "Toggle")
             {
+                SecurityHelper.RequirePermission("Deals.Edit");
                 var result = DBHelper.ExecuteDataTable("sp_ToggleDealStatus",
                     DBHelper.Parameter("@DealID", dealId));
                 bool nowActive = result.Rows.Count > 0 && Convert.ToBoolean(result.Rows[0][0]);
                 ShowMsg(nowActive ? "Deal activated." : "Deal deactivated.");
+                SecurityHelper.LogActivity("Deals", "ToggleDealStatus", nowActive ? "Deal activated." : "Deal deactivated.", null, "Deal", dealId);
                 BindDeals();
             }
             else if (e.CommandName == "DeleteDeal")
             {
+                SecurityHelper.RequirePermission("Deals.Delete");
                 DBHelper.ExecuteNonQuery("sp_DeleteDeal", DBHelper.Parameter("@DealID", dealId));
                 ShowMsg("Deal deleted.");
+                SecurityHelper.LogActivity("Deals", "DeleteDeal", "Deal deleted.", null, "Deal", dealId);
                 BindDeals();
             }
         }

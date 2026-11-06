@@ -21,6 +21,7 @@ namespace OMS.Admin
         protected global::System.Web.UI.WebControls.DropDownList ddlRightsRole;
         protected global::System.Web.UI.WebControls.Panel pnlRights;
         protected global::System.Web.UI.WebControls.Repeater rptRights;
+        protected global::System.Web.UI.WebControls.Repeater rptPermissions;
         protected global::System.Web.UI.WebControls.Button btnSaveRights;
         protected global::System.Web.UI.WebControls.Panel pnlNoRole;
     }

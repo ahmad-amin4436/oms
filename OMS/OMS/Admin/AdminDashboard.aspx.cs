@@ -9,7 +9,7 @@ namespace OMS.Admin
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            SecurityHelper.RequireRoles("Admin", "Manager");
+            SecurityHelper.RequirePermission("Administration.View");
             if (!IsPostBack)
                 BindStats();
         }

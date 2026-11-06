@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMS.Common", "OMS.Common\OM
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OMS.DAL", "OMS.DAL\OMS.DAL.csproj", "{654040E8-82DC-48A7-A802-F60CD4EF33D9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrinterSimulator", "PrinterSimulator\PrinterSimulator.csproj", "{2069A910-CC6E-4AAC-A663-1AC2AFF59E61}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{654040E8-82DC-48A7-A802-F60CD4EF33D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{654040E8-82DC-48A7-A802-F60CD4EF33D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{654040E8-82DC-48A7-A802-F60CD4EF33D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2069A910-CC6E-4AAC-A663-1AC2AFF59E61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2069A910-CC6E-4AAC-A663-1AC2AFF59E61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2069A910-CC6E-4AAC-A663-1AC2AFF59E61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2069A910-CC6E-4AAC-A663-1AC2AFF59E61}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

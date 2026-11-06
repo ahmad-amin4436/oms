@@ -96,6 +96,7 @@ namespace OMS.Menu
 
         protected void gvMenuItems_RowCommand(object sender, GridViewCommandEventArgs e)
         {
+            SecurityHelper.RequirePermission(e.CommandName == "DeleteItem" ? "Menu.Delete" : "Menu.Edit");
             switch (e.CommandName)
             {
                 case "Toggle":
@@ -112,20 +113,24 @@ namespace OMS.Menu
 
         private void ToggleAvailability(int itemId)
         {
+            SecurityHelper.RequirePermission("Menu.Edit");
             var result = DBHelper.ExecuteDataTable("sp_ToggleMenuItemAvailability",
                 DBHelper.Parameter("@ItemID", itemId));
 
             bool nowAvailable = result.Rows.Count > 0 && Convert.ToBoolean(result.Rows[0][0]);
             ShowMsg(nowAvailable ? "Item marked as available." : "Item marked as unavailable.");
+            SecurityHelper.LogActivity("Menu", "ToggleMenuItemAvailability", nowAvailable ? "Menu item enabled." : "Menu item disabled.", null, "MenuItem", itemId);
             BindItems();
         }
 
         private void DeleteItem(int itemId)
         {
+            SecurityHelper.RequirePermission("Menu.Delete");
             // sp_DeleteMenuItem is a soft delete (sets IsAvailable = 0) so existing
             // order history that references the item stays intact.
             DBHelper.ExecuteNonQuery("sp_DeleteMenuItem", DBHelper.Parameter("@ItemID", itemId));
             ShowMsg("Item removed from the menu.");
+            SecurityHelper.LogActivity("Menu", "DeleteMenuItem", "Menu item removed from the menu.", null, "MenuItem", itemId);
             HideEditor();
             BindItems();
         }
@@ -134,6 +139,7 @@ namespace OMS.Menu
 
         protected void btnAddNew_Click(object sender, EventArgs e)
         {
+            SecurityHelper.RequirePermission("Menu.Add");
             BindCategoryDropdown();
             hfItemID.Value      = "0";
             litEditorTitle.Text = "Add New Item";

@@ -11,7 +11,7 @@ namespace OMS.Admin
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            SecurityHelper.RequireRoles("Admin");
+            SecurityHelper.RequirePermission("Administration.Users.View");
             if (!IsPostBack)
                 BindUsers();
         }
@@ -72,16 +72,19 @@ namespace OMS.Admin
 
         private void ToggleStatus(int userId)
         {
+            SecurityHelper.RequirePermission("Administration.Users.Edit");
             var result = DBHelper.ExecuteDataTable("sp_ToggleUserStatus",
                 DBHelper.Parameter("@UserID", userId));
 
             bool nowActive = result.Rows.Count > 0 && Convert.ToBoolean(result.Rows[0][0]);
             ShowMsg(nowActive ? "User activated." : "User deactivated.");
+            SecurityHelper.LogActivity("Administration", "ToggleUserStatus", nowActive ? "User activated." : "User deactivated.", null, "User", userId);
             BindUsers();
         }
 
         private void DeleteUser(int userId)
         {
+            SecurityHelper.RequirePermission("Administration.Users.Delete");
             // An admin shouldn't be able to delete their own logged-in account.
             if (userId == SecurityHelper.UserID)
             {
@@ -95,6 +98,7 @@ namespace OMS.Admin
                 // sp_DeleteUser raises an error if the user has order history.
                 DBHelper.ExecuteNonQuery("sp_DeleteUser", DBHelper.Parameter("@UserID", userId));
                 ShowMsg("User deleted.");
+                SecurityHelper.LogActivity("Administration", "DeleteUser", "User deleted.", null, "User", userId);
                 HideEditor();
                 BindUsers();
             }
@@ -109,6 +113,7 @@ namespace OMS.Admin
 
         protected void btnAddNew_Click(object sender, EventArgs e)
         {
+            SecurityHelper.RequirePermission("Administration.Users.Add");
             BindRoleDropdown();
             BindDepartmentDropdown();
             hfUserID.Value      = "0";
@@ -161,6 +166,9 @@ namespace OMS.Admin
 
         protected void btnSave_Click(object sender, EventArgs e)
         {
+            int requestedUserId;
+            int.TryParse(hfUserID.Value, out requestedUserId);
+            SecurityHelper.RequirePermission(requestedUserId == 0 ? "Administration.Users.Add" : "Administration.Users.Edit");
             if (!Page.IsValid) { pnlEditor.Visible = true; return; }
 
             int userId = 0;
@@ -206,6 +214,8 @@ namespace OMS.Admin
                     DBHelper.Parameter("@DepartmentID", deptId.HasValue ? (object)deptId.Value : DBNull.Value));
 
                 ShowMsg(userId == 0 ? "New user created." : "User updated.");
+                SecurityHelper.LogActivity("Administration", userId == 0 ? "AddUser" : "EditUser",
+                    userId == 0 ? "User created." : "User updated.", null, "User", Convert.ToInt32(idParam.Value));
                 HideEditor();
                 BindUsers();
             }

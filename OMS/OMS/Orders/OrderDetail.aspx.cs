@@ -32,11 +32,7 @@ namespace OMS.Orders
         protected void btnCancelOrder_Click(object sender, EventArgs e)
         {
             // Server-side authorization — hiding the panel is only a convenience.
-            if (!SecurityHelper.IsInRole("Admin"))
-            {
-                Response.Redirect("~/AccessDenied.aspx", false);
-                return;
-            }
+            SecurityHelper.RequirePermission("Orders.Cancel");
 
             Page.Validate("CancelOrder");
             if (!Page.IsValid) return;
@@ -47,6 +43,10 @@ namespace OMS.Orders
                     DBHelper.Parameter("@OrderID",     OrderID),
                     DBHelper.Parameter("@CancelledBy", SecurityHelper.UserID == 0 ? (object)DBNull.Value : SecurityHelper.UserID),
                     DBHelper.Parameter("@Reason",      txtCancelReason.Text.Trim()));
+
+                SecurityHelper.LogActivity("Orders", "CancelOrder",
+                    txtCancelReason.Text.Trim(), OrderID, "Order", OrderID,
+                    "Status", "Pending", "Cancelled");
 
                 txtCancelReason.Text = "";
                 lblStatusMsg.Text    = "Order cancelled.";
@@ -66,7 +66,7 @@ namespace OMS.Orders
         // right away. Nothing is saved until Confirm Payment is pressed (which uses the same rate).
         protected void ddlPayMethod_Changed(object sender, EventArgs e)
         {
-            if (!SecurityHelper.IsInRole("Cashier", "Admin")) return;
+            if (!SecurityHelper.CanPerform("Orders.ConfirmPayment")) return;
 
             var ds = DBHelper.ExecuteDataSet("sp_GetOrderByID", DBHelper.Parameter("@OrderID", OrderID));
             if (ds.Tables.Count == 0 || ds.Tables[0].Rows.Count == 0) return;
@@ -96,6 +96,7 @@ namespace OMS.Orders
 
         protected void btnAddDish_Click(object sender, EventArgs e)
         {
+            SecurityHelper.RequirePermission("Orders.AddItem");
             Page.Validate("AddDish");
             if (!Page.IsValid) return;
 
@@ -174,12 +175,7 @@ namespace OMS.Orders
         // and Order Takers/other roles must never be able to mark an order paid.
         protected void btnConfirmPayment_Click(object sender, EventArgs e)
         {
-            if (!SecurityHelper.IsInRole("Cashier", "Admin"))
-            {
-                Response.Redirect("~/AccessDenied.aspx", false);
-                Context.ApplicationInstance.CompleteRequest();
-                return;
-            }
+            SecurityHelper.RequirePermission("Orders.ConfirmPayment");
 
             int cashierId = SecurityHelper.UserID;
             if (cashierId == 0) { SecurityHelper.RequireLogin(); return; }
@@ -198,6 +194,10 @@ namespace OMS.Orders
                     DBHelper.Parameter("@ConfirmedBy",   cashierId),
                     DBHelper.Parameter("@PaymentMethod", method),
                     DBHelper.Parameter("@TaxPercent",    taxPct));
+
+                SecurityHelper.LogActivity("Orders", "ConfirmOrder",
+                    "Order payment confirmed.", OrderID, "Order", OrderID,
+                    "PaymentStatus", "Pending", "Paid");
 
                 lblStatusMsg.Text    = "Payment confirmed. The order is now Confirmed (paid).";
                 lblStatusMsg.Visible = true;
@@ -305,7 +305,7 @@ namespace OMS.Orders
             bool pending   = status == "Pending";
             bool confirmed = status == "Confirmed";
             bool dayClosed = Convert.ToInt32(row["DayClosed"]) == 1;
-            bool canConfirm = SecurityHelper.IsInRole("Cashier", "Admin");
+            bool canConfirm = SecurityHelper.CanPerform("Orders.ConfirmPayment");
 
             // Payment panel: Cashier/Admin can confirm an unpaid order; others see its state.
             pnlPayment.Visible  = !cancelled;
@@ -325,7 +325,7 @@ namespace OMS.Orders
             }
 
             // Cancel: Admin only; paid orders of a closed business day are final.
-            pnlCancel.Visible       = !cancelled && SecurityHelper.IsInRole("Admin") && !(confirmed && dayClosed);
+            pnlCancel.Visible       = !cancelled && SecurityHelper.CanPerform("Orders.Cancel") && !(confirmed && dayClosed);
             pnlCancelInfo.Visible   = cancelled;
             // Dishes can only be added while the order is unpaid and its day is open.
             BindAddDish(pending && !dayClosed);

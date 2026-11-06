@@ -22,7 +22,7 @@ namespace OMS.Admin
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            SecurityHelper.RequireRoles("Admin");
+            SecurityHelper.RequirePermission("Administration.Roles.View");
             if (!IsPostBack)
             {
                 BindRolesGrid();
@@ -42,6 +42,7 @@ namespace OMS.Admin
 
         protected void btnAddRole_Click(object sender, EventArgs e)
         {
+            SecurityHelper.RequirePermission("Administration.Roles.Add");
             hfRoleID.Value   = "0";
             txtRoleName.Text = "";
             pnlRoleEditor.Visible = true;
@@ -54,9 +55,11 @@ namespace OMS.Admin
             switch (e.CommandName)
             {
                 case "EditRole":
+                    SecurityHelper.RequirePermission("Administration.Roles.Edit");
                     OpenRoleEditor(roleId);
                     break;
                 case "DeleteRole":
+                    SecurityHelper.RequirePermission("Administration.Roles.Delete");
                     DeleteRole(roleId);
                     break;
                 case "RightsRole":
@@ -90,6 +93,7 @@ namespace OMS.Admin
 
         protected void btnSaveRole_Click(object sender, EventArgs e)
         {
+            SecurityHelper.RequirePermission(string.IsNullOrEmpty(hfRoleID.Value) || hfRoleID.Value == "0" ? "Administration.Roles.Add" : "Administration.Roles.Edit");
             if (!Page.IsValid) { pnlRoleEditor.Visible = true; return; }
 
             int roleId = 0;
@@ -246,6 +250,10 @@ namespace OMS.Admin
             rptRights.DataSource = view;
             rptRights.DataBind();
 
+            rptPermissions.DataSource = DBHelper.ExecuteDataTable("sp_GetPermissionCatalog",
+                DBHelper.Parameter("@RoleID", ddlRightsRole.SelectedValue));
+            rptPermissions.DataBind();
+
             pnlRights.Visible = true;
             pnlNoRole.Visible = false;
         }
@@ -270,6 +278,7 @@ namespace OMS.Admin
 
         protected void btnSaveRights_Click(object sender, EventArgs e)
         {
+            SecurityHelper.RequirePermission("Administration.Roles.Edit");
             string roleName = SelectedRoleName;
             if (string.IsNullOrEmpty(roleName))
             {
@@ -308,6 +317,14 @@ namespace OMS.Admin
                 }
             }
 
+            var permissionIds = new List<string>();
+            foreach (RepeaterItem permission in rptPermissions.Items)
+            {
+                var chk = (CheckBox)permission.FindControl("chkPermission");
+                var hf = (System.Web.UI.HtmlControls.HtmlInputHidden)permission.FindControl("hfPermissionId");
+                if (chk != null && chk.Checked && hf != null) permissionIds.Add(hf.Value);
+            }
+
             try
             {
                 DBHelper.ExecuteNonQuery("sp_SetRoleNavGroups",
@@ -315,6 +332,16 @@ namespace OMS.Admin
                     DBHelper.Parameter("@GroupIDs", groupIds.Count > 0
                         ? (object)string.Join(",", groupIds)
                         : DBNull.Value));
+
+                int roleId;
+                if (int.TryParse(ddlRightsRole.SelectedValue, out roleId))
+                {
+                    DBHelper.ExecuteNonQuery("sp_SetRolePermissions",
+                        DBHelper.Parameter("@RoleID", roleId),
+                        DBHelper.Parameter("@PermissionIDs", permissionIds.Count > 0
+                            ? (object)string.Join(",", permissionIds)
+                            : DBNull.Value));
+                }
 
                 DBHelper.ExecuteNonQuery("sp_SetRoleNavItems",
                     DBHelper.Parameter("@RoleName", roleName),

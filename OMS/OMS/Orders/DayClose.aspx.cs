@@ -14,16 +14,14 @@ namespace OMS.Orders
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            SecurityHelper.RequireRoles("Cashier", "Admin");
-            if (!SecurityHelper.IsInRole("Cashier", "Admin")) return;
+            SecurityHelper.RequirePermission("Orders.CloseBusinessDay");
             if (!IsPostBack) BindAll();
         }
 
         protected void btnClose_Click(object sender, EventArgs e)
         {
             // Server-side authorization: the button being visible proves nothing.
-            SecurityHelper.RequireRoles("Cashier", "Admin");
-            if (!SecurityHelper.IsInRole("Cashier", "Admin")) return;
+            SecurityHelper.RequirePermission("Orders.CloseBusinessDay");
 
             int userId = SecurityHelper.UserID;
             if (userId == 0) { SecurityHelper.RequireLogin(); return; }
@@ -31,6 +29,7 @@ namespace OMS.Orders
             try
             {
                 var ds = DBHelper.ExecuteDataSet("sp_CloseBusinessDay", DBHelper.Parameter("@ClosedBy", userId));
+                SecurityHelper.LogActivity("Orders", "CloseBusinessDay", "Business day closed.");
                 if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
                 {
                     DataRow r = ds.Tables[0].Rows[0];

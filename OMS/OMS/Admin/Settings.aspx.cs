@@ -21,7 +21,7 @@ namespace OMS.Admin
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            SecurityHelper.RequireRoles("Admin");
+            SecurityHelper.RequirePermission("Administration.Settings.View");
             if (!IsPostBack)
                 foreach (var m in SettingsHelper.TaxPaymentMethods)
                     BoxFor(m[0]).Text = SettingsHelper.TaxPercentFor(m[0]).ToString("0.##", CultureInfo.InvariantCulture);
@@ -29,7 +29,7 @@ namespace OMS.Admin
 
         protected void btnSave_Click(object sender, EventArgs e)
         {
-            SecurityHelper.RequireRoles("Admin");
+            SecurityHelper.RequirePermission("Administration.Settings.Edit");
             Page.Validate("Settings");
             if (!Page.IsValid) return;
 
