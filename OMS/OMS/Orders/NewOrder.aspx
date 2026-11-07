@@ -255,13 +255,13 @@
                         </td>
                         <td class="text-center">
                           <div class="d-flex align-items-center justify-content-center gap-1">
-                            <asp:LinkButton ID="lbMinus" runat="server"
+                            <asp:LinkButton ID="lbMinus" runat="server" Visible='<%# CanEditCart %>'
                               CommandName="Minus"
                               CommandArgument='<%# Eval("Key") %>'
                               CssClass="btn btn-sm btn-falcon-default px-2 py-0 lh-sm"
                               CausesValidation="false" ToolTip="Decrease">&#8722;</asp:LinkButton>
                             <span class="fw-semibold px-1" style="min-width:20px;text-align:center"><%# Eval("Qty") %></span>
-                            <asp:LinkButton ID="lbPlus" runat="server"
+                            <asp:LinkButton ID="lbPlus" runat="server" Visible='<%# CanEditCart %>'
                               CommandName="Plus"
                               CommandArgument='<%# Eval("Key") %>'
                               CssClass="btn btn-sm btn-falcon-default px-2 py-0 lh-sm"
@@ -270,7 +270,7 @@
                         </td>
                         <td class="text-end pe-0 fw-semibold">Rs.&#160;<%# Eval("LineTotal", "{0:N0}") %></td>
                         <td class="text-center">
-                          <asp:LinkButton ID="lbRemove" runat="server"
+                          <asp:LinkButton ID="lbRemove" runat="server" Visible='<%# CanEditCart %>'
                             CommandName="Remove"
                             CommandArgument='<%# Eval("Key") %>'
                             CssClass="btn btn-sm btn-falcon-danger p-1 lh-1"
@@ -290,6 +290,7 @@
               <span class="text-600">Subtotal</span>
               <asp:Label ID="lblSubtotal" runat="server" Text="Rs. 0" />
             </div>
+            <asp:Panel ID="pnlDiscountRow" runat="server">
             <div class="d-flex justify-content-between align-items-center fs--1 mb-1">
               <span class="text-600">Discount&nbsp;(%)</span>
               <div class="d-flex align-items-center gap-2">
@@ -307,6 +308,7 @@
               MinimumValue="0" MaximumValue="100" Type="Double"
               ErrorMessage="Discount must be between 0 and 100." Display="Dynamic"
               CssClass="text-danger fs--2 d-block text-end mb-1" Text="0-100 only" />
+            </asp:Panel>
             <div class="d-flex justify-content-between fs--1 mb-2">
               <asp:Label ID="lblTaxLabel" runat="server" CssClass="text-600" Text="Tax" />
               <asp:Label ID="lblTax" runat="server" Text="Rs. 0" />

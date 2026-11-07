@@ -12,6 +12,7 @@ namespace OMS.Reports
             // Access follows the DB-driven nav rights (Roles & Rights screen),
             // so granting a role the Print Invoice menu also lets it open here.
             SecurityHelper.RequireUrlAccess();
+            btnPrintInvoice.Visible = SecurityHelper.CanPerform("Reports.Print");
             if (!IsPostBack)
                 BindInvoice();
         }

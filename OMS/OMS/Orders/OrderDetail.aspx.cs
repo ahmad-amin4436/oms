@@ -60,7 +60,7 @@ namespace OMS.Orders
             }
         }
 
-        // Dishes can be added to an open order but never removed. The price and the
+        // Dishes can be added to, or (with the Delete Item permission) removed from, an open order. The price and the
         // status rule are enforced in sp_AddOrderItem, not trusted from the page.
         // The cashier picks how the customer is paying: show the tax and total at THAT method's rate
         // right away. Nothing is saved until Confirm Payment is pressed (which uses the same rate).
@@ -92,6 +92,46 @@ namespace OMS.Orders
             lblTotal.Text    = Fmt(total);
             btnConfirmPayment.OnClientClick = "return confirm('Confirm that " + Fmt(total) + " was received?');";
             lblPayHint.Text  = "Tax shown at the " + ddlPayMethod.SelectedItem.Text + " rate (" + pct.ToString("0.##") + "%). It is saved when you confirm payment.";
+        }
+
+        // Delete Item: the button is shown only to roles holding OrderDetail.DeleteItem on an open,
+        // unpaid order. The handler re-checks both, because a posted command does not need the button.
+        protected bool CanDeleteItems { get; private set; }
+
+        protected string DeleteConfirmScript(object name, object qty)
+        {
+            string text = "Delete " + Convert.ToString(qty) + " x " + Convert.ToString(name)
+                        + " from this order? The totals will be recalculated.";
+            return "return confirm('" + System.Web.HttpUtility.JavaScriptStringEncode(text) + "');";
+        }
+
+        protected void gvItems_RowCommand(object sender, System.Web.UI.WebControls.GridViewCommandEventArgs e)
+        {
+            if (e.CommandName != "DeleteOrderItem") return;
+
+            SecurityHelper.RequirePermission("OrderDetail.DeleteItem");
+
+            int orderItemId;
+            if (!int.TryParse(Convert.ToString(e.CommandArgument), out orderItemId)) return;
+
+            try
+            {
+                DBHelper.ExecuteNonQuery("sp_DeleteOrderItem",
+                    DBHelper.Parameter("@OrderID",     OrderID),
+                    DBHelper.Parameter("@OrderItemID", orderItemId),
+                    DBHelper.Parameter("@DeletedBy",   SecurityHelper.UserID == 0 ? (object)DBNull.Value : SecurityHelper.UserID),
+                    DBHelper.Parameter("@IPAddress",   Request.UserHostAddress));
+
+                BindOrder();
+                lblAddMsg.Text    = "Item deleted. Totals updated.";
+                lblAddMsg.Visible = true;
+            }
+            catch (Exception ex)
+            {
+                BindOrder();
+                lblError.Text    = "Could not delete the item: " + ex.Message;
+                lblError.Visible = true;
+            }
         }
 
         protected void btnAddDish_Click(object sender, EventArgs e)
@@ -328,7 +368,8 @@ namespace OMS.Orders
             pnlCancel.Visible       = !cancelled && SecurityHelper.CanPerform("Orders.Cancel") && !(confirmed && dayClosed);
             pnlCancelInfo.Visible   = cancelled;
             // Dishes can only be added while the order is unpaid and its day is open.
-            BindAddDish(pending && !dayClosed);
+            BindAddDish(pending && !dayClosed && SecurityHelper.CanPerform("Orders.AddItem"));
+            CanDeleteItems = pending && !dayClosed && SecurityHelper.CanPerform("OrderDetail.DeleteItem");
             if (cancelled)
             {
                 lblCancelledAt.Text = row["CancelledAt"] == DBNull.Value ? "&mdash;"

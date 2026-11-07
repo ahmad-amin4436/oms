@@ -65,7 +65,7 @@
                 HeaderStyle-CssClass="text-center fw-medium"
                 ItemStyle-CssClass="text-center pe-3">
                 <ItemTemplate>
-                  <asp:LinkButton runat="server"
+                  <asp:LinkButton runat="server" Visible='<%# OMS.Common.Helpers.SecurityHelper.CanPerform("Offers.Toggle") %>'
                     CommandName="Toggle"
                     CommandArgument='<%# Eval("CouponID") %>'
                     CssClass='<%# "btn btn-sm px-2 py-0 fs--2 " + ((bool)Eval("IsActive") ? "btn-falcon-warning" : "btn-falcon-success") %>'>

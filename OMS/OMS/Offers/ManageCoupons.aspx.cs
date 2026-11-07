@@ -9,6 +9,7 @@ namespace OMS.Offers
         protected void Page_Load(object sender, EventArgs e)
         {
             SecurityHelper.RequireUrlAccess();
+            SecurityHelper.RequirePermission("Offers.View");
             if (!IsPostBack)
                 BindCoupons();
         }
@@ -22,6 +23,7 @@ namespace OMS.Offers
         protected void gvCoupons_RowCommand(object sender, System.Web.UI.WebControls.GridViewCommandEventArgs e)
         {
             if (e.CommandName != "Toggle") return;
+            SecurityHelper.RequirePermission("Offers.Toggle");
 
             int couponId = Convert.ToInt32(e.CommandArgument);
             var result   = DBHelper.ExecuteDataTable("sp_ToggleCouponStatus",

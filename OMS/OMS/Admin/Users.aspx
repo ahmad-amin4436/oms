@@ -159,7 +159,7 @@
                       ToolTip="Edit">
                       <span class="fas fa-edit"></span>
                     </asp:LinkButton>
-                    <asp:LinkButton runat="server"
+                    <asp:LinkButton runat="server" Visible='<%# OMS.Common.Helpers.SecurityHelper.CanPerform("Administration.Users.Activate") %>'
                       CommandName="Toggle"
                       CommandArgument='<%# Eval("UserID") %>'
                       CausesValidation="false"

@@ -25,6 +25,12 @@ namespace OMS
         // Notifications (bell): unread customer messages + pending orders
         // ----------------------------------------------------------------
 
+        // True when the signed-in role lacks this screen's Export operation (see SecurityHelper.CanExportCurrentPage).
+        protected bool ExportBlocked
+        {
+            get { return OMS.Common.Helpers.SecurityHelper.IsAuthenticated && !OMS.Common.Helpers.SecurityHelper.CanExportCurrentPage(); }
+        }
+
         protected override void OnPreRender(EventArgs e)
         {
             base.OnPreRender(e);
@@ -40,7 +46,10 @@ namespace OMS
         {
             if (!OMS.Common.Helpers.SecurityHelper.IsAuthenticated) return string.Empty;
 
-            bool canSeeMessages = OMS.Common.Helpers.SecurityHelper.IsInRole("Admin", "Manager");
+            // Bell, message notifications and "mark all read" follow the Notifications / Messages operations.
+            if (!OMS.Common.Helpers.SecurityHelper.CanPerform("Notifications.View")) return string.Empty;
+            bool canSeeMessages = OMS.Common.Helpers.SecurityHelper.CanPerform("Messages.View");
+            bool canMarkRead = OMS.Common.Helpers.SecurityHelper.CanPerform("Notifications.MarkRead");
             System.Data.DataTable dt = null;
             try
             {
@@ -59,7 +68,7 @@ namespace OMS
             sb.Append("<div class=\"dropdown-menu dropdown-caret dropdown-menu-end dropdown-menu-card dropdown-menu-notification dropdown-caret-bg\" aria-labelledby=\"navbarDropdownNotification\">");
             sb.Append("<div class=\"card card-notification shadow-none\"><div class=\"card-header\"><div class=\"row justify-content-between align-items-center\">");
             sb.Append("<div class=\"col-auto\"><h6 class=\"card-header-title mb-0\">Notifications</h6></div>");
-            if (canSeeMessages && count > 0)
+            if (canSeeMessages && canMarkRead && count > 0)
                 sb.Append("<div class=\"col-auto ps-0 ps-sm-3\"><a class=\"card-link fw-normal\" href=\"#\" data-mark-read=\"1\">Mark all as read</a></div>");
             sb.Append("</div></div><div class=\"scrollbar-overlay\" style=\"max-height: 19rem\"><div class=\"list-group list-group-flush fw-normal fs--1\">");
 

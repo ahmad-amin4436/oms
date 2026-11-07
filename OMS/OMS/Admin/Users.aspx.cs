@@ -62,6 +62,7 @@ namespace OMS.Admin
                     ToggleStatus(Convert.ToInt32(e.CommandArgument));
                     break;
                 case "EditUser":
+                    SecurityHelper.RequirePermission("Administration.Users.Edit");
                     OpenEditorForEdit(Convert.ToInt32(e.CommandArgument));
                     break;
                 case "DeleteUser":
@@ -72,7 +73,7 @@ namespace OMS.Admin
 
         private void ToggleStatus(int userId)
         {
-            SecurityHelper.RequirePermission("Administration.Users.Edit");
+            SecurityHelper.RequirePermission("Administration.Users.Activate");
             var result = DBHelper.ExecuteDataTable("sp_ToggleUserStatus",
                 DBHelper.Parameter("@UserID", userId));
 

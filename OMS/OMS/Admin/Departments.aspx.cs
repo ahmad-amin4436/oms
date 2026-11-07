@@ -29,7 +29,8 @@ namespace OMS.Admin
 
         protected void gvDepartments_RowCommand(object sender, GridViewCommandEventArgs e)
         {
-            SecurityHelper.RequirePermission(e.CommandName == "DeleteDept" ? "Administration.Departments.Delete" : "Administration.Departments.Edit");
+            SecurityHelper.RequirePermission(e.CommandName == "DeleteDept" ? "Administration.Departments.Delete"
+                : e.CommandName == "ToggleDept" ? "Administration.Departments.Toggle" : "Administration.Departments.Edit");
             int id;
             if (!int.TryParse(Convert.ToString(e.CommandArgument), out id)) return;
 

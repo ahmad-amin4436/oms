@@ -113,7 +113,7 @@
                   HeaderStyle-CssClass="text-end fw-medium pe-3" ItemStyle-CssClass="text-end pe-3">
                   <ItemTemplate>
                     <div class="d-inline-flex gap-1">
-                      <asp:LinkButton runat="server" CommandName="EditCat"
+                      <asp:LinkButton runat="server" Visible='<%# OMS.Common.Helpers.SecurityHelper.CanPerform("Categories.Edit") %>' CommandName="EditCat"
                         CommandArgument='<%# Eval("CategoryID") %>' CausesValidation="false"
                         CssClass="btn btn-sm btn-falcon-default px-2 py-0 fs--2" ToolTip="Edit">
                         <span class="fas fa-edit"></span>
@@ -121,7 +121,7 @@
                       <asp:LinkButton runat="server" CommandName="DeleteCat"
                         CommandArgument='<%# Eval("CategoryID") %>' CausesValidation="false"
                         CssClass="btn btn-sm btn-falcon-danger px-2 py-0 fs--2" ToolTip="Deactivate"
-                        Visible='<%# (bool)Eval("IsActive") %>'
+                        Visible='<%# (bool)Eval("IsActive") && OMS.Common.Helpers.SecurityHelper.CanPerform("Categories.Delete") %>'
                         OnClientClick="return confirm('Deactivate this category? It will be hidden from filters and the item form.');">
                         <span class="fas fa-trash-alt"></span>
                       </asp:LinkButton>
@@ -275,7 +275,7 @@
                       ToolTip="Edit">
                       <span class="fas fa-edit"></span>
                     </asp:LinkButton>
-                    <asp:LinkButton runat="server"
+                    <asp:LinkButton runat="server" Visible='<%# OMS.Common.Helpers.SecurityHelper.CanPerform("Menu.Toggle") %>'
                       CommandName="Toggle"
                       CommandArgument='<%# Eval("ItemID") %>'
                       CausesValidation="false"

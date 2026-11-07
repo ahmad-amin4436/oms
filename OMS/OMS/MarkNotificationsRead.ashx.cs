@@ -16,7 +16,7 @@ namespace OMS
             bool ajax = context.Request.Headers["X-Requested-With"] == "XMLHttpRequest";
             if (context.Request.HttpMethod != "POST" || !ajax) { Fail(context, 400); return; }
             if (!SecurityHelper.IsAuthenticated) { Fail(context, 401); return; }
-            if (!SecurityHelper.IsInRole("Admin", "Manager")) { Fail(context, 403); return; }
+            if (!SecurityHelper.CanPerform("Notifications.MarkRead")) { Fail(context, 403); return; }
 
             DBHelper.ExecuteNonQuery("sp_MarkAllMessagesRead");
             context.Response.ContentType = "text/plain";

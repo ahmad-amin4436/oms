@@ -48,6 +48,7 @@ namespace OMS.Common.Helpers
                 case "sp_SaveDepartment": case "sp_DeleteDepartment":
                     return "menu";
                 case "sp_SaveRole": case "sp_DeleteRole": case "sp_SetRoleNavGroups": case "sp_SetRoleNavItems":
+                case "sp_SetRolePermissions":
                 case "sp_SaveUser": case "sp_DeleteUser": case "sp_ToggleUserStatus":
                     return "auth";
                 case "sp_SetSetting":

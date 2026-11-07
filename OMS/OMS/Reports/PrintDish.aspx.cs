@@ -14,6 +14,7 @@ namespace OMS.Reports
         {
             // A dish ticket is printed from Order Detail, so it needs that page's right.
             SecurityHelper.RequireUrlAccess("~/Orders/OrderDetail.aspx");
+            SecurityHelper.RequirePermission("OrderDetail.Print");
 
             int orderId, orderItemId;
             if (!int.TryParse(Request.QueryString["id"], out orderId) ||

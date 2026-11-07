@@ -96,16 +96,16 @@
             <asp:TemplateField HeaderText="Actions" HeaderStyle-CssClass="text-end fw-medium pe-3" ItemStyle-CssClass="text-end pe-3">
               <ItemTemplate>
                 <div class="d-inline-flex gap-1">
-                  <asp:LinkButton runat="server" CommandName="EditDept" CommandArgument='<%# Eval("DepartmentID") %>'
+                  <asp:LinkButton runat="server" Visible='<%# OMS.Common.Helpers.SecurityHelper.CanPerform("Administration.Departments.Edit") %>' CommandName="EditDept" CommandArgument='<%# Eval("DepartmentID") %>'
                     CausesValidation="false" CssClass="btn btn-sm btn-falcon-default px-2 py-0 fs--2" ToolTip="Edit">
                     <span class="fas fa-edit"></span>
                   </asp:LinkButton>
-                  <asp:LinkButton runat="server" CommandName="ToggleDept" CommandArgument='<%# Eval("DepartmentID") %>'
+                  <asp:LinkButton runat="server" Visible='<%# OMS.Common.Helpers.SecurityHelper.CanPerform("Administration.Departments.Toggle") %>' CommandName="ToggleDept" CommandArgument='<%# Eval("DepartmentID") %>'
                     CausesValidation="false"
                     CssClass='<%# "btn btn-sm px-2 py-0 fs--2 " + ((bool)Eval("IsActive") ? "btn-falcon-warning" : "btn-falcon-success") %>'>
                     <%# (bool)Eval("IsActive") ? "Deactivate" : "Activate" %>
                   </asp:LinkButton>
-                  <asp:LinkButton runat="server" CommandName="DeleteDept" CommandArgument='<%# Eval("DepartmentID") %>'
+                  <asp:LinkButton runat="server" Visible='<%# OMS.Common.Helpers.SecurityHelper.CanPerform("Administration.Departments.Delete") %>' CommandName="DeleteDept" CommandArgument='<%# Eval("DepartmentID") %>'
                     CausesValidation="false" CssClass="btn btn-sm btn-falcon-danger px-2 py-0 fs--2" ToolTip="Delete"
                     OnClientClick="return confirm('Delete this department? This cannot be undone.');">
                     <span class="fas fa-trash-alt"></span>

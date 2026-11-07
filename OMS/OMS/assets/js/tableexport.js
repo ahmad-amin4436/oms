@@ -216,6 +216,7 @@
   function isAction(h) { return !h || /^actions?$/i.test(h); }
 
   function attach(table, index) {
+    if (document.getElementById('omsNoExport')) return;               // this role has no Export right for the screen
     if (table.getAttribute('data-exp') || table.hasAttribute('data-no-export')) return;
     if (table.closest('nav, header, .navbar, .modal, [data-no-export]')) return;
     if (table.querySelector('table')) return;                         // layout table with real tables inside

@@ -344,5 +344,11 @@ namespace OMS {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.LinkButton btnBestViewAll;
+
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl pnlSalesExport;
+
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl pnlTopExport;
+
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl pnlRecentExport;
     }
 }

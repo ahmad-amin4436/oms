@@ -32,8 +32,10 @@ namespace OMS
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            SecurityHelper.RequireRoles("Admin");
-            if (!SecurityHelper.IsInRole("Admin")) return;   // redirect is queued, stop here
+            SecurityHelper.RequireUrlAccess();
+            SecurityHelper.RequirePermission("Dashboard.View");
+            bool canExport = SecurityHelper.CanPerform("Dashboard.Export");
+            pnlSalesExport.Visible = pnlTopExport.Visible = pnlRecentExport.Visible = canExport;
             MaintainScrollPositionOnPostBack = true;          // keep the scroll spot after View All / range / export postbacks
             if (!IsPostBack)
                 BindDashboard();
@@ -398,6 +400,7 @@ namespace OMS
         // Total Sales card → Excel
         protected void btnSalesExcel_Click(object sender, EventArgs e)
         {
+            SecurityHelper.RequirePermission("Dashboard.Export");
             List<object[]> rows = SalesRows();
             SendExcel("Total_Sales", "Total Sales - This Month vs Last Month (Rs.)",
                       new[] { "Day", "This Month", "Last Month" }, rows);
@@ -406,6 +409,7 @@ namespace OMS
         // Total Sales card → PDF
         protected void btnSalesPDF_Click(object sender, EventArgs e)
         {
+            SecurityHelper.RequirePermission("Dashboard.Export");
             List<object[]> rows = SalesRows();
             var lines = new List<string>
             {
@@ -427,6 +431,7 @@ namespace OMS
         // Top Products card → Excel
         protected void btnTopProductsExcel_Click(object sender, EventArgs e)
         {
+            SecurityHelper.RequirePermission("Dashboard.Export");
             DataTable top = DashboardService.TopMenuItems(LocalToday.AddDays(-(BestRangeDays() - 1)), LocalToday, 7);
             var rows = new List<object[]>();
             foreach (DataRow r in top.Rows)
@@ -439,6 +444,7 @@ namespace OMS
         // Top Products card → PDF
         protected void btnTopProductsPDF_Click(object sender, EventArgs e)
         {
+            SecurityHelper.RequirePermission("Dashboard.Export");
             int days = BestRangeDays();
             DataTable top = DashboardService.TopMenuItems(LocalToday.AddDays(-(days - 1)), LocalToday, 7);
             var lines = new List<string>
@@ -494,6 +500,7 @@ namespace OMS
 
         protected void btnRecentExcel_Click(object sender, EventArgs e)
         {
+            SecurityHelper.RequirePermission("Dashboard.Export");
             var cols = SelectedRecentCols();
             DataTable orders = DashboardService.RecentOrders(14);
             var rows = new List<object[]>();
@@ -505,6 +512,7 @@ namespace OMS
 
         protected void btnRecentPDF_Click(object sender, EventArgs e)
         {
+            SecurityHelper.RequirePermission("Dashboard.Export");
             var cols = SelectedRecentCols();
             DataTable orders = DashboardService.RecentOrders(14);
 

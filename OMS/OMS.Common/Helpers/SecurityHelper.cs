@@ -19,13 +19,42 @@ namespace OMS.Common.Helpers
             RequireLogin();
             if (string.IsNullOrEmpty(actionKey) || string.IsNullOrEmpty(UserRole)) return false;
 
+            // Same answer all request long (rights only change via the Roles page), so look it up once.
+            var items = HttpContext.Current.Items;
+            string cacheKey = "CanPerform:" + UserRole + "|" + actionKey;
+            if (items[cacheKey] is bool) return (bool)items[cacheKey];
+
             var canParam = DBHelper.OutputParameter("@CanPerform", SqlDbType.Bit);
             DBHelper.ExecuteNonQuery("sp_CanRolePerform",
                 DBHelper.Parameter("@RoleName", UserRole),
                 DBHelper.Parameter("@ActionKey", actionKey),
                 canParam);
 
-            return canParam.Value != DBNull.Value && Convert.ToBoolean(canParam.Value);
+            bool allowed = canParam.Value != DBNull.Value && Convert.ToBoolean(canParam.Value);
+            items[cacheKey] = allowed;
+            return allowed;
+        }
+
+        /// <summary>
+        /// Table export is done in the browser from rows the page already shows, so the Export operation
+        /// of the screen's module decides whether the Export button is offered. A screen whose module has
+        /// no Export operation in Roles & Rights is not restricted.
+        /// </summary>
+        public static bool CanExportCurrentPage()
+        {
+            var ctx = HttpContext.Current;
+            if (ctx == null || !IsAuthenticated) return true;
+            string path = ctx.Request.AppRelativeCurrentExecutionFilePath ?? "";
+            string module;
+            switch (path.ToLowerInvariant())
+            {
+                case "~/orders/orderlist.aspx":      module = "OrderList"; break;
+                case "~/menu/menuitems.aspx":        module = "MenuItems"; break;
+                case "~/default.aspx":               module = "Dashboard"; break;
+                case "~/analytics/analytics.aspx":   module = "Analytics"; break;
+                default: return true;
+            }
+            return CanPerform(module + ".Export");
         }
 
         public static void RequirePermission(string actionKey)

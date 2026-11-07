@@ -9,7 +9,7 @@
       <h4 class="mb-0">Deals</h4>
       <p class="text-600 fs--1 mb-0">All promotional deals and their active windows.</p>
     </div>
-    <a href="CreateDeals.aspx" class="btn btn-sm btn-primary flex-shrink-0">
+    <a href="CreateDeals.aspx" runat="server" id="lnkAddDeal" class="btn btn-sm btn-primary flex-shrink-0">
       <span class="fas fa-plus me-1"></span> Create Deal
     </a>
   </div>
@@ -89,7 +89,7 @@
                       CssClass="btn btn-sm btn-falcon-default px-2 py-0 fs--2" ToolTip="Edit">
                       <span class="fas fa-edit"></span>
                     </asp:HyperLink>
-                    <asp:LinkButton runat="server"
+                    <asp:LinkButton runat="server" Visible='<%# OMS.Common.Helpers.SecurityHelper.CanPerform("Deals.Toggle") %>'
                       CommandName="Toggle"
                       CommandArgument='<%# Eval("DealID") %>'
                       CausesValidation="false"

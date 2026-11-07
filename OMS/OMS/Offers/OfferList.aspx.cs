@@ -15,6 +15,7 @@ namespace OMS.Offers
         protected void Page_Load(object sender, EventArgs e)
         {
             SecurityHelper.RequireUrlAccess();
+            SecurityHelper.RequirePermission("Offers.View");
             if (!IsPostBack)
                 BindOffers();
         }
@@ -59,6 +60,7 @@ namespace OMS.Offers
         protected void gvOffers_RowCommand(object sender, System.Web.UI.WebControls.GridViewCommandEventArgs e)
         {
             if (e.CommandName != "Toggle") return;
+            SecurityHelper.RequirePermission("Offers.Toggle");
 
             int offerId = Convert.ToInt32(e.CommandArgument);
             var result  = DBHelper.ExecuteDataTable("sp_ToggleOfferStatus",

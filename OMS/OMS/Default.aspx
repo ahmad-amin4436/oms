@@ -231,7 +231,7 @@
                              aria-labelledby="dropdown-total-sales-ecomm">
                           <a class="dropdown-item" href="<%= ResolveUrl("~/Analytics/Analytics.aspx") %>">View Details</a>
                           <div class="dropdown-divider"></div>
-                          <div class="dropdown-submenu">
+                          <div id="pnlSalesExport" runat="server" class="dropdown-submenu">
                             <a class="dropdown-item dropdown-toggle" href="javascript:void(0);">Export</a>
                             <div class="dropdown-menu">
                               <asp:LinkButton ID="btnSalesExcel" runat="server" CssClass="dropdown-item" OnClick="btnSalesExcel_Click" CausesValidation="false">Export as Excel</asp:LinkButton>
@@ -297,7 +297,7 @@
         </button>
         <div class="dropdown-menu dropdown-menu-end border py-2" aria-labelledby="dropdown-top-products">
             <a class="dropdown-item" href="<%= ResolveUrl("~/Analytics/Analytics.aspx") %>">View</a>
-            <div class="dropdown-submenu">
+            <div id="pnlTopExport" runat="server" class="dropdown-submenu">
                 <a class="dropdown-item dropdown-toggle" href="javascript:void(0);">Export</a>
                 <div class="dropdown-menu">
                     <asp:LinkButton ID="btnTopProductsExcel" runat="server" CssClass="dropdown-item" OnClick="btnTopProductsExcel_Click" CausesValidation="false">Export as Excel</asp:LinkButton>
@@ -333,7 +333,7 @@
                             <option value="Archive">Archive</option>
                           </select><button class="btn btn-falcon-default btn-sm ms-2" type="button">Apply</button></div>
                       </div>
-                      <div id="table-purchases-replace-element"><a class="btn btn-falcon-default btn-sm" href="Orders/OrderList.aspx"><span class="fas fa-plus" data-fa-transform="shrink-3 down-2"></span><span class="d-none d-sm-inline-block ms-1">New</span></a><a class="btn btn-falcon-default btn-sm mx-2" href="Orders/OrderList.aspx"><span class="fas fa-filter" data-fa-transform="shrink-3 down-2"></span><span class="d-none d-sm-inline-block ms-1">Filter</span></a><div class="dropdown d-inline-block font-sans-serif text-start">
+                      <div id="table-purchases-replace-element"><a class="btn btn-falcon-default btn-sm" href="Orders/OrderList.aspx"><span class="fas fa-plus" data-fa-transform="shrink-3 down-2"></span><span class="d-none d-sm-inline-block ms-1">New</span></a><a class="btn btn-falcon-default btn-sm mx-2" href="Orders/OrderList.aspx"><span class="fas fa-filter" data-fa-transform="shrink-3 down-2"></span><span class="d-none d-sm-inline-block ms-1">Filter</span></a><div id="pnlRecentExport" runat="server" class="dropdown d-inline-block font-sans-serif text-start">
                           <button class="btn btn-falcon-default btn-sm dropdown-toggle dropdown-caret-none" type="button" id="dropdown-recent-export" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-haspopup="true" aria-expanded="false"><span class="fas fa-external-link-alt" data-fa-transform="shrink-3 down-2"></span><span class="d-none d-sm-inline-block ms-1">Export</span></button>
                           <div class="dropdown-menu dropdown-menu-end border p-3" aria-labelledby="dropdown-recent-export" style="min-width:260px">
                             <div class="fs--1 text-600 mb-2">Columns to export</div>

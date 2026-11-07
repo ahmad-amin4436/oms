@@ -8,6 +8,7 @@ namespace OMS.Menu
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            OMS.Common.Helpers.SecurityHelper.RequireUrlAccess();
             if (!IsPostBack)
             {
                 var dt = DBHelper.ExecuteDataTable("sp_GetMenuItems",

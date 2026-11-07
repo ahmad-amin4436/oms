@@ -63,7 +63,7 @@
               <asp:GridView ID="gvItems" runat="server"
                 CssClass="table table-striped border-bottom align-middle mb-0"
                 AutoGenerateColumns="False" GridLines="None"
-                EmptyDataText="No items on this order.">
+                EmptyDataText="No items on this order." OnRowCommand="gvItems_RowCommand">
                 <EmptyDataRowStyle CssClass="text-center text-600 py-3 fs--1" />
                 <HeaderStyle CssClass="bg-200 text-900" />
                 <Columns>
@@ -90,10 +90,17 @@
                   </asp:TemplateField>
                   <asp:TemplateField HeaderStyle-CssClass="border-0" ItemStyle-CssClass="align-middle text-end">
                     <ItemTemplate>
-                      <a href="#" class="btn btn-falcon-default btn-sm px-2 py-0 fs--2" title="Print this dish"
+                      <asp:PlaceHolder runat="server" Visible='<%# OMS.Common.Helpers.SecurityHelper.CanPerform("OrderDetail.Print") %>'><a href="#" class="btn btn-falcon-default btn-sm px-2 py-0 fs--2" title="Print this dish"
                          onclick="return printDish(<%# Eval("OrderItemID") %>);">
                         <span class="fas fa-print"></span> Print
-                      </a>
+                      </a></asp:PlaceHolder>
+                      <asp:LinkButton ID="lbDeleteItem" runat="server" CommandName="DeleteOrderItem"
+                         CommandArgument='<%# Eval("OrderItemID") %>' CausesValidation="false"
+                         CssClass="btn btn-falcon-danger btn-sm px-2 py-0 fs--2 ms-1" ToolTip="Delete this item"
+                         Visible='<%# CanDeleteItems %>'
+                         OnClientClick='<%# DeleteConfirmScript(Eval("ItemName"), Eval("Quantity")) %>'>
+                        <span class="fas fa-trash-alt"></span> Delete
+                      </asp:LinkButton>
                     </ItemTemplate>
                   </asp:TemplateField>
                 </Columns>
@@ -126,7 +133,7 @@
           </div>
         </div>
 
-        <%-- Add dishes: allowed until the order is Delivered/Cancelled; dishes can only be added, never removed --%>
+        <%-- Add dishes: allowed until the order is Delivered/Cancelled; removing a dish needs the Delete Item permission --%>
         <asp:Panel ID="pnlAddDish" runat="server" CssClass="card mb-3">
           <div class="card-header py-2">
             <h5 class="mb-0 fs-0">Add Dish</h5>

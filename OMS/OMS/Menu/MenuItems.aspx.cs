@@ -24,6 +24,10 @@ namespace OMS.Menu
         protected void Page_Load(object sender, EventArgs e)
         {
             SecurityHelper.RequireUrlAccess();
+            // Buttons follow the role's operations; every handler re-checks on the server.
+            btnAddNew.Visible     = SecurityHelper.CanPerform("Menu.Add");
+            btnToggleCats.Visible = SecurityHelper.CanPerform("Categories.View");
+            btnAddCat.Visible     = SecurityHelper.CanPerform("Categories.Add");
             if (!IsPostBack)
                 BindAll();
         }
@@ -96,7 +100,7 @@ namespace OMS.Menu
 
         protected void gvMenuItems_RowCommand(object sender, GridViewCommandEventArgs e)
         {
-            SecurityHelper.RequirePermission(e.CommandName == "DeleteItem" ? "Menu.Delete" : "Menu.Edit");
+            SecurityHelper.RequirePermission(e.CommandName == "DeleteItem" ? "Menu.Delete" : e.CommandName == "Toggle" ? "Menu.Toggle" : "Menu.Edit");
             switch (e.CommandName)
             {
                 case "Toggle":
@@ -113,7 +117,7 @@ namespace OMS.Menu
 
         private void ToggleAvailability(int itemId)
         {
-            SecurityHelper.RequirePermission("Menu.Edit");
+            SecurityHelper.RequirePermission("Menu.Toggle");
             var result = DBHelper.ExecuteDataTable("sp_ToggleMenuItemAvailability",
                 DBHelper.Parameter("@ItemID", itemId));
 
@@ -184,10 +188,10 @@ namespace OMS.Menu
 
         protected void btnSave_Click(object sender, EventArgs e)
         {
-            if (!Page.IsValid) return;
-
             int itemId = 0;
             int.TryParse(hfItemID.Value, out itemId);
+            SecurityHelper.RequirePermission(itemId == 0 ? "Menu.Add" : "Menu.Edit");
+            if (!Page.IsValid) return;
 
             int categoryId;
             if (!int.TryParse(ddlCategory.SelectedValue, out categoryId))
@@ -270,6 +274,7 @@ namespace OMS.Menu
 
         protected void btnToggleCats_Click(object sender, EventArgs e)
         {
+            SecurityHelper.RequirePermission("Categories.View");
             CategoriesOpen   = !CategoriesOpen;
             pnlCategories.Visible = CategoriesOpen;
             btnToggleCats.Text    = CategoriesOpen ? "Hide Categories" : "Manage Categories";
@@ -303,6 +308,7 @@ namespace OMS.Menu
 
         protected void btnAddCat_Click(object sender, EventArgs e)
         {
+            SecurityHelper.RequirePermission("Categories.Add");
             KeepCategoriesOpen();
             BindCatDepartments(null);
             hfCatID.Value      = "0";
@@ -315,6 +321,7 @@ namespace OMS.Menu
 
         protected void gvCategories_RowCommand(object sender, GridViewCommandEventArgs e)
         {
+            SecurityHelper.RequirePermission(e.CommandName == "DeleteCat" ? "Categories.Delete" : "Categories.Edit");
             KeepCategoriesOpen();
 
             if (e.CommandName == "EditCat")
@@ -360,11 +367,11 @@ namespace OMS.Menu
 
         protected void btnSaveCat_Click(object sender, EventArgs e)
         {
-            KeepCategoriesOpen();
-            if (!Page.IsValid) { pnlCatEditor.Visible = true; BindCategoriesGrid(); return; }
-
             int catId = 0;
             int.TryParse(hfCatID.Value, out catId);
+            SecurityHelper.RequirePermission(catId == 0 ? "Categories.Add" : "Categories.Edit");
+            KeepCategoriesOpen();
+            if (!Page.IsValid) { pnlCatEditor.Visible = true; BindCategoriesGrid(); return; }
 
             int order = 0;
             int.TryParse(txtCatOrder.Text.Trim(), out order);

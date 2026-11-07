@@ -235,13 +235,36 @@ namespace OMS.Orders
             CalcAndDisplayTotals(cart);
         }
 
+        // Operation permissions for this page, read once per request from the
+        // role's saved permissions (NewOrder.Discount / NewOrder.EditCart).
+        private bool? _canDiscount, _canEditCart;
+        private bool CanDiscount { get { if (!_canDiscount.HasValue) _canDiscount = SecurityHelper.CanPerform("NewOrder.Discount"); return _canDiscount.Value; } }
+        protected bool CanEditCart { get { if (!_canEditCart.HasValue) _canEditCart = SecurityHelper.CanPerform("NewOrder.EditCart"); return _canEditCart.Value; } }
+
+        // The discount the current user is actually allowed to apply. Whatever was
+        // typed or posted is ignored when the role lacks the Discount permission.
+        private decimal EffectiveDiscountPct()
+        {
+            if (!CanDiscount) return 0m;
+            decimal discPct = 0m;
+            decimal.TryParse(txtDiscountPct.Text, out discPct);
+            return Math.Max(0m, Math.Min(100m, discPct));
+        }
+
         private void CalcAndDisplayTotals(List<CartItem> cart)
         {
             decimal subtotal = cart.Sum(c => c.LineTotal);
 
-            decimal discPct = 0m;
-            decimal.TryParse(txtDiscountPct.Text, out discPct);
-            discPct = Math.Max(0m, Math.Min(100m, discPct));
+            decimal discPct = EffectiveDiscountPct();
+
+            if (!CanDiscount)
+            {
+                txtDiscountPct.Text = "0";
+                txtDiscountPct.Visible = false;
+                lblDiscountAmt.Visible = false;
+                rngDiscount.Enabled = false;
+                pnlDiscountRow.Visible = false;
+            }
 
             decimal discount = Math.Round(subtotal * discPct / 100m, 2);
             decimal taxable  = subtotal - discount;
@@ -407,6 +430,7 @@ namespace OMS.Orders
 
         protected void rptCart_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
+            SecurityHelper.RequirePermission("NewOrder.EditCart");
             string key = Convert.ToString(e.CommandArgument);
             var cart   = Cart;
             var item   = cart.FirstOrDefault(c => c.Key == key);
@@ -442,6 +466,7 @@ namespace OMS.Orders
 
         protected void txtDiscountPct_Changed(object sender, EventArgs e)
         {
+            SecurityHelper.RequirePermission("NewOrder.Discount");
             BindCart();
         }
 
@@ -471,9 +496,7 @@ namespace OMS.Orders
                 return;
             }
 
-            decimal discPct = 0m;
-            decimal.TryParse(txtDiscountPct.Text, out discPct);
-            discPct = Math.Max(0m, Math.Min(100m, discPct));
+            decimal discPct = EffectiveDiscountPct();
 
             decimal subtotal  = cart.Sum(c => c.LineTotal);
             decimal discount  = Math.Round(subtotal * discPct / 100m, 2);

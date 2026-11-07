@@ -26,7 +26,7 @@
           </div>
           <div class="mt-2 d-flex flex-wrap gap-2">
             <asp:LinkButton ID="lbItemAdded" runat="server" Text="Item Added" CssClass="btn btn-sm btn-falcon-default" CommandArgument="AddOrderItem" OnClick="ActivityFilter_Click" />
-            <asp:LinkButton ID="lbItemRemoved" runat="server" Text="Item Removed" CssClass="btn btn-sm btn-falcon-default" CommandArgument="RemoveOrderItem" OnClick="ActivityFilter_Click" />
+            <asp:LinkButton ID="lbItemRemoved" runat="server" Text="Item Removed" CssClass="btn btn-sm btn-falcon-default" CommandArgument="DeleteOrderItem" OnClick="ActivityFilter_Click" />
             <asp:LinkButton ID="lbOrderEdited" runat="server" Text="Order Edited" CssClass="btn btn-sm btn-falcon-default" CommandArgument="EditOrder" OnClick="ActivityFilter_Click" />
             <asp:LinkButton ID="lbOrderCancelled" runat="server" Text="Order Cancelled" CssClass="btn btn-sm btn-falcon-default" CommandArgument="CancelOrder" OnClick="ActivityFilter_Click" />
             <asp:LinkButton ID="lbClear" runat="server" Text="Clear" CssClass="btn btn-sm btn-falcon-default" OnClick="Clear_Click" />

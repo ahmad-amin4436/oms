@@ -249,7 +249,7 @@ GO
 CREATE OR ALTER PROCEDURE dbo.sp_GetNavItems
 AS
 BEGIN
-  SELECT i.ItemID, i.GroupID, i.ItemName, i.SortOrder
+  SELECT i.ItemID, i.GroupID, i.ItemName, i.Url, i.SortOrder
   FROM dbo.NavItems i
   INNER JOIN dbo.NavGroups g ON g.GroupID = i.GroupID AND g.IsActive = 1
   WHERE i.IsActive = 1

@@ -37,6 +37,7 @@
   <script>
     (function () {
       var FEED = '<%= FeedUrl %>';
+      var CAN_DONE = <%= CanDone %>;
       var POLL_MS = 3000, POLL_HIDDEN_MS = 10000, WARN_MIN = 10, LATE_MIN = 20;
 
       var items = [], known = {}, justDone = {}, firstLoad = true, cat = 'all', fetchedAt = Date.now();
@@ -111,7 +112,7 @@
                 (it.size ? '<div class="fs--1 text-600">' + esc(it.size) + '</div>' : '') + '</div></div>' +
               (it.note ? '<div class="alert alert-warning py-1 px-2 fs--1 mb-2">' + esc(it.note) + '</div>' : '') +
               '<div class="fs--2 text-600 mb-2">' + esc(it.dept) + ' &rsaquo; ' + esc(it.cat) + '</div>' +
-              '<button type="button" class="btn btn-success mt-auto" data-done="' + it.id + '">Done</button>' +
+              (CAN_DONE ? '<button type="button" class="btn btn-success mt-auto" data-done="' + it.id + '">Done</button>' : '') +
             '</div></div></div>';
         }).join('');
         empty.classList.toggle('d-none', shown.length !== 0);

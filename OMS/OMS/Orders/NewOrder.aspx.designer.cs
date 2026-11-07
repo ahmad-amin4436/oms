@@ -283,6 +283,11 @@ namespace OMS.Orders {
         protected global::System.Web.UI.WebControls.Label lblSubtotal;
         
         /// <summary>
+        /// pnlDiscountRow control.
+        /// </summary>
+        protected global::System.Web.UI.WebControls.Panel pnlDiscountRow;
+
+        /// <summary>
         /// txtDiscountPct control.
         /// </summary>
         /// <remarks>

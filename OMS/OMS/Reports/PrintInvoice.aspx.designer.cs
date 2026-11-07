@@ -17,5 +17,6 @@ namespace OMS.Reports
         protected global::System.Web.UI.WebControls.Label    lblDiscount;
         protected global::System.Web.UI.WebControls.Label    lblTax;
         protected global::System.Web.UI.WebControls.Label    lblTotal;
+        protected global::System.Web.UI.HtmlControls.HtmlButton btnPrintInvoice;
     }
 }

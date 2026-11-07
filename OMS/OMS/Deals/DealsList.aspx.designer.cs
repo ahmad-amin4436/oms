@@ -15,5 +15,6 @@ namespace OMS.Deals
         protected global::System.Web.UI.WebControls.LinkButton lbActive;
         protected global::System.Web.UI.WebControls.LinkButton lbInactive;
         protected global::System.Web.UI.WebControls.GridView gvDeals;
+        protected global::System.Web.UI.HtmlControls.HtmlAnchor lnkAddDeal;
     }
 }

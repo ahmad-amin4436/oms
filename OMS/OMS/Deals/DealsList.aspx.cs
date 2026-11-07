@@ -16,6 +16,7 @@ namespace OMS.Deals
         protected void Page_Load(object sender, EventArgs e)
         {
             SecurityHelper.RequireUrlAccess();
+            lnkAddDeal.Visible = SecurityHelper.CanPerform("Deals.Add");
             if (!IsPostBack)
                 BindDeals();
         }
@@ -50,7 +51,7 @@ namespace OMS.Deals
 
             if (e.CommandName == "Toggle")
             {
-                SecurityHelper.RequirePermission("Deals.Edit");
+                SecurityHelper.RequirePermission("Deals.Toggle");
                 var result = DBHelper.ExecuteDataTable("sp_ToggleDealStatus",
                     DBHelper.Parameter("@DealID", dealId));
                 bool nowActive = result.Rows.Count > 0 && Convert.ToBoolean(result.Rows[0][0]);

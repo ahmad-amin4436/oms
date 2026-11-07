@@ -56,7 +56,7 @@
   <form runat="server">
 
     <div class="toolbar no-print">
-      <button type="button" onclick="window.print()">Print</button>
+      <button type="button" onclick="window.print()" runat="server" id="btnPrintInvoice">Print</button>
     </div>
 
     <div class="receipt">
