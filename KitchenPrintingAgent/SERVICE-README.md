@@ -18,7 +18,6 @@ The service host requires the .NET Framework 4.7.2 runtime on the restaurant com
 Before installation, edit the deployed `KitchenPrintingAgent.exe.config` (copied from `App.config`):
 
 - Set `OmsPrintFeedUrl` to the reachable OMS `KitchenPrintFeed.ashx` endpoint.
-- Set `KitchenPrintApiKey` to the secret shared with OMS.
 - Keep `PollIntervalSeconds` at `5` unless OMS operations explicitly require another value.
 - Keep the printer timeout values reasonable for the restaurant network.
 - Leave `LogPath` blank to log to `%ProgramData%\KitchenPrintingAgent\KitchenPrintingAgent.log`, or set an explicit path.

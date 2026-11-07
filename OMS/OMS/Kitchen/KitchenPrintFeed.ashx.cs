@@ -1,4 +1,4 @@
-﻿
+
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -21,6 +21,10 @@ namespace OMS.Kitchen
 
             try
             {
+                // No key: the print agent just polls. Optionally limit callers to the restaurant's address(es):
+                // appSettings KitchenPrintAllowedIPs = "203.0.113.10,203.0.113.11" (blank = anyone).
+                if (!CallerAllowed(context)) { Fail(context, 403, "Not allowed."); return; }
+
                 if (context.Request.HttpMethod == "GET")
                 {
                     GetPendingJobs(context);
@@ -42,6 +46,16 @@ namespace OMS.Kitchen
 
                 Fail(context, 500, "Printing service error.");
             }
+        }
+
+        private static bool CallerAllowed(HttpContext context)
+        {
+            string list = ConfigurationManager.AppSettings["KitchenPrintAllowedIPs"];
+            if (string.IsNullOrWhiteSpace(list)) return true;
+            string ip = context.Request.UserHostAddress;
+            foreach (string allowed in list.Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries))
+                if (string.Equals(allowed.Trim(), ip, StringComparison.OrdinalIgnoreCase)) return true;
+            return false;
         }
 
         private static void GetPendingJobs(HttpContext context)
